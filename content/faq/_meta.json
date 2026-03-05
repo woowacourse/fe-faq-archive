@@ -1,13 +1,13 @@
 {
   "q01-capsule": "Q1. 캡슐화",
   "q02-class-split": "Q2. 클래스 분리",
-  "q03-tdd": "Q3. TDD 순서",
-  "q04-readability": "Q4. 가독성",
-  "q05-error-handling": "Q5. 에러 처리",
-  "q06-srp": "Q6. 단일 책임 원칙",
-  "q07-mvc": "Q7. Model/View 분리",
-  "q08-unit-test": "Q8. 단위 테스트",
+  "q03-srp": "Q3. 단일 책임 원칙",
+  "q04-tdd": "Q4. TDD 순서",
+  "q05-unit-test": "Q5. 단위 테스트",
+  "q06-readability": "Q6. 가독성",
+  "q07-error-handling": "Q7. 에러 처리",
+  "q08-magic-number": "Q8. 매직 넘버",
+  "q09-mvc": "Q9. Model/View 분리",
   "q10-design-pattern": "Q10. 디자인 패턴",
-  "q11-magic-number": "Q11. 매직 넘버",
-  "q12-module-structure": "Q12. 모듈 구조"
+  "q11-module-structure": "Q11. 파일 구조"
 }
