@@ -1,0 +1,38 @@
+---
+title: 'Q10. 디자인 패턴 적용'
+---
+
+# Q10. MVC 등 디자인 패턴을 어떻게 선택하고 적용해야 하나요?
+
+## 선배 크루의 질문
+
+> "MVC 패턴에 대한 이해없이 맹목적으로 사용했기 때문에 이번 미션 때에는 필요하지 않다면 사용하지 말아야겠다 생각했지만, 알고있는 다른 디자인 패턴이 없고 초기에 패턴을 잡지 않고 시작하려니 그것 역시 막막하여 결국 MVC 패턴을 사용하게 되었습니다." — PR #20 ([링크](https://github.com/woowacourse/javascript-lotto/pull/20))
+
+> "최근 미션을 진행하면서 MVC에 너무 고립된 것 같아 이번에는 기초부터 돌아가자라고 생각하여 단순히 UI와 도메인 분리에 집중을 하였는데요" — PR #92 ([링크](https://github.com/woowacourse/javascript-lotto/pull/92))
+
+> "처음부터 불필요하게 구조나 디자인 패턴을 적용하지 말자. 앱의 규모에 따라서 적절한 구조를 적용해보자" — PR #17 ([링크](https://github.com/woowacourse/javascript-lotto/pull/17))
+
+## AS-IS 코드
+
+```js
+// MVC를 맹목적으로 적용 - 앱 규모에 비해 과도한 구조
+class LottoController {
+  constructor() {
+    this.model = new LottoModel();
+    this.view = new LottoView();
+  }
+
+  handlePurchase(money) {
+    // Controller에서 DOM에 직접 접근
+    const input = document.querySelector("#money-input");
+    this.model.setMoney(Number(input.value));
+    this.model.generateLottos();
+    this.view.render(this.model.getLottos());
+  }
+}
+
+// Model, View, Controller 각각 파일을 만들었지만
+// 역할 구분이 불명확하고 서로 깊이 의존
+```
+
+---

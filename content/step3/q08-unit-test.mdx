@@ -1,0 +1,30 @@
+---
+title: 'Q8. 단위 테스트 대상'
+---
+
+# Q8. 단위 테스트의 대상과 범위는 어떻게 정해야 하나요?
+
+## 선배 크루의 질문
+
+> "단위 테스트를 진행하다보니 util만 검사하는 것 같아 lotto에 대한 테스트를 따로 해주었는데요, 인스턴스에 대해서도 테스트를 해주는 것이 옳은지 그렇다면 단위를 어떻게 잡아야하는지 궁금합니다." — PR #112 ([링크](https://github.com/woowacourse/javascript-lotto/pull/112))
+
+> "클래스의 메서드에서 멤버변수들을 활용하는 로직을 어떻게 테스트할 지가 고민됩니다." — PR #157 ([링크](https://github.com/woowacourse/javascript-lotto/pull/157))
+
+> "프라이빗 필드를 유효성 검사시에 인자로 내보내는 방식을 사용해도 될까요?" — PR #191 ([링크](https://github.com/woowacourse/javascript-lotto/pull/191))
+
+## AS-IS 코드
+
+```js
+// 에러가 던져지는지만 확인하는 불충분한 테스트
+test("유효성 검사", () => {
+  expect(() => validateMoney(-1000)).toThrow();
+});
+
+// 단순 getter만 테스트하는 불필요한 테스트
+test("로또 번호를 반환한다", () => {
+  const lotto = new Lotto([1, 2, 3, 4, 5, 6]);
+  expect(lotto.numbers).toEqual([1, 2, 3, 4, 5, 6]);
+});
+```
+
+---

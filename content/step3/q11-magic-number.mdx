@@ -1,0 +1,32 @@
+---
+title: 'Q11. 매직 넘버 상수화'
+---
+
+# Q11. 매직 넘버는 어떤 기준으로 상수화해야 하나요?
+
+## 선배 크루의 질문
+
+> "1000원을 의미하는 '1000'의 변수를 티켓 한 장의 가격의 의미로 쓰는 경우도 있고, 구매 시 지불해야하는 최소 금액의 의미로 쓰는 경우도 있는데, 이 경우에는 하나의 변수에 상수를 두 개 만드는 것이 맞을까요?" — PR #20 ([링크](https://github.com/woowacourse/javascript-lotto/pull/20))
+
+> "상수 파일을 나누는 기준이 뭔가요?" — PR #104 ([링크](https://github.com/woowacourse/javascript-lotto/pull/104))
+
+> "에러메시지도 상수화해야 하나요?" — PR #191 ([링크](https://github.com/woowacourse/javascript-lotto/pull/191))
+
+## AS-IS 코드
+
+```js
+// 매직 넘버 그대로 사용 - 1000이 무엇을 의미하는지 불명확
+function validateMoney(money) {
+  if (money < 1000) {
+    throw new Error("금액이 부족합니다");
+  }
+  return Math.floor(money / 1000);
+}
+
+// 같은 값에 하나의 상수만 사용 - 의미가 모호
+const LOTTO_PRICE = 1000;
+if (money < LOTTO_PRICE) { ... }            // 최소 구매 금액 의미
+const count = Math.floor(money / LOTTO_PRICE); // 장당 가격 의미
+```
+
+---

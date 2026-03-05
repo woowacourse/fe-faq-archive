@@ -1,0 +1,22 @@
+---
+title: 'Q12. 모듈/파일 구조'
+---
+
+# Q12. 모듈과 파일은 어떤 기준으로 분리하고 구조화해야 하나요?
+
+## 선배 크루의 질문
+
+> "constants 파일은 프로그램 사이즈가 작은 상태에서 굳이 잘게 분리할 필요가 없을 것 같아 다시 합쳤습니다." — PR #104 ([링크](https://github.com/woowacourse/javascript-lotto/pull/104))
+
+> "폴더 구조는 다음과 같습니다. `[js] [lottos] - constant.js - controller.js - model.js - template.js - validator.js - view.js - index.js - util.js`" — PR #10 ([링크](https://github.com/woowacourse/javascript-lotto/pull/10))
+
+> "UI와 도메인 영역을 분리한다" — PR #291 ([링크](https://github.com/woowacourse/javascript-lotto/pull/291))
+
+## AS-IS 코드
+
+```
+src/
+├── index.js          # 앱 초기화 + 이벤트 바인딩 + 렌더링 + 유효성 검사 모두 포함
+├── constant.js       # INIT, ERROR_MESSAGE, LOTTO 등 모든 상수를 한 파일에
+└── util.js           # 랜덤 생성, DOM 조작, 유효성 검사 등 모든 유틸 함수
+```

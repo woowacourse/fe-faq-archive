@@ -1,0 +1,51 @@
+---
+title: 'Q7. Model/View 분리'
+---
+
+# Q7. 도메인(Model)과 UI(View)는 어떤 기준으로 분리해야 하나요?
+
+## 선배 크루의 질문
+
+> "View가 Model을 직접 참조해도 되나요? View와 Model은 서로를 몰라야하고, 오직 Controller에 의해서만 가능하다라고 알고 있었는데" — PR #90 ([링크](https://github.com/woowacourse/javascript-lotto/pull/90))
+
+> "view이벤트, 로또구매나 토글 버튼의 이벤트 리스너를 controller vs view 어디에서 등록하는 것이 옳은지 고민했습니다" — PR #87 ([링크](https://github.com/woowacourse/javascript-lotto/pull/87))
+
+> "Controller의 역할이 너무 커지는데 어떡하나요?" — PR #84 ([링크](https://github.com/woowacourse/javascript-lotto/pull/84))
+
+## AS-IS 코드
+
+```js
+// View에 비즈니스 로직이 섞여 있는 코드
+class LottoView {
+  onSubmitMoney(event) {
+    event.preventDefault();
+    const money = Number(this.moneyInput.value);
+
+    // 비즈니스 로직이 View에 위치
+    if (money < 1000) {
+      alert('1000원 이상 입력하세요.');
+      return;
+    }
+    const lottoCount = Math.floor(money / 1000);
+    const lottos = [];
+    for (let i = 0; i < lottoCount; i++) {
+      lottos.push(this.generateLotto());
+    }
+
+    // DOM 조작
+    this.lottoCountLabel.textContent = `총 ${lottoCount}개를 구매했습니다.`;
+    lottos.forEach((lotto) => this.renderLottoItem(lotto));
+  }
+
+  generateLotto() {
+    // 도메인 로직이 View 안에 존재
+    const numbers = new Set();
+    while (numbers.size < 6) {
+      numbers.add(Math.floor(Math.random() * 45) + 1);
+    }
+    return [...numbers].sort((a, b) => a - b);
+  }
+}
+```
+
+---

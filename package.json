@@ -1,0 +1,30 @@
+{
+  "name": "fe-faq-archive",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/woowacourse/fe-faq-archive.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/woowacourse/fe-faq-archive/issues"
+  },
+  "homepage": "https://github.com/woowacourse/fe-faq-archive#readme",
+  "dependencies": {
+    "next": "^16.1.6",
+    "nextra": "^4.6.1",
+    "nextra-theme-docs": "^4.6.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  }
+}

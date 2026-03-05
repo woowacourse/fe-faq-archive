@@ -1,0 +1,44 @@
+---
+title: 'Q2. 클래스 분리 기준'
+---
+
+# Q2. 클래스를 어떤 기준으로 나누고, 각 클래스의 역할은 어떻게 정해야 하나요?
+
+## 선배 크루의 질문
+
+> "컴포넌트를 최대한 작게 나누는 것이 좋을까요? 1개의 컴포넌트가 담당하는 역할이 많아지니 가독성도 떨어지고 단일 책임의 원칙(?)에도 맞지 않는 것같아서 고민됩니다!" — PR #5 ([링크](https://github.com/woowacourse/javascript-lotto/pull/5))
+
+> "Lotto의 역할과 개념이 분명했으면 좋겠어요. 로또가 Pocket인지, 로또 안에 Pocket 배열이 있는건지 확실해야 코드 상에서 혼선이 없을 것 같습니다." — PR #10 ([링크](https://github.com/woowacourse/javascript-lotto/pull/10))
+
+> "domain/ 이라는 같은 계층에 존재하는 Lotto, Validator, LottoGame이 모두 다른 범위의 역할과 책임을 가지고 있는 것 같은데요." — PR #167 ([링크](https://github.com/woowacourse/javascript-lotto/pull/167))
+
+## AS-IS 코드
+
+```js
+class LottoGame {
+  #money;
+  #lottos = [];
+  #winningNumbers;
+  #bonusNumber;
+
+  purchase(money) {
+    // 금액 검증
+    if (money < 1000) throw new Error('금액이 부족합니다.');
+    if (money % 1000 !== 0) throw new Error('1000원 단위로 입력하세요.');
+    this.#money = money;
+    // 로또 생성
+    const count = money / 1000;
+    for (let i = 0; i < count; i++) {
+      this.#lottos.push(this.#generateNumbers());
+    }
+  }
+
+  #generateNumbers() { /* 번호 생성 로직 */ }
+
+  setWinningNumbers(numbers, bonus) { /* 당첨 번호 설정 */ }
+
+  getResult() { /* 결과 계산 + 수익률 계산 + 출력 포맷팅까지 모두 수행 */ }
+}
+```
+
+---

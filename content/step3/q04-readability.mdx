@@ -1,0 +1,38 @@
+---
+title: 'Q4. 가독성과 리팩터링'
+---
+
+# Q4. 가독성 좋은 코드란 무엇이고, 리팩터링은 어떻게 진행해야 하나요?
+
+## 선배 크루의 질문
+
+> "전체적으로 코드의 가독성이 어떤지 궁금합니다!" — PR #90 ([링크](https://github.com/woowacourse/javascript-lotto/pull/90))
+
+> "메서드내의 임시변수 제거 vs 가독성 있는 변수 생성에 대해 고민했습니다" — PR #87 ([링크](https://github.com/woowacourse/javascript-lotto/pull/87))
+
+> "함수명이 길어지는 것에 대해 어떻게 생각하시나요? 저는 길어도 최대한 정확하게 함수 동작을 설명하는 것이 좋다고 생각합니다" — PR #10 ([링크](https://github.com/woowacourse/javascript-lotto/pull/10))
+
+## AS-IS 코드
+
+```js
+// 한 함수에서 여러 역할을 수행하는 코드
+submitPurchaseLotto(event) {
+  if (event.detail < 1000) {
+    alert('금액은 1000원 이상을 입력해주세요.');
+    return;
+  }
+  const count = Math.floor(event.detail / 1000);
+  this.lottos = Array.from({ length: count }, () => {
+    const numbers = [];
+    while (numbers.length < 6) {
+      const num = Math.floor(Math.random() * 45) + 1;
+      if (!numbers.includes(num)) numbers.push(num);
+    }
+    return numbers.sort((a, b) => a - b);
+  });
+  this.renderLottoList();
+  this.showToggleButton();
+}
+```
+
+---

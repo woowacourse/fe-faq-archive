@@ -1,0 +1,48 @@
+---
+title: 'Q6. 단일 책임 원칙(SRP)'
+---
+
+# Q6. 함수와 클래스의 단일 책임 원칙(SRP)은 실제로 어떻게 적용하나요?
+
+## 선배 크루의 질문
+
+> "컴포넌트를 최대한 작게 나누는 것이 좋을까요? 1개의 컴포넌트가 담당하는 역할이 많아지니 가독성도 떨어지고 단일 책임의 원칙(?)에도 맞지 않는 것같아서 고민됩니다!" — PR #5 ([링크](https://github.com/woowacourse/javascript-lotto/pull/5))
+
+> "getAndClearBuyValue 함수는 함수명에서 알 수 있듯이 buyInput value를 가져오고, 그 input을 비워줍니다. 이게 하나의 함수에서 두 동작을 하는거라고 생각해서 분리하려 했는데, 굳이 너무 작은 단위도 분리해야 하나 싶어서 그냥 했습니다." — PR #10 ([링크](https://github.com/woowacourse/javascript-lotto/pull/10))
+
+> "역할을 나누다 보면 파일이 너무 많아지는데 괜찮은지" — PR #102 ([링크](https://github.com/woowacourse/javascript-lotto/pull/102))
+
+## AS-IS 코드
+
+```js
+// 하나의 클래스가 너무 많은 책임을 가진 경우
+class LottoApp {
+  constructor() {
+    this.lottos = [];
+    this.winningNumbers = [];
+  }
+
+  // 로또 생성 + 검증 + 렌더링을 한 메서드에서 처리
+  purchaseLotto(money) {
+    if (money < 1000) throw new Error('금액 부족');
+    const count = Math.floor(money / 1000);
+    for (let i = 0; i < count; i++) {
+      const numbers = this.generateRandomNumbers();
+      this.lottos.push(numbers);
+    }
+    document.querySelector('.lotto-count').textContent = `${count}개`;
+    this.lottos.forEach((lotto) => {
+      const li = document.createElement('li');
+      li.textContent = lotto.join(', ');
+      document.querySelector('.lotto-list').appendChild(li);
+    });
+  }
+
+  generateRandomNumbers() { /* ... */ }
+  checkWinning() { /* ... */ }
+  calculateProfit() { /* ... */ }
+  renderResult() { /* ... */ }
+}
+```
+
+---

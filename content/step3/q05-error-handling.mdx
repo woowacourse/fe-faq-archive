@@ -1,0 +1,45 @@
+---
+title: 'Q5. 에러 처리 위치'
+---
+
+# Q5. 에러 처리와 유효성 검증 로직은 어디에 위치해야 하나요?
+
+## 선배 크루의 질문
+
+> "유효성 검사를 Controller에서 해야 하나 Model에서 해야 하나 페어와 의견 충돌이 있었습니다. 페어는 코드의 모듈화를 위해 외부(Controller)에서 검증을 한 후 Model에 데이터를 넣자는 의견이었고, 저는 코드의 확장성과 재사용성을 위해 Model 내에서 검증을 하자는 의견이었습니다." — PR #167 ([링크](https://github.com/woowacourse/javascript-lotto/pull/167))
+
+> "유효성 검사를 지금은 여러 클래스에서 별다른 규칙없이 하고 있는데, 유효성 검증 로직은 누가 들고 있어야 할까요?" — PR #173 ([링크](https://github.com/woowacourse/javascript-lotto/pull/173))
+
+> "입력 유효성 검사의 위치가 미션을 진행하면서도 고민입니다." — PR #183 ([링크](https://github.com/woowacourse/javascript-lotto/pull/183))
+
+## AS-IS 코드
+
+```js
+// 검증 로직이 여기저기 흩어져 있는 코드
+class LottoGameController {
+  submitPurchase(input) {
+    if (isNaN(input)) {
+      alert('숫자를 입력해주세요.');
+      return;
+    }
+    if (input < 1000) {
+      alert('1000원 이상 입력해주세요.');
+      return;
+    }
+    if (input % 1000 !== 0) {
+      alert('1000원 단위로 입력해주세요.');
+      return;
+    }
+    this.lottoGame.purchase(input);
+  }
+}
+
+class Lotto {
+  constructor(numbers) {
+    // 검증 없이 그대로 저장
+    this.numbers = numbers;
+  }
+}
+```
+
+---

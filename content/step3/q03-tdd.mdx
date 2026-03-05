@@ -1,0 +1,34 @@
+---
+title: 'Q3. TDD 순서와 범위'
+---
+
+# Q3. TDD는 어떤 순서로 진행하고, 어디까지 테스트를 작성해야 하나요?
+
+## 선배 크루의 질문
+
+> "이번 미션에서 TDD에 처음 도전해 봤습니다. 실패하는 테스트 작성 -> 성공하도록 빠르게 구현 -> 리팩토링 과정을 거쳐서 유닛테스트 코드를 만들었는데, 정석대로 하고 있는 지는 잘 모르겠지만.. 실무에서도 TDD로 개발하는 경우가 많은가요?" — PR #91 ([링크](https://github.com/woowacourse/javascript-lotto/pull/91))
+
+> "TDD를 할 때 전체 기능에서 몇 퍼센트 정도까지 단위 테스트 코드를 작성해야 하는지 궁금합니다." — PR #104 ([링크](https://github.com/woowacourse/javascript-lotto/pull/104))
+
+> "TDD를 적용해 단위 테스트 기반으로 점진적인 리팩토링을 시행한다. 가장 작은 도메인을 구현할 때는 TDD를 사용했지만 GameController와 LottoMachine을 구현할 때는 테스트의 어려움을 겪어 TDD를 적용하지 못했습니다." — PR #291 ([링크](https://github.com/woowacourse/javascript-lotto/pull/291))
+
+## AS-IS 코드
+
+```js
+// 테스트를 위한 테스트 - 단순 getter만 검증
+describe('Lotto', () => {
+  it('로또 번호를 반환한다', () => {
+    const lotto = new Lotto([1, 2, 3, 4, 5, 6]);
+    expect(lotto.numbers).toEqual([1, 2, 3, 4, 5, 6]);
+  });
+});
+
+// 유효성 검사 테스트에서 에러 메시지까지 구체적으로 확인하지 않음
+describe('유효성 검사', () => {
+  it('잘못된 입력에 에러를 던진다', () => {
+    expect(() => new Lotto([1, 2, 3])).toThrow();
+  });
+});
+```
+
+---
