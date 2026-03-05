@@ -17,18 +17,18 @@ title: 'Q1. 캡슐화 — private과 getter'
 ```js
 class Lotto {
   constructor(numbers) {
-    this.numbers = numbers; // public 필드 - 외부에서 자유롭게 접근/수정 가능
+    this.numbers = numbers;
   }
 
   get lottoNumbers() {
-    return this.numbers; // 원본 배열 참조를 그대로 반환
+    return this.numbers;
   }
 }
 
 const lotto = new Lotto([1, 2, 3, 4, 5, 6]);
 const nums = lotto.lottoNumbers;
-nums.push(7); // 외부에서 내부 상태를 변경해버림
-console.log(lotto.numbers); // [1, 2, 3, 4, 5, 6, 7] - 의도치 않은 변경
+nums.push(7);
+console.log(lotto.numbers);
 ```
 
 ---

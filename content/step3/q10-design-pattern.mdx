@@ -15,7 +15,6 @@ title: 'Q10. 디자인 패턴 적용'
 ## AS-IS 코드
 
 ```js
-// MVC를 맹목적으로 적용 - 앱 규모에 비해 과도한 구조
 class LottoController {
   constructor() {
     this.model = new LottoModel();
@@ -23,7 +22,6 @@ class LottoController {
   }
 
   handlePurchase(money) {
-    // Controller에서 DOM에 직접 접근
     const input = document.querySelector("#money-input");
     this.model.setMoney(Number(input.value));
     this.model.generateLottos();
@@ -31,8 +29,6 @@ class LottoController {
   }
 }
 
-// Model, View, Controller 각각 파일을 만들었지만
-// 역할 구분이 불명확하고 서로 깊이 의존
 ```
 
 ---

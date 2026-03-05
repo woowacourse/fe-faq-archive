@@ -15,12 +15,10 @@ title: 'Q8. 단위 테스트 대상'
 ## AS-IS 코드
 
 ```js
-// 에러가 던져지는지만 확인하는 불충분한 테스트
 test("유효성 검사", () => {
   expect(() => validateMoney(-1000)).toThrow();
 });
 
-// 단순 getter만 테스트하는 불필요한 테스트
 test("로또 번호를 반환한다", () => {
   const lotto = new Lotto([1, 2, 3, 4, 5, 6]);
   expect(lotto.numbers).toEqual([1, 2, 3, 4, 5, 6]);

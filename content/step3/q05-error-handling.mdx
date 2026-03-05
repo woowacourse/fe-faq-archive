@@ -15,7 +15,6 @@ title: 'Q5. 에러 처리 위치'
 ## AS-IS 코드
 
 ```js
-// 검증 로직이 여기저기 흩어져 있는 코드
 class LottoGameController {
   submitPurchase(input) {
     if (isNaN(input)) {
@@ -36,7 +35,6 @@ class LottoGameController {
 
 class Lotto {
   constructor(numbers) {
-    // 검증 없이 그대로 저장
     this.numbers = numbers;
   }
 }

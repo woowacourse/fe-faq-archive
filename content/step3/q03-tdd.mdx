@@ -15,7 +15,6 @@ title: 'Q3. TDD 순서와 범위'
 ## AS-IS 코드
 
 ```js
-// 테스트를 위한 테스트 - 단순 getter만 검증
 describe('Lotto', () => {
   it('로또 번호를 반환한다', () => {
     const lotto = new Lotto([1, 2, 3, 4, 5, 6]);
@@ -23,7 +22,6 @@ describe('Lotto', () => {
   });
 });
 
-// 유효성 검사 테스트에서 에러 메시지까지 구체적으로 확인하지 않음
 describe('유효성 검사', () => {
   it('잘못된 입력에 에러를 던진다', () => {
     expect(() => new Lotto([1, 2, 3])).toThrow();
