@@ -1,0 +1,41 @@
+---
+title: 'A-2. 의존 방향 — View가 Controller를 import하면?'
+---
+
+import { Reveal } from '../../components/Reveal'
+
+# A-2. 의존의 방향은 단방향 — View가 Controller를 import하면?
+
+## 선배 크루의 상황
+
+> 2단계에서 View를 구현하면서, View 파일에서 Controller를 import해서 데이터를 직접 가져왔습니다.
+> 비즈니스 로직에서 CSS style을 직접 조작하는 코드도 생겼습니다.
+
+---
+
+<Reveal>
+
+## 탐색 미션
+
+### PR #56 — 신세한탄 (2021, 2단계)
+[PR 링크](https://github.com/woowacourse/javascript-lotto/pull/56)
+
+**찾아볼 것:**
+1. "receiptView에서 Controller를 import한 것에 대해 리뷰어가 뭐라고 했나요? '의존의 방향이 잘못된 것'이란 구체적으로 어떤 의미인가요?"
+2. "'필요한 값은 파라미터로 받아서 그리기만 해야 한다'는 것이 코드에서 어떤 모습일까요?"
+
+### PR #305 — 소하 (2024, 2단계)
+[PR 링크](https://github.com/woowacourse/javascript-lotto/pull/305)
+
+**찾아볼 것:**
+1. "리뷰어가 EventController에서 CSS style.display를 직접 조작하는 코드에 대해 어떤 질문을 던졌나요?"
+2. "비즈니스 로직에서 CSS 속성을 직접 제어하면 어떤 문제가 생길 수 있을까요?"
+
+### PR #355 — 앵버 (2025, 2단계)
+[PR 링크](https://github.com/woowacourse/javascript-lotto/pull/355)
+
+**찾아볼 것:**
+1. "리뷰어(크리스)가 '도메인 분리는 적절하다'고 하면서도 지적한 문제는 무엇인가요?"
+2. "'입력/출력/데이터 생성/데이터 변경을 각각 개별적으로 추상화해야 한다'는 것이 구체적으로 어떤 코드 변경을 의미하나요?"
+
+</Reveal>

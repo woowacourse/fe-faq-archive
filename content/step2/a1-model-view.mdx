@@ -1,0 +1,41 @@
+---
+title: 'A-1. Model/View 분리 — DOM 접근 코드는 어디에?'
+---
+
+import { Reveal } from '../../components/Reveal'
+
+# A-1. Model은 View를 모른다 — DOM 접근 코드는 어디에?
+
+## 선배 크루의 상황
+
+> 2단계에서 UI를 붙이면서, Model 클래스 안에 DOM에 접근하는 코드가 생겼습니다.
+> 결과를 화면에 표시하려고 Result 모델에서 직접 `document.querySelector`를 호출했습니다.
+
+---
+
+<Reveal>
+
+## 탐색 미션
+
+### PR #56 — 신세한탄 (2021, 2단계)
+[PR 링크](https://github.com/woowacourse/javascript-lotto/pull/56)
+
+**찾아볼 것:**
+1. "리뷰어가 Result 모델에서 DOM 접근 코드를 발견하고 뭐라고 했나요?"
+2. "리뷰어가 MVC에서 Model, View, Controller 각각이 알아야 하는 것과 몰라야 하는 것을 어떻게 설명했나요?"
+
+### PR #36 — 도비 (2021, 2단계)
+[PR 링크](https://github.com/woowacourse/javascript-lotto/pull/36)
+
+**찾아볼 것:**
+1. "리뷰어가 도메인 상태(payment, lottos 등)와 라이브러리(Store)를 분리하라고 한 이유는 무엇인가요?"
+2. "'npm에 배포한다고 가정하고 리팩토링해보라'는 제안이 왜 도메인 분리와 관련이 있을까요?"
+
+### PR #126 — 돔하디 (2022, 2단계)
+[PR 링크](https://github.com/woowacourse/javascript-lotto/pull/126)
+
+**찾아볼 것:**
+1. "돔하디가 Controller에서 eventHandler를 View로 이전한 이유를 PR 설명에서 어떻게 설명했나요?"
+2. "Controller에서 DOM 참조를 제거하면 테스트가 어떻게 쉬워진다고 했나요?"
+
+</Reveal>

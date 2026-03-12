@@ -1,0 +1,41 @@
+---
+title: 'B-1. UI 테스트 작성 — 테스트를 위해 프로덕션 코드를 바꿔도 될까?'
+---
+
+import { Reveal } from '../../components/Reveal'
+
+# B-1. UI 테스트 작성 — 테스트를 위해 프로덕션 코드를 바꿔도 될까?
+
+## 선배 크루의 상황
+
+> 2단계에서 UI 테스트를 작성하려는데, DOM이 없어서 테스트가 통과하지 않습니다.
+> 테스트를 위해 optional chaining을 추가하거나, private 메서드를 public으로 바꾸는 일이 생겼습니다.
+
+---
+
+<Reveal>
+
+## 탐색 미션
+
+### PR #33 — 하루 (2021, 2단계)
+[PR 링크](https://github.com/woowacourse/javascript-lotto/pull/33)
+
+**찾아볼 것:**
+1. "리뷰어(한재엽)가 '테스트를 위해 프로덕션 코드에 trick이 가해지는 상황은 없어야 한다'고 한 것은 구체적으로 어떤 코드였나요?"
+2. "하루가 '다음 단계에서는 더 testable한 코드를 작성해보려고 합니다'라고 답했는데, testable한 코드란 어떤 구조일까요?"
+
+### PR #121 — 준찌 (2022, 2단계)
+[PR 링크](https://github.com/woowacourse/javascript-lotto/pull/121)
+
+**찾아볼 것:**
+1. "'테스트를 위해 private 메서드를 public으로 변경해야 하나요?'라는 질문에 리뷰어가 어떻게 답했나요?"
+2. "'도메인 폴더의 퍼블릭 메소드와 constants를 이용해보세요'라는 조언은 구체적으로 어떤 테스트 방법을 의미할까요?"
+
+### PR #356 — 기린 (2025, 2단계)
+[PR 링크](https://github.com/woowacourse/javascript-lotto/pull/356)
+
+**찾아볼 것:**
+1. "기린이 '테스트만을 위해 특정 메서드를 public으로 유지하는 경우도 있나요?'라고 질문한 맥락은 무엇인가요?"
+2. "캡슐화와 테스트 용이성 사이의 트레이드오프를 리뷰어는 어떻게 설명했나요?"
+
+</Reveal>

@@ -1,0 +1,9 @@
+{
+  "index": "2단계 홈",
+  "a1-model-view": "A-1. Model/View 분리",
+  "a2-dependency": "A-2. 의존 방향",
+  "a3-domain-logic": "A-3. 도메인 로직 위치",
+  "b1-ui-test": "B-1. UI 테스트 작성",
+  "b2-test-separation": "B-2. 테스트 분리",
+  "b3-test-strategy": "B-3. 테스트 전략"
+}
