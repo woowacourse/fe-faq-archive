@@ -6,7 +6,15 @@ import { Reveal } from '../../components/Reveal'
 
 # A-2. 의존의 방향은 단방향 — View가 Controller를 import하면?
 
-## 선배 크루의 질문
+## 선배 크루의 고민
+
+> "1단계 domain을 그대로 두고 view만 교체한다는 방향으로 진행했는데, View에서 필요한 데이터를 가져오려다 보니 Controller를 import하게 되었습니다." — 쿠마, [PR #251](https://github.com/woowacourse/javascript-lotto/pull/251)
+
+> "컴포넌트가 사실상 컨트롤러 역할을 하고 있는 것 같아요. 이벤트 처리, 상태 관리, 렌더링이 한 곳에 모여 있어서 분리가 어렵습니다." — 마루, [PR #300](https://github.com/woowacourse/javascript-lotto/pull/300)
+
+> "웹 환경에서 이벤트 리스너 간 데이터를 전달하려면 어떻게 해야 할지 고민입니다. 결국 전역 상태나 DOM을 통해 공유하게 되는데 이게 맞는 건지 모르겠습니다." — 다이앤, [PR #384](https://github.com/woowacourse/javascript-lotto/pull/384)
+
+## 리뷰어의 피드백
 
 > "View 파일에서 Controller 파일을 import 하면 의존의 방향이 잘못된 것이라고 볼 수 있습니다." — PR #56 ([링크](https://github.com/woowacourse/javascript-lotto/pull/56))
 

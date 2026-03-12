@@ -6,13 +6,21 @@ import { Reveal } from '../../components/Reveal'
 
 # A-3. 도메인 로직이 엉뚱한 곳에 — utils? reducer? 어디에 있어야 할까?
 
-## 선배 크루의 질문
+## 선배 크루의 고민
+
+> "도메인과 관련된 로직을 util로 빼는 실수를 한 것 같아요. 처음 구현 당시 webOutputView에 있는 게 맞나에 대한 의문에서 dom 디렉토리로 분리했던 것 같습니다!" — 마루, [PR #300](https://github.com/woowacourse/javascript-lotto/pull/300)
+
+> "validator가 utils에 있어도 되는 건지 고민이 됩니다. 검증 로직이 도메인에 속하는 건지, 범용 유틸리티인 건지 구분이 잘 안 됩니다." — 신세한탄, [PR #56](https://github.com/woowacourse/javascript-lotto/pull/56)
+
+> "Lotto와 LottoMachine의 역할 구분이 혼란스럽습니다. 어디까지가 Lotto의 책임이고 어디서부터 LottoMachine이 해야 하는지 경계가 모호합니다." — 앵버, [PR #355](https://github.com/woowacourse/javascript-lotto/pull/355)
+
+## 리뷰어의 피드백
 
 > "이런 도메인 의존적인 상태들(payment, lottos... 등등)과 라이브러리(리덕스 역할의) Store를 분리하는게 좋습니다. 그래야 재사용 가능해집니다. 이 모듈을 npm에 배포해서 다른 프로젝트에서도 쓸 수 있게끔 만든다고 가정하고 리팩토링 해보시면 도움이 될 것입니다." — PR #36 ([링크](https://github.com/woowacourse/javascript-lotto/pull/36))
 
-> "도메인과 관련된 로직을 util로 빼는 실수를 한 것 같아요. 처음 구현 당시 webOutputView에 있는 게 맞나에 대한 의문에서 dom 디렉토리로 분리했던 것 같습니다!" — PR #300 ([링크](https://github.com/woowacourse/javascript-lotto/pull/300))
-
 > "이 부분은 리듀서 내부에서 결정될 것이 아니고 액션 크리에이터의 페이로드를 통해 완성된 lottos가 들어와야 할 것 같습니다. 리듀서는 순수함수여야 합니다. 사이드 이팩트가 없고 넣은게 같다면 나오는 것도 같아야 합니다." — PR #36 ([링크](https://github.com/woowacourse/javascript-lotto/pull/36))
+
+> "중요한 부분은 드러내고 중요하지 않은 부분은 감추라. 입력·출력·데이터 생성·데이터 변경을 각각 개별적으로 추상화해야 합니다." — PR #355 ([링크](https://github.com/woowacourse/javascript-lotto/pull/355))
 
 ## AS-IS 코드
 

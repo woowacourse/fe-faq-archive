@@ -6,7 +6,15 @@ import { Reveal } from '../../components/Reveal'
 
 # B-3. 테스트 범위와 전략 — 뭘 테스트하고, 뭘 테스트하지 말아야 할까?
 
-## 선배 크루의 질문
+## 선배 크루의 고민
+
+> "TDD가 오히려 사고를 경직시키는 느낌이 들었습니다. 테스트를 먼저 작성하다 보니 구현 방향이 테스트에 끌려가는 것 같아서, 어느 정도 수준으로 테스트를 작성해야 할지 감이 안 잡힙니다." — 부엉이, [PR #202](https://github.com/woowacourse/javascript-lotto/pull/202)
+
+> "리팩터링할 때마다 테스트도 같이 수정해야 해서 번거롭습니다. 구현 세부사항에 의존하는 테스트가 많은 것 같은데, 요구사항 기반으로 테스트를 작성하는 방법이 궁금합니다." — 쿠마, [PR #200](https://github.com/woowacourse/javascript-lotto/pull/200)
+
+> "테스트에서도 매직 넘버 대신 상수를 사용해야 하는지 궁금합니다. 테스트의 가독성을 위해 직접 값을 쓰는 게 나을 수도 있다고 생각했는데, 유지보수 관점에서는 상수가 나을 것 같기도 하고요." — 기린, [PR #356](https://github.com/woowacourse/javascript-lotto/pull/356)
+
+## 리뷰어의 피드백
 
 > "ㅋㅋㅋㅋㅋ 에러에 대한 테스트가 필요하다고 피드백 드렸더니 정말 성실하게 다 해주셨군요!! 좋습니다..! 그런데 성공하는 경우도 함께 있으면 더 좋겠네요 ㅋㅋㅋㅋ (죄송)" — PR #122 ([링크](https://github.com/woowacourse/javascript-lotto/pull/122))
 
