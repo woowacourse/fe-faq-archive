@@ -6,10 +6,46 @@ import { Reveal } from '../../components/Reveal'
 
 # B-1. UI 테스트 작성 — 테스트를 위해 프로덕션 코드를 바꿔도 될까?
 
-## 선배 크루의 상황
+## 선배 크루의 질문
 
-> 2단계에서 UI 테스트를 작성하려는데, DOM이 없어서 테스트가 통과하지 않습니다.
-> 테스트를 위해 optional chaining을 추가하거나, private 메서드를 public으로 바꾸는 일이 생겼습니다.
+> "테스트를 위해 프로덕션 코드에 trick이 가해지는 상황은 없어야 합니다!" — PR #33 ([링크](https://github.com/woowacourse/javascript-lotto/pull/33))
+
+> "추가하다가 문득... 테스트를 구현하기 위해 `LottoList`의 `private method`를 `public`으로 변경해야겠다고 생각이 들었는데, 이런 경우 public으로 메소드를 풀어야 하나요? 아니면 다른 방식이 또 있을까요?" — PR #121 ([링크](https://github.com/woowacourse/javascript-lotto/pull/121))
+
+> "calculateRankHistory()는 내부에서만 사용되지만, 테스트 때문에 어쩔 수 없이 public으로 놔뒀습니다. 궁금한 점은 테스트만을 위해 특정 메서드를 public으로 유지하는 경우도 있나요? 아니면 더 좋은 방법이 있을까요?" — PR #356 ([링크](https://github.com/woowacourse/javascript-lotto/pull/356))
+
+## AS-IS 코드
+
+```js
+// PR #33 (하루) — 테스트 통과를 위해 프로덕션 코드에 optional chaining을 추가
+export default class ResultModal {
+  constructor({ isVisible, lottoTickets, winningNumber, onRestart }) {
+    this.$modal = $('.modal');
+    this.$modalClose = $('.modal-close');
+    this.attachEvents();
+  }
+
+  attachEvents() {
+    // 테스트 환경에서 DOM이 없어서 null → optional chaining으로 우회
+    this.$modalClose?.addEventListener('click', this.closeModal.bind(this));
+    this.$resetButton?.addEventListener('click', () => {
+      this.onRestart();
+      this.closeModal();
+    });
+  }
+
+  // 이 메서드를 테스트하고 싶지만, 생성자에서 DOM을 찾으므로
+  // 테스트 환경에서는 에러가 발생한다
+  getLottoRateOfReturn() {
+    const profit = this.lottoTickets.reduce(
+      (acc, lottoTicket) => acc + WINNING_PRIZE[lottoTicket.totalMatchCount].PRIZE,
+      0
+    );
+    const loss = this.lottoTickets.length * LOTTO_PRICE;
+    return getRateOfReturn(profit, loss);
+  }
+}
+```
 
 ---
 
@@ -31,7 +67,7 @@ import { Reveal } from '../../components/Reveal'
 1. "'테스트를 위해 private 메서드를 public으로 변경해야 하나요?'라는 질문에 리뷰어가 어떻게 답했나요?"
 2. "'도메인 폴더의 퍼블릭 메소드와 constants를 이용해보세요'라는 조언은 구체적으로 어떤 테스트 방법을 의미할까요?"
 
-### PR #356 — 기린 (2025, 2단계)
+### PR #356 — 기린 (2025, 1단계)
 [PR 링크](https://github.com/woowacourse/javascript-lotto/pull/356)
 
 **찾아볼 것:**

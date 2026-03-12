@@ -6,10 +6,28 @@ import { Reveal } from '../../components/Reveal'
 
 # A-2. 의존의 방향은 단방향 — View가 Controller를 import하면?
 
-## 선배 크루의 상황
+## 선배 크루의 질문
 
-> 2단계에서 View를 구현하면서, View 파일에서 Controller를 import해서 데이터를 직접 가져왔습니다.
-> 비즈니스 로직에서 CSS style을 직접 조작하는 코드도 생겼습니다.
+> "View 파일에서 Controller 파일을 import 하면 의존의 방향이 잘못된 것이라고 볼 수 있습니다." — PR #56 ([링크](https://github.com/woowacourse/javascript-lotto/pull/56))
+
+> "MVC 패턴에서 View와 Model은 Controller를 모릅니다. 따라서 View가 Controller의 기능에 의존하면 안되고 Controller로 부터 주입을 받아야 합니다. getTotalPrize를 직접 호출 하지 말고 필요한 값은 파라미터로 받아서 그리기만 해야 합니다." — PR #56 ([링크](https://github.com/woowacourse/javascript-lotto/pull/56))
+
+> "전반적으로 class 선택자로 요소를 찾아주시고 계시네요! class는 일반적으로 하나의 페이지 내 여러 요소에 중복적으로 들어갈 수 있고, 실제로 그렇게 사용되는게 지향되기도 해요. 그런 관점에서 봤을 때 class를 사용해서 비즈니스 로직에서 특정 요소를 찾는게 올바른지 한번 고민해보셔도 좋을 것 같습니다~!" — PR #305 ([링크](https://github.com/woowacourse/javascript-lotto/pull/305))
+
+## AS-IS 코드
+
+```js
+// PR #56 (신세한탄) — View에서 Controller를 import하여 직접 호출하는 역방향 의존
+import { getTotalPrize } from '../Controller/submitController.js';
+
+const receiptView = {
+  renderReceipt() {
+    // View가 Controller의 함수를 직접 호출하여 데이터를 가져옴
+    const totalPrize = getTotalPrize();
+    // ... 렌더링 로직
+  }
+};
+```
 
 ---
 
@@ -31,7 +49,7 @@ import { Reveal } from '../../components/Reveal'
 1. "리뷰어가 EventController에서 CSS style.display를 직접 조작하는 코드에 대해 어떤 질문을 던졌나요?"
 2. "비즈니스 로직에서 CSS 속성을 직접 제어하면 어떤 문제가 생길 수 있을까요?"
 
-### PR #355 — 앵버 (2025, 2단계)
+### PR #355 — 앵버 (2025, 1단계)
 [PR 링크](https://github.com/woowacourse/javascript-lotto/pull/355)
 
 **찾아볼 것:**

@@ -6,10 +6,32 @@ import { Reveal } from '../../components/Reveal'
 
 # A-3. 도메인 로직이 엉뚱한 곳에 — utils? reducer? 어디에 있어야 할까?
 
-## 선배 크루의 상황
+## 선배 크루의 질문
 
-> 2단계에서 UI를 추가하면서, 도메인 로직이 utils 폴더나 상태 관리 코드 안에 섞이는 일이 생겼습니다.
-> "동작은 하는데, 이 코드가 여기 있는 게 맞나?" 하는 상황입니다.
+> "이런 도메인 의존적인 상태들(payment, lottos... 등등)과 라이브러리(리덕스 역할의) Store를 분리하는게 좋습니다. 그래야 재사용 가능해집니다. 이 모듈을 npm에 배포해서 다른 프로젝트에서도 쓸 수 있게끔 만든다고 가정하고 리팩토링 해보시면 도움이 될 것입니다." — PR #36 ([링크](https://github.com/woowacourse/javascript-lotto/pull/36))
+
+> "도메인과 관련된 로직을 util로 빼는 실수를 한 것 같아요. 처음 구현 당시 webOutputView에 있는 게 맞나에 대한 의문에서 dom 디렉토리로 분리했던 것 같습니다!" — PR #300 ([링크](https://github.com/woowacourse/javascript-lotto/pull/300))
+
+> "이 부분은 리듀서 내부에서 결정될 것이 아니고 액션 크리에이터의 페이로드를 통해 완성된 lottos가 들어와야 할 것 같습니다. 리듀서는 순수함수여야 합니다. 사이드 이팩트가 없고 넣은게 같다면 나오는 것도 같아야 합니다." — PR #36 ([링크](https://github.com/woowacourse/javascript-lotto/pull/36))
+
+## AS-IS 코드
+
+```js
+// PR #36 (도비) — 리듀서 내부에서 도메인 로직(로또 번호 랜덤 생성)을 수행
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'BUY_LOTTOS':
+      return {
+        ...state,
+        // 리듀서 안에서 랜덤 로또 생성 — 순수함수 원칙 위반
+        lottos: Array.from({ length: action.payload.count }, () =>
+          generateRandomLottoNumbers()  // 사이드 이펙트 발생
+        ),
+      };
+    // ...
+  }
+};
+```
 
 ---
 
@@ -31,7 +53,7 @@ import { Reveal } from '../../components/Reveal'
 1. "마루가 스스로 발견한 '도메인 로직을 util로 빼는 실수'란 구체적으로 어떤 코드였나요?"
 2. "utils/dom 안에 lotto 관련 네이밍이 있으면 왜 문제가 될까요? 도메인 로직과 유틸 함수의 경계는 어디인가요?"
 
-### PR #355 — 앵버 (2025, 2단계)
+### PR #355 — 앵버 (2025, 1단계)
 [PR 링크](https://github.com/woowacourse/javascript-lotto/pull/355)
 
 **찾아볼 것:**

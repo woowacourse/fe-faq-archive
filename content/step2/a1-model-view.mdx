@@ -6,10 +6,42 @@ import { Reveal } from '../../components/Reveal'
 
 # A-1. Model은 View를 모른다 — DOM 접근 코드는 어디에?
 
-## 선배 크루의 상황
+## 선배 크루의 질문
 
-> 2단계에서 UI를 붙이면서, Model 클래스 안에 DOM에 접근하는 코드가 생겼습니다.
-> 결과를 화면에 표시하려고 Result 모델에서 직접 `document.querySelector`를 호출했습니다.
+> "Model은 View를 알지 못합니다. DOM에 접근하는 코드가 존재해서는 안됩니다." — PR #56 ([링크](https://github.com/woowacourse/javascript-lotto/pull/56))
+
+> "컨트롤러에 너무 많은 기능이 포함되다보니 너무 비대해져 버렸네요... 그러다보니 도메인에 대한 테스트도 어려워진 것 같습니다. 이 중에 상당수는 Model, View, util로 분리하고 이동시켜 볼 수 있을 것 같습니다" — PR #126 ([링크](https://github.com/woowacourse/javascript-lotto/pull/126))
+
+> "이런 구조라면 실행될 때마다 DOM에 접근하게 되는데요. 일반적으로 DOM에 대한 접근은 비용이 비싸기 때문에 최소화하는 습관을 들이시는게 좋은데요." — PR #126 ([링크](https://github.com/woowacourse/javascript-lotto/pull/126))
+
+## AS-IS 코드
+
+```js
+// PR #305 (소하) — 도메인 모델 설정 함수 안에서 DOM을 직접 조회하는 패턴
+function insertWinningNumbers(lottoMachine) {
+  try {
+    const array = new Array(6).fill(0);
+    const extractionWinningNumbers = array.map(
+      (_, idx) => document.getElementById(`winningNumber${idx + 1}`).value
+    );
+    const inputWinningNumber = extractionWinningNumbers.filter(
+      (num) => num.trim() !== ''
+    );
+    lottoMachine.winningLotto = inputWinningNumber.join(',');
+  } catch (error) {
+    document.querySelector('.lp-nig-winning-box').classList.add('error-line');
+  }
+}
+
+function insertBonusNumber(lottoMachine) {
+  try {
+    const inputBonusNumber = document.getElementById('bonusNumber').value;
+    lottoMachine.bonusNumber = inputBonusNumber;
+  } catch (error) {
+    document.querySelector('.lp-nig-bonus-box').classList.add('error-line');
+  }
+}
+```
 
 ---
 

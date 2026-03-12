@@ -6,10 +6,37 @@ import { Reveal } from '../../components/Reveal'
 
 # B-2. 도메인 테스트와 UI 테스트 분리 — 테스트 파일을 나눠야 할까?
 
-## 선배 크루의 상황
+## 선배 크루의 질문
 
-> 2단계에서 테스트를 작성했는데, 기능 테스트와 UI 테스트가 한 파일에 섞여 있습니다.
-> Controller가 비대해지면서 모든 테스트가 DOM에 종속적이 되어버렸습니다.
+> "기능 테스트와 UI 테스트의 파일을 분리해보는 건 어떨까요~? 파일 하나에 있으니 찾기 어려워 지는 것 같아요!" — PR #44 ([링크](https://github.com/woowacourse/javascript-lotto/pull/44))
+
+> "현재 step2-index.js파일에서 너무 많은 정보를 알고 있어야하고 이는 곧 변경에 취약한 설계라는 것을 의미합니다. 적절하게 도메인과 UI 객체를 분리해서 객체에게 메세지를 보내는 형식으로 변경해 보는 것은 어떨까요?" — PR #395 ([링크](https://github.com/woowacourse/javascript-lotto/pull/395))
+
+> "Controller의 역할에 대해 다시한번 생각할 필요가 있을 것 같아요. 현재는 입력검증, 로직처리, 흐름제어등을 모두 직접적으로 하고 있기 때문에 Controller가 간단한 로직임에도 불구하고 많이 무거워진 상태입니다. Controller가 세부로직들을 모두 알 필요가 있을까요?" — PR #356 ([링크](https://github.com/woowacourse/javascript-lotto/pull/356))
+
+## AS-IS 코드
+
+```js
+// PR #234 (부엉이) — 컨트롤러가 DOM 접근 + 검증 + 도메인 로직 + UI 렌더링을 모두 수행
+buyLotto() {
+  try {
+    ui.hideMoneyValidationText();
+    const moneyInput = domList.moneyInput.value; // 컨트롤러가 DOM에 직접 접근
+    inputValidator.validateMoneyInput(moneyInput);
+    this.#lottoMachine.buyLotto(+moneyInput);
+    ui.showRestUI(this.#lottoMachine.lottos);     // UI 렌더링도 여기서
+  } catch (error) {
+    // ...
+  }
+}
+
+bindAllEvents() {
+  // 컨트롤러가 DOM 요소를 직접 알고 이벤트를 바인딩
+  this.addEvent({ element: ui.getDomWithName('buyBtn'), event: () => this.buyLotto(), type: 'click' });
+  this.addEvent({ element: ui.getDomWithName('resultBtn'), event: () => this.calculateStatistics(), type: 'click' });
+  this.addEvent({ element: ui.getDomWithName('retryBtn'), event: () => this.restartGame(), type: 'click' });
+}
+```
 
 ---
 
@@ -24,18 +51,18 @@ import { Reveal } from '../../components/Reveal'
 1. "리뷰어(발리스타)가 '기능 테스트와 UI 테스트의 파일을 분리해보는 건 어떨까요'라고 한 이유는 무엇인가요?"
 2. "한 파일에 있으면 '찾기 어려워진다'는 것 외에, 분리하면 어떤 이점이 더 있을까요?"
 
-### PR #200 — 쿠마 (2023, 2단계)
+### PR #200 — 쿠마 (2023, 1단계)
 [PR 링크](https://github.com/woowacourse/javascript-lotto/pull/200)
 
 **찾아볼 것:**
 1. "리뷰어(벡)가 '컨트롤러가 비대해지다보니 모든 테스트도 controller에 종속적이 되어버렸다'고 한 것은 어떤 상황인가요?"
 2. "'도메인별로, 메소드별로 테스트 코드를 개선해볼 수 있을 것'이라는 조언은 구체적으로 어떤 변화를 의미할까요?"
 
-### PR #200 — 쿠마 (2023, 2단계)
-[PR 링크](https://github.com/woowacourse/javascript-lotto/pull/200)
+### PR #395 — 기린 (2025, 2단계)
+[PR 링크](https://github.com/woowacourse/javascript-lotto/pull/395)
 
 **찾아볼 것:**
-1. "'매번 DOM이 loaded된 이후에나 Controller의 로직을 확인할 수 있다'는 것이 왜 문제인가요?"
-2. "DOM에 의존하지 않는 테스트를 위해 어떤 구조적 변경이 필요하다고 리뷰어가 암시했나요?"
+1. "리뷰어가 '너무 많은 정보를 알고 있어야 한다'고 지적한 파일은 무엇이고, 어떤 종류의 정보가 섞여 있나요?"
+2. "'객체에게 메세지를 보내는 형식'이란 구체적으로 어떤 코드 변경을 의미할까요?"
 
 </Reveal>

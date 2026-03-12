@@ -6,10 +6,30 @@ import { Reveal } from '../../components/Reveal'
 
 # B-3. 테스트 범위와 전략 — 뭘 테스트하고, 뭘 테스트하지 말아야 할까?
 
-## 선배 크루의 상황
+## 선배 크루의 질문
 
-> 2단계에서 테스트를 작성했는데, 성공 케이스만 있거나 에러 케이스만 있습니다.
-> 기대값을 하드코딩했더니, 요구사항이 바뀌면 테스트도 다 고쳐야 하는 상황이 생겼습니다.
+> "ㅋㅋㅋㅋㅋ 에러에 대한 테스트가 필요하다고 피드백 드렸더니 정말 성실하게 다 해주셨군요!! 좋습니다..! 그런데 성공하는 경우도 함께 있으면 더 좋겠네요 ㅋㅋㅋㅋ (죄송)" — PR #122 ([링크](https://github.com/woowacourse/javascript-lotto/pull/122))
+
+> "현재의 계산식을 염두에 두고 직접 값을 입력해 테스트하는 방식은, 유효하지 않은 테스트는 아니지만 요구사항이 바뀜에 따라 해당 테스트 코드도 같이 바꿔줘야 할 가능성이 큽니다. 추후에 리소스를 소모할 가능성이 있는 테스트 코드는 최대한 지양하는 것이 좋습니다." — PR #355 ([링크](https://github.com/woowacourse/javascript-lotto/pull/355))
+
+> "각 테스트는 이전 테스트에 영향을 안받도록해야겠습니다. 상위컨텍스트에 공용으로 사용하는 데이터를 두기보단 테스트데이터를 생성하는 함수를 하나 만들어보는게 좋겠어요" — PR #202 ([링크](https://github.com/woowacourse/javascript-lotto/pull/202))
+
+## AS-IS 코드
+
+```js
+// PR #355 (앵버) — 기대값을 하드코딩하여 테스트
+test('전체 당첨 금액을 계산한다', () => {
+  // given
+  const winning = new Winning(winningNumbers, bonusNumber);
+  winning.calculateRankHistory(lottos);
+
+  // then - 하드코딩된 기대값: 요구사항 변경 시 테스트도 수정 필요
+  expect(winning.getTotalPrize()).toEqual(2000000000);
+
+  // 리뷰어 크리스의 제안: 계산식을 드러내는 방식으로 변경
+  // expect(winning.getTotalPrize()).toEqual(price / PRIZE.fifth);
+});
+```
 
 ---
 
@@ -17,21 +37,21 @@ import { Reveal } from '../../components/Reveal'
 
 ## 탐색 미션
 
-### PR #122 — 하리 (2022, 2단계)
+### PR #122 — 하리 (2022, 1단계)
 [PR 링크](https://github.com/woowacourse/javascript-lotto/pull/122)
 
 **찾아볼 것:**
 1. "리뷰어(발리스타)가 에러 케이스만 테스트한 것에 대해 어떤 피드백을 줬나요?"
 2. "테스트에서 에러 케이스와 성공 케이스의 균형은 왜 중요할까요?"
 
-### PR #355 — 앵버 (2025, 2단계)
+### PR #355 — 앵버 (2025, 1단계)
 [PR 링크](https://github.com/woowacourse/javascript-lotto/pull/355)
 
 **찾아볼 것:**
 1. "리뷰어(크리스)가 '계산식을 염두에 두고 직접 값을 입력해 테스트하는 방식'의 문제점을 어떻게 설명했나요?"
 2. "'요구사항이 바뀜에 따라 테스트 코드도 같이 바꿔야 할 가능성이 크다'는 것을 방지하려면 어떻게 테스트를 작성해야 할까요?"
 
-### PR #202 — 부엉이 (2023, 2단계)
+### PR #202 — 부엉이 (2023, 1단계)
 [PR 링크](https://github.com/woowacourse/javascript-lotto/pull/202)
 
 **찾아볼 것:**
