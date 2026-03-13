@@ -51,6 +51,11 @@ function insertBonusNumber(lottoMachine) {
 }
 ```
 
+### 이 코드를 보면서 이야기해봅시다
+
+- "이 함수의 파라미터(`lottoMachine`)와 함수 안에서 하는 일(`document.getElementById`)을 각각 보면, 이 함수는 누구의 책임인가요?"
+- "만약 이 코드를 콘솔 앱에서도 쓰고 싶다면 어떤 부분이 걸리나요?"
+
 ---
 
 <Reveal>
@@ -75,7 +80,7 @@ function insertBonusNumber(lottoMachine) {
 [PR 링크](https://github.com/woowacourse/javascript-lotto/pull/126)
 
 **찾아볼 것:**
-1. "돔하디가 Controller에서 eventHandler를 View로 이전한 이유를 PR 설명에서 어떻게 설명했나요?"
+1. "컨트롤러가 너무 많은 책임을 가지고 있을 때, 리뷰어는 어떤 로직을 어디로 이동하라고 제안했나요?"
 2. "Controller에서 DOM 참조를 제거하면 테스트가 어떻게 쉬워진다고 했나요?"
 
 </Reveal>
