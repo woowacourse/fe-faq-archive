@@ -6,6 +6,8 @@ import { Reveal } from '../../components/Reveal'
 
 # A-1. Model은 View를 모른다 — DOM 접근 코드는 어디에?
 
+> **이렇게 읽어보세요:** 선배 크루의 고민 → AS-IS 코드를 직접 분석하며 토론 → 리뷰어의 피드백으로 관점 확인 → 탐색 미션에서 PR 깊이 파기
+
 ## 선배 크루의 고민
 
 > "MVC 패턴의 각 역할이 혼란스럽습니다. 특히 Result 모델에서 DOM에 접근하는 코드가 생겨버렸는데, 이게 맞는 건지 모르겠습니다." — 신세한탄, [PR #56](https://github.com/woowacourse/javascript-lotto/pull/56)
@@ -13,14 +15,6 @@ import { Reveal } from '../../components/Reveal'
 > "Controller에 있던 eventHandler를 View로 이전하면서 DOM 의존도를 제거하려고 했습니다. 그런데 Controller가 너무 비대해져서 어디까지가 Controller의 역할인지 고민됩니다." — 돔하디, [PR #126](https://github.com/woowacourse/javascript-lotto/pull/126)
 
 > "UI 생성 코드와 비즈니스 로직이 한 파일에 혼재되어 있는데, 어떻게 분리해야 할지 감이 안 잡힙니다." — 앵버, [PR #418](https://github.com/woowacourse/javascript-lotto/pull/418)
-
-## 리뷰어의 피드백
-
-> "Model은 View를 알지 못합니다. DOM에 접근하는 코드가 존재해서는 안됩니다." — PR #56 ([링크](https://github.com/woowacourse/javascript-lotto/pull/56))
-
-> "컨트롤러에 너무 많은 기능이 포함되다보니 너무 비대해져 버렸네요... 그러다보니 도메인에 대한 테스트도 어려워진 것 같습니다. 이 중에 상당수는 Model, View, util로 분리하고 이동시켜 볼 수 있을 것 같습니다" — PR #126 ([링크](https://github.com/woowacourse/javascript-lotto/pull/126))
-
-> "이런 구조라면 실행될 때마다 DOM에 접근하게 되는데요. 일반적으로 DOM에 대한 접근은 비용이 비싸기 때문에 최소화하는 습관을 들이시는게 좋은데요." — PR #126 ([링크](https://github.com/woowacourse/javascript-lotto/pull/126))
 
 ## AS-IS 코드
 
@@ -57,6 +51,14 @@ function insertBonusNumber(lottoMachine) {
 
 - "이 함수의 파라미터(`lottoMachine`)와 함수 안에서 하는 일(`document.getElementById`)을 각각 보면, 이 함수는 누구의 책임인가요?"
 - "만약 `lottoMachine`에 대한 단위 테스트를 작성한다면, 이 함수를 테스트할 수 있을까요? 무엇이 걸리나요?"
+
+## 리뷰어의 피드백
+
+> "Model은 View를 알지 못합니다. DOM에 접근하는 코드가 존재해서는 안됩니다." — PR #56 ([링크](https://github.com/woowacourse/javascript-lotto/pull/56))
+
+> "컨트롤러에 너무 많은 기능이 포함되다보니 너무 비대해져 버렸네요... 그러다보니 도메인에 대한 테스트도 어려워진 것 같습니다. 이 중에 상당수는 Model, View, util로 분리하고 이동시켜 볼 수 있을 것 같습니다" — PR #126 ([링크](https://github.com/woowacourse/javascript-lotto/pull/126))
+
+> "이런 구조라면 실행될 때마다 DOM에 접근하게 되는데요. 일반적으로 DOM에 대한 접근은 비용이 비싸기 때문에 최소화하는 습관을 들이시는게 좋은데요." — PR #126 ([링크](https://github.com/woowacourse/javascript-lotto/pull/126))
 
 ---
 
