@@ -24,29 +24,45 @@ import { Reveal } from '../../components/Reveal'
 
 ## AS-IS 코드
 
-> 출처: [PR #36 — 도비 (2021, 2단계)](https://github.com/woowacourse/javascript-lotto/pull/36) · [해당 파일](https://github.com/woowacourse/javascript-lotto/blob/1c0c5103b4239b253704c65eb34d7b8a4fe4aafd/src/js/redux/reducer.js)
+> 출처: [PR #300 — 마루 (2024, 2단계)](https://github.com/woowacourse/javascript-lotto/pull/300) · [해당 파일](https://github.com/woowacourse/javascript-lotto/blob/007aae916647d1390ecfbb89878e6aa9486ffea0/src/utils/dom/index.js)
 
 ```js
-// redux/reducer.js — 리듀서 내부에서 도메인 로직(로또 번호 랜덤 생성)을 수행
-const reducer = (state, action) => {
-  switch (action.type) {
-    case 'BUY_LOTTOS':
-      return {
-        ...state,
-        // 리듀서 안에서 랜덤 로또 생성 — 순수함수 원칙 위반
-        lottos: Array.from({ length: action.payload.count }, () =>
-          generateRandomLottoNumbers()  // 사이드 이펙트 발생
-        ),
-      };
-    // ...
-  }
+// utils/dom/index.js — 범용 DOM 유틸 객체 안에 로또 도메인 로직이 섞여 있는 패턴
+import PRIZE from '../../constants/prize';
+
+const dom = {
+  $(selector) { /* 범용 DOM 헬퍼 */ },
+  create(tag, id, className, text) { /* 범용 DOM 헬퍼 */ },
+
+  // 아래 함수들은 로또 당첨 등수(PRIZE)를 직접 사용하는 도메인 로직
+  createLottoResultTitle() {
+    const lottoResultRowTitle = document.createElement('div');
+    PRIZE.TABLE_TITLE_LIST.forEach(text => {
+      const lottoTableTitle = this.create('div', null, 'lotto-result-cell', text);
+      lottoResultRowTitle.appendChild(lottoTableTitle);
+    });
+    return lottoResultRowTitle;
+  },
+
+  createLottoResultTable(ranks) {
+    const resultTableFragment = document.createDocumentFragment();
+    [PRIZE.FIFTH, PRIZE.FORTH, PRIZE.THIRD, PRIZE.SECOND, PRIZE.FIRST].forEach(rank => {
+      const lottoResultRow = this.create('div', null, 'lotto-result-row');
+      const lottoMatchedCount = this.create('div', null, 'lotto-result-cell', `${PRIZE.COUNT_OUTPUTS[rank]}`);
+      const lottoResultPrize = this.create('div', null, 'lotto-result-cell', `${PRIZE.AMOUNT[rank].toLocaleString()}`);
+      const lottoRankCount = this.create('div', null, 'lotto-result-cell', `${ranks[rank]}개`);
+      lottoResultRow.append(lottoMatchedCount, lottoResultPrize, lottoRankCount);
+      resultTableFragment.appendChild(lottoResultRow);
+    });
+    return resultTableFragment;
+  },
 };
 ```
 
 ### 이 코드를 보면서 이야기해봅시다
 
-- "이 reducer에 같은 action을 두 번 보내면 같은 결과가 나올까요? 그게 왜 문제가 될 수 있을까요?"
-- "로또 번호 생성은 도메인 로직인데 reducer(상태 관리) 안에 있습니다. 내 코드에서 도메인 로직이 엉뚱한 곳에 있는 부분은 없나요?"
+- "`utils/dom`이라는 파일명만 보고, `createLottoResultTable` 같은 함수가 여기 있을 거라고 예측할 수 있나요?"
+- "범용 헬퍼(`$`, `create`)와 도메인 로직(`PRIZE`를 아는 함수)이 한 객체에 섞여 있으면, 내 코드에서 도메인 로직을 찾으려 할 때 어떤 문제가 생기나요?"
 
 ---
 

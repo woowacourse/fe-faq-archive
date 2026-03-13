@@ -53,7 +53,7 @@ bindAllEvents() {
 ### 이 코드를 보면서 이야기해봅시다
 
 - "이 `buyLotto()`를 테스트하려면 무엇을 준비해야 하나요? (DOM, validator, lottoMachine, ui) 이 중 도메인 로직만 테스트하고 싶다면?"
-- "이 함수를 역할별로 쪼갠다면, 각각의 테스트 파일은 어떻게 나뉠까요?"
+- "이 함수에서 `this.#lottoMachine.buyLotto(+moneyInput)` 한 줄만 테스트하고 싶다면, 나머지 코드(DOM 접근, UI 렌더링)가 왜 방해가 되나요?"
 
 ---
 
