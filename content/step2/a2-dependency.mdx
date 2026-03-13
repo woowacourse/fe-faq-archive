@@ -24,8 +24,10 @@ import { Reveal } from '../../components/Reveal'
 
 ## AS-IS 코드
 
+> 출처: [PR #56 — 신세한탄 (2021, 2단계)](https://github.com/woowacourse/javascript-lotto/pull/56) · [해당 파일](https://github.com/woowacourse/javascript-lotto/blob/b864ef3369279be4b094c643448a76581b4eae2a/src/js/View/receiptView.js)
+
 ```js
-// PR #56 (신세한탄) — View에서 Controller를 import하여 직접 호출하는 역방향 의존
+// View에서 Controller를 import하여 직접 호출하는 역방향 의존
 import { getTotalPrize } from '../Controller/submitController.js';
 
 const receiptView = {

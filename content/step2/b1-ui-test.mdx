@@ -24,8 +24,10 @@ import { Reveal } from '../../components/Reveal'
 
 ## AS-IS 코드
 
+> 출처: [PR #33 — 하루 (2021, 2단계)](https://github.com/woowacourse/javascript-lotto/pull/33) · [해당 파일](https://github.com/woowacourse/javascript-lotto/blob/dd7e93fd69b5cef1d895a758d04b68774561816c/src/js/components/ResultModal.js)
+
 ```js
-// PR #33 (하루) — 테스트 통과를 위해 프로덕션 코드에 optional chaining을 추가
+// 테스트 통과를 위해 프로덕션 코드에 optional chaining을 추가
 export default class ResultModal {
   constructor({ isVisible, lottoTickets, winningNumber, onRestart }) {
     this.$modal = $('.modal');

@@ -26,8 +26,10 @@ import { Reveal } from '../../components/Reveal'
 
 이렇게 한 곳에 모인 코드는, 테스트도 한 파일에 몰리게 됩니다.
 
+> 출처: [PR #234 — 부엉이 (2023, 2단계)](https://github.com/woowacourse/javascript-lotto/pull/234) · [해당 파일](https://github.com/woowacourse/javascript-lotto/blob/b6231ed7fca3fc82b3c50e2f9ce12ae4aad1b88d/src/js/controller/stepTwo/WebLottoController.js)
+
 ```js
-// PR #234 (부엉이) — 컨트롤러가 DOM 접근 + 검증 + 도메인 로직 + UI 렌더링을 모두 수행
+// 컨트롤러가 DOM 접근 + 검증 + 도메인 로직 + UI 렌더링을 모두 수행
 buyLotto() {
   try {
     ui.hideMoneyValidationText();
