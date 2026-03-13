@@ -27,7 +27,7 @@ import { Reveal } from '../../components/Reveal'
 > 출처: [PR #305 — 소하 (2024, 2단계)](https://github.com/woowacourse/javascript-lotto/pull/305) · [해당 파일](https://github.com/woowacourse/javascript-lotto/blob/1b9aa5f48880bc874fa13a17d06be0c8d005ba7f/src/controller/LottoControllerWeb.js)
 
 ```js
-// 도메인 모델 설정 함수 안에서 DOM을 직접 조회하는 패턴
+// LottoControllerWeb.js — 컨트롤러에서 도메인 객체를 설정하면서 DOM을 직접 조회하는 패턴
 function insertWinningNumbers(lottoMachine) {
   try {
     const array = new Array(6).fill(0);
