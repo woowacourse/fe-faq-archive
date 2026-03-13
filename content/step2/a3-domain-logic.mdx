@@ -6,7 +6,7 @@ import { Reveal } from '../../components/Reveal'
 
 # A-3. 도메인 로직이 엉뚱한 곳에 — utils? reducer? 어디에 있어야 할까?
 
-> **이렇게 읽어보세요:** 선배 크루의 고민 → AS-IS 코드를 직접 분석하며 토론 → 리뷰어의 피드백으로 관점 확인 → 탐색 미션에서 PR 깊이 파기
+> **이렇게 읽어보세요:** 선배 크루의 고민 → 토론 질문을 먼저 읽고 → AS-IS 코드를 직접 분석 → 리뷰어의 피드백으로 관점 확인 → 탐색 미션에서 PR 깊이 파기
 
 ## 선배 크루의 고민
 
@@ -15,6 +15,11 @@ import { Reveal } from '../../components/Reveal'
 > "validator가 utils에 있어도 되는 건지 고민이 됩니다. 검증 로직이 도메인에 속하는 건지, 범용 유틸리티인 건지 구분이 잘 안 됩니다." — 신세한탄, [PR #56](https://github.com/woowacourse/javascript-lotto/pull/56)
 
 > "Lotto와 LottoMachine의 역할 구분이 혼란스럽습니다. 어디까지가 Lotto의 책임이고 어디서부터 LottoMachine이 해야 하는지 경계가 모호합니다." — 앵버, [PR #355](https://github.com/woowacourse/javascript-lotto/pull/355)
+
+### 이 코드를 보면서 이야기해봅시다
+
+- "`utils/dom`이라는 파일명만 보고, `createLottoResultTable` 같은 함수가 여기 있을 거라고 예측할 수 있나요?"
+- "범용 헬퍼(`$`, `create`)와 도메인 로직(`PRIZE`를 아는 함수)이 한 객체에 섞여 있으면, 내 코드에서 도메인 로직을 찾으려 할 때 어떤 문제가 생기나요?"
 
 ## AS-IS 코드
 
@@ -52,11 +57,6 @@ const dom = {
   },
 };
 ```
-
-### 이 코드를 보면서 이야기해봅시다
-
-- "`utils/dom`이라는 파일명만 보고, `createLottoResultTable` 같은 함수가 여기 있을 거라고 예측할 수 있나요?"
-- "범용 헬퍼(`$`, `create`)와 도메인 로직(`PRIZE`를 아는 함수)이 한 객체에 섞여 있으면, 내 코드에서 도메인 로직을 찾으려 할 때 어떤 문제가 생기나요?"
 
 ## 리뷰어의 피드백
 

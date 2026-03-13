@@ -6,7 +6,7 @@ import { Reveal } from '../../components/Reveal'
 
 # B-1. UI 테스트 작성 — 테스트를 위해 프로덕션 코드를 바꿔도 될까?
 
-> **이렇게 읽어보세요:** 선배 크루의 고민 → AS-IS 코드를 직접 분석하며 토론 → 리뷰어의 피드백으로 관점 확인 → 탐색 미션에서 PR 깊이 파기
+> **이렇게 읽어보세요:** 선배 크루의 고민 → 토론 질문을 먼저 읽고 → AS-IS 코드를 직접 분석 → 리뷰어의 피드백으로 관점 확인 → 탐색 미션에서 PR 깊이 파기
 
 ## 선배 크루의 고민
 
@@ -15,6 +15,11 @@ import { Reveal } from '../../components/Reveal'
 > "추가하다가 문득... 테스트를 구현하기 위해 `LottoList`의 `private method`를 `public`으로 변경해야겠다고 생각이 들었는데, 이런 경우 public으로 메소드를 풀어야 하나요? 아니면 다른 방식이 또 있을까요?" — 준찌, [PR #121](https://github.com/woowacourse/javascript-lotto/pull/121)
 
 > "calculateRankHistory()는 내부에서만 사용되지만, 테스트 때문에 어쩔 수 없이 public으로 놔뒀습니다. 궁금한 점은 테스트만을 위해 특정 메서드를 public으로 유지하는 경우도 있나요? 아니면 더 좋은 방법이 있을까요?" — 기린, [PR #356](https://github.com/woowacourse/javascript-lotto/pull/356)
+
+### 이 코드를 보면서 이야기해봅시다
+
+- "`getLottoRateOfReturn()`은 수익률을 계산하는 순수한 로직인데, 테스트하려면 DOM이 필요한 구조입니다. 어떻게 분리하면 DOM 없이 테스트할 수 있을까요?"
+- "optional chaining은 문제를 해결한 걸까요, 숨긴 걸까요?"
 
 ## AS-IS 코드
 
@@ -50,11 +55,6 @@ export default class ResultModal {
   }
 }
 ```
-
-### 이 코드를 보면서 이야기해봅시다
-
-- "`getLottoRateOfReturn()`은 수익률을 계산하는 순수한 로직인데, 테스트하려면 DOM이 필요한 구조입니다. 어떻게 분리하면 DOM 없이 테스트할 수 있을까요?"
-- "optional chaining은 문제를 해결한 걸까요, 숨긴 걸까요?"
 
 ## 리뷰어의 피드백
 
