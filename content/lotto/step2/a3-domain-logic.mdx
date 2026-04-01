@@ -2,13 +2,13 @@
 title: 'A-3. 도메인 로직 위치 — utils? reducer? 어디에?'
 ---
 
-import { Reveal } from '../../components/Reveal'
+import { Reveal } from '../../../components/Reveal'
 
 # A-3. 도메인 로직이 엉뚱한 곳에 — utils? reducer? 어디에 있어야 할까?
 
-> **이렇게 읽어보세요:** 선배 크루의 고민 → 토론 질문을 먼저 읽고 → AS-IS 코드를 직접 분석 → 리뷰어의 피드백으로 관점 확인 → 탐색 미션에서 PR 깊이 파기
+> **이렇게 읽어보세요:** 크루의 고민 → 토론 질문을 먼저 읽고 → AS-IS 코드를 직접 분석 → 리뷰어의 피드백으로 관점 확인 → 탐색 미션에서 PR 깊이 파기
 
-## 선배 크루의 고민
+## 크루의 고민
 
 > "도메인과 관련된 로직을 util로 빼는 실수를 한 것 같아요. 처음 구현 당시 webOutputView에 있는 게 맞나에 대한 의문에서 dom 디렉토리로 분리했던 것 같습니다!" — 마루, [PR #300](https://github.com/woowacourse/javascript-lotto/pull/300)
 

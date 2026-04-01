@@ -2,13 +2,13 @@
 title: 'A-2. 의존 방향 — View가 Controller를 import하면?'
 ---
 
-import { Reveal } from '../../components/Reveal'
+import { Reveal } from '../../../components/Reveal'
 
 # A-2. 의존의 방향은 단방향 — View가 Controller를 import하면?
 
-> **이렇게 읽어보세요:** 선배 크루의 고민 → 토론 질문을 먼저 읽고 → AS-IS 코드를 직접 분석 → 리뷰어의 피드백으로 관점 확인 → 탐색 미션에서 PR 깊이 파기
+> **이렇게 읽어보세요:** 크루의 고민 → 토론 질문을 먼저 읽고 → AS-IS 코드를 직접 분석 → 리뷰어의 피드백으로 관점 확인 → 탐색 미션에서 PR 깊이 파기
 
-## 선배 크루의 고민
+## 크루의 고민
 
 > "1단계 domain을 그대로 두고 view만 교체한다는 방향으로 진행했는데, View에서 필요한 데이터를 가져오려다 보니 Controller를 import하게 되었습니다." — 쿠마, [PR #251](https://github.com/woowacourse/javascript-lotto/pull/251)
 

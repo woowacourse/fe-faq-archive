@@ -2,13 +2,13 @@
 title: 'B-1. UI 테스트 작성 — 테스트를 위해 프로덕션 코드를 바꿔도 될까?'
 ---
 
-import { Reveal } from '../../components/Reveal'
+import { Reveal } from '../../../components/Reveal'
 
 # B-1. UI 테스트 작성 — 테스트를 위해 프로덕션 코드를 바꿔도 될까?
 
-> **이렇게 읽어보세요:** 선배 크루의 고민 → 토론 질문을 먼저 읽고 → AS-IS 코드를 직접 분석 → 리뷰어의 피드백으로 관점 확인 → 탐색 미션에서 PR 깊이 파기
+> **이렇게 읽어보세요:** 크루의 고민 → 토론 질문을 먼저 읽고 → AS-IS 코드를 직접 분석 → 리뷰어의 피드백으로 관점 확인 → 탐색 미션에서 PR 깊이 파기
 
-## 선배 크루의 고민
+## 크루의 고민
 
 > "테스트를 통과시키려고 프로덕션 코드에 optional chaining(`?.`)을 추가했는데, 이게 맞는 건지 찝찝합니다. 테스트 환경에서 DOM이 없어서 null이 되는 걸 우회한 건데..." — 하루, [PR #33](https://github.com/woowacourse/javascript-lotto/pull/33)
 

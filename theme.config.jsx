@@ -1,5 +1,5 @@
 export default {
-  logo: <span>📚 로또 선배 PR 아카이브</span>,
+  logo: <span>📚 우테코 FE 미션 아카이브</span>,
   project: {
     link: 'https://github.com/woowacourse/fe-faq-archive',
   },
@@ -10,7 +10,7 @@ export default {
   head: (
     <>
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>로또 선배 PR 아카이브</title>
+      <title>우테코 FE 미션 아카이브</title>
     </>
   ),
   sidebar: {
@@ -18,7 +18,7 @@ export default {
   },
   useNextSeoProps() {
     return {
-      titleTemplate: '%s – 로또 선배 PR 아카이브',
+      titleTemplate: '%s – 우테코 FE 미션 아카이브',
     }
   },
 }
