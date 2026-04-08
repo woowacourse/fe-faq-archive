@@ -22,36 +22,36 @@ title: '영화 리뷰 미션 안티패턴 워크북'
 
 API 호출과 에러 객체를 다루는 방식에서 관찰된 패턴입니다.
 
-- [원본 에러를 삼키는 catch](/movie-review/01-error-swallowed) · 17건
-- [알림 단계에서 다시 평탄화되는 에러](/movie-review/02-error-reflattened) · 6건
-- [ok 검사를 건너뛴 fetch](/movie-review/10-fetch-without-ok) · 6건
+- [사라지는 원본 에러](/movie-review/01-error-swallowed) · 17건
+- [알림 한 줄로 뭉뚱그려지는 에러](/movie-review/02-error-reflattened) · 6건
+- [ok 검사 없이 바로 쓰는 fetch 응답](/movie-review/10-fetch-without-ok) · 6건
 
 ### DOM 렌더링
 
 DOM 조작과 HTML 생성에서 관찰된 패턴입니다.
 
-- [재렌더로 끊어지는 이벤트 리스너](/movie-review/03-listener-break) · 8건
-- [이스케이프 없는 HTML 삽입](/movie-review/04-html-injection) · 8건
+- [재렌더에 휩쓸려 사라지는 이벤트 리스너](/movie-review/03-listener-break) · 8건
+- [이스케이프 없이 꽂는 HTML](/movie-review/04-html-injection) · 8건
 
 ### 책임 분리
 
 함수와 모듈의 책임 경계에서 관찰된 패턴입니다.
 
-- [모든 일을 떠안은 God 핸들러](/movie-review/05-god-handler) · 16건
-- [한 함수에 뒤섞인 render와 fetch](/movie-review/09-render-fetch-mixed) · 7건
+- [모든 일을 떠맡은 main 함수](/movie-review/05-god-handler) · 16건
+- [렌더와 fetch가 뒤섞인 함수](/movie-review/09-render-fetch-mixed) · 7건
 
 ### 상태 관리
 
 애플리케이션 상태를 저장·동기화하는 방식에서 관찰된 패턴입니다.
 
-- [모드 플래그로 수동 동기화하는 상태](/movie-review/06-mode-flag-state) · 8건
-- [중복된 진실의 출처](/movie-review/07-duplicated-source-of-truth) · 6건
+- [플래그로 손수 맞추는 모드 전환](/movie-review/06-mode-flag-state) · 8건
+- [여러 곳에 흩어진 상태의 출처](/movie-review/07-duplicated-source-of-truth) · 6건
 
 ### 중복과 추상화
 
 비슷한 코드가 반복되며 변경 지점이 늘어나는 패턴입니다.
 
-- [복붙으로 불어난 fetch 함수](/movie-review/08-duplicated-fetch) · 12건
+- [복붙으로 늘어난 fetch 함수](/movie-review/08-duplicated-fetch) · 12건
 
 ### 네이밍과 상수
 
