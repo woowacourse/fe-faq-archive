@@ -1,0 +1,105 @@
+# ok 검사를 건너뛴 fetch
+
+> 카테고리: error-handling · 이 패턴은 8기 PR 26건 중 6건에서 관찰됩니다.
+
+**fetch 응답을 ok 검사 없이 곧바로 데이터로 사용한다.**
+
+`response.ok` 체크나 `try/catch` 없이 `fetch().then(res => res.json())`로 곧바로 파싱하는 패턴입니다. 4xx/5xx 응답 본문이 정상 데이터처럼 흘러가거나, 네트워크 실패가 그대로 호출자에게 전파되어 화면이 부분적으로만 갱신됩니다.
+
+## 문제 코드
+
+다음은 실제 8기 크루 PR에서 추출한 코드입니다. 작성자는 익명 처리하고 원본 PR 링크만 남깁니다.
+
+### 사례 1
+
+```ts
+export const apiRequest = async <T>({ url, method = "GET" }: FetchOptions): Promise<T> => {
+  return await fetch(`${import.meta.env.VITE_BASE_URL}${url}`, {
+    method,
+    headers: { Authorization: `Bearer ${import.meta.env.VITE_TMDB_API_KEY}`, "Content-Type": "application/json" },
+  }).then((res) => res.json());
+};
+```
+
+> ok 검사도 try/catch도 없어, 401 응답 본문이 정상 데이터 구조로 흘러갑니다.
+> 원본: [PR #274](https://github.com/woowacourse/javascript-movie-review/pull/274) · `src/utils/api.ts`
+
+### 사례 2
+
+```ts
+export const handleMainSeeMore = async () => {
+  // ...
+  window.history.pushState({}, "", url.toString());
+  const movies = await getPopularMovies({ page: prevPage + 1, language: "ko-KR" });
+  renderThumbnailList({ movies: movies.results, thumbnailListElement: mainThumbnailList });
+};
+```
+
+> URL은 이미 갱신했지만 fetch 실패 시 렌더가 멈춰, URL과 화면 상태가 어긋납니다.
+> 원본: [PR #289](https://github.com/woowacourse/javascript-movie-review/pull/289) · `src/dom/eventHandler/handleSeeMore.ts`
+
+### 사례 3
+
+```ts
+const response = await fetch(resultUrl, options);
+const data = await response.json();
+if (!response.ok) { throw new TMDBError(data as TmdbErrorType); }
+return data;
+```
+
+> TMDBError는 서버 응답만 잡고 네트워크 실패는 처리하지 않아 호출자에게 그대로 전파됩니다.
+> 원본: [PR #290](https://github.com/woowacourse/javascript-movie-review/pull/290) · `src/api/fetchApi.ts`
+
+## 스스로 진단해보기
+
+해설을 펼치기 전에 다음 질문에 답한다.
+
+1. fetch가 reject되는 경우와 response.ok가 false인 경우를 각각 한 가지씩 적는다.
+2. 이 코드에서 401이 반환되면 호출자가 어떤 데이터를 손에 쥐는지 추정한다.
+3. URL을 먼저 바꾸는 코드와 fetch 결과를 그릴 때까지 기다리는 코드 중 어느 쪽이 먼저여야 하는지 판단한다.
+
+## 해설
+
+<details>
+<summary>해설 보기</summary>
+
+[`fetch`](https://developer.mozilla.org/ko/docs/Web/API/Fetch_API/Using_Fetch)는 **HTTP 4xx/5xx 응답을 reject하지 않습니다**. CORS 위반이나 네트워크 단절처럼 응답 자체를 받지 못한 경우에만 reject되고, 서버가 401을 돌려줘도 Promise는 정상적으로 resolve됩니다. 그래서 [`Response.ok`](https://developer.mozilla.org/ko/docs/Web/API/Response/ok)나 [`Response.status`](https://developer.mozilla.org/ko/docs/Web/API/Response/status)를 직접 검사하지 않으면, 에러 응답 본문(JSON 형태의 에러 메시지 객체)이 정상 데이터인 척 호출자에게 전달됩니다.
+
+영향은 두 군데에서 나타납니다. 첫째, **타입이 거짓말을 합니다**. 함수 시그니처는 `Promise<MovieResponse>`라고 적혀 있지만 실제로 들어오는 객체는 `{ status_code, status_message }` 형태입니다. 호출자가 `data.results.map(...)`을 호출하는 순간 `undefined.map`으로 터집니다. 둘째, **URL 갱신과 화면 갱신의 순서가 어긋납니다**. URL을 먼저 [`pushState`](https://developer.mozilla.org/ko/docs/Web/API/History/pushState)로 바꿔 두고 그 뒤 fetch가 실패하면 사용자 입장에서는 주소만 바뀌고 화면은 그대로인 이상한 상태가 남습니다.
+
+해결의 두 축은 "응답 검증"과 "에러 경로 통합"입니다. fetch 결과는 항상 `if (!res.ok) throw new ApiError(...)`로 거른 다음 [`response.json()`](https://developer.mozilla.org/ko/docs/Web/API/Response/json)을 호출하고, 네트워크 실패와 HTTP 실패를 같은 catch 경로에서 잡습니다. URL 갱신은 fetch가 성공한 뒤로 미루거나, 실패 시 [`replaceState`](https://developer.mozilla.org/ko/docs/Web/API/History/replaceState)로 되돌리는 보상 처리를 함께 둡니다.
+
+</details>
+
+## 개선 방향
+
+**Before**
+
+```ts
+const data = await fetch(url, options).then((res) => res.json());
+return data;
+```
+
+**After**
+
+```ts
+try {
+  const res = await fetch(url, options);
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new ApiError(res.status, body);
+  }
+  return await res.json();
+} catch (error) {
+  throw error instanceof ApiError ? error : new NetworkError({ cause: error });
+}
+```
+
+핵심 변화는 `response.ok`로 HTTP 실패를 명시적으로 거르고, 네트워크 실패와 HTTP 실패를 구분된 에러 타입으로 통합해 호출자가 분기할 수 있게 했다는 점입니다.
+
+## 더 알아볼 개념
+
+- [Response.ok](https://developer.mozilla.org/ko/docs/Web/API/Response/ok)
+- [Response.status](https://developer.mozilla.org/ko/docs/Web/API/Response/status)
+- [Fetch 사용하기](https://developer.mozilla.org/ko/docs/Web/API/Fetch_API/Using_Fetch)
+- [History.pushState](https://developer.mozilla.org/ko/docs/Web/API/History/pushState)

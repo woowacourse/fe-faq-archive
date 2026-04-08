@@ -1,0 +1,129 @@
+# 모든 일을 떠안은 God 핸들러
+
+> 카테고리: responsibility · 이 패턴은 8기 PR 26건 중 16건에서 관찰됩니다.
+
+**main.ts/App가 fetch, 렌더, 상태, 이벤트를 한 메서드에 모두 담는다.**
+
+최상위 `load` 핸들러나 `App` 클래스의 한 메서드가 데이터 페칭, DOM 쿼리, 렌더, 스켈레톤, 라우팅, 에러 UX, 이벤트 바인딩까지 한꺼번에 처리하는 패턴입니다. 50~150줄 규모의 God handler가 만들어지고, 변경 한 가지에 영향 범위가 폭발적으로 늘어납니다.
+
+## 문제 코드
+
+다음은 실제 8기 크루 PR에서 추출한 코드입니다. 작성자는 익명 처리하고 원본 PR 링크만 남깁니다.
+
+### 사례 1
+
+```ts
+private handleSearchSubmit = async () => {
+  this.state.isSearched = true;
+  this.state.searchPageCount = 1;
+  // ...
+  const list = document.querySelector(".thumbnail-list");
+  if (list) list.replaceChildren();
+  const header = document.querySelector<HTMLElement>("#header");
+  if (header) { header.replaceChildren(); replaceBanner(header); }
+  this.state.totalSearchPages = await renderSearchedMovies();
+};
+```
+
+> 한 핸들러에서 상태 토글, DOM 초기화, 배너 교체, 페칭, 페이지 카운트 수정까지 한꺼번에 합니다.
+> 원본: [PR #270](https://github.com/woowacourse/javascript-movie-review/pull/270) · `src/App.ts`
+
+### 사례 2
+
+```ts
+const loadPopularMovies = async () => {
+  try {
+    renderSkeleton();
+    const page = pageState.getPage();
+    const movies = await getPopularMovies({ page });
+    if (movies) { renderMovieList(movies); updateMoreButton(movies.page, movies.total_pages); }
+  } catch (e) { showErrorAlert(e); }
+  finally { removeSkeleton(); }
+};
+```
+
+> main.ts 한 파일이 상태, 페칭, 렌더, 스켈레톤, 라우팅, 이벤트 바인딩, 에러 UI를 모두 가집니다.
+> 원본: [PR #271](https://github.com/woowacourse/javascript-movie-review/pull/271) · `src/main.ts`
+
+### 사례 3
+
+```ts
+#searchEventHandler = async () => {
+  const searchValue = this.#views.search.getInputValue();
+  this.#views.topRated.hide();
+  this.#views.movieList.hideNotFound();
+  this.#state.searchMoviePage = 1;
+  window.scrollTo({ top: 0, behavior: "instant" });
+  this.#views.movieList.renderTitle(`\"${searchValue}\"검색 결과`);
+  try { /* fetchSearchedMovies() */ }
+  catch (error) { alert(ERROR_MESSAGE.MOVIE.FAILED_SEARCH); }
+  finally { this.#views.movieList.removeAllSkeletons(); }
+};
+```
+
+> View 6개 제어, 상태 5곳 수정, 스크롤, 페칭, 에러를 한 핸들러가 모두 책임집니다.
+> 원본: [PR #283](https://github.com/woowacourse/javascript-movie-review/pull/283) · `src/App.ts`
+
+## 스스로 진단해보기
+
+해설을 펼치기 전에 다음 질문에 답한다.
+
+1. 이 함수가 책임지고 있는 일을 동사로 모두 적어 본다.
+2. 각 동사 중 어떤 것을 별도 함수나 모듈로 옮기면 테스트가 가능해지는지 판단한다.
+3. 이 함수가 변경되어야 하는 이유를 세 가지 이상 떠올린다.
+
+## 해설
+
+<details>
+<summary>해설 보기</summary>
+
+함수의 책임은 그 함수가 "변경되어야 하는 이유"의 수와 같습니다. 페칭, 렌더, 상태, 이벤트, 에러 UX, 라우팅이 모두 한 함수에 들어 있다면 "변경되어야 하는 이유"가 최소 여섯 가지입니다. 이 원칙이 이른바 [단일 책임 원칙](https://ko.wikipedia.org/wiki/%EB%8B%A8%EC%9D%BC_%EC%B1%85%EC%9E%84_%EC%9B%90%EC%B9%99)의 출발점입니다.
+
+영향은 두 방향에서 나타납니다. 첫째, **테스트가 불가능해집니다**. 한 함수 안에 [`fetch`](https://developer.mozilla.org/ko/docs/Web/API/Fetch_API/Using_Fetch), DOM 조작, 상태 변경, [`alert`](https://developer.mozilla.org/ko/docs/Web/API/Window/alert)이 섞여 있으면 입력을 주고 출력을 검증하는 단위 테스트를 만들 수 있는 경계가 없습니다. 둘째, **재사용이 불가능해집니다**. 같은 페칭 로직이 필요한 다른 화면이 생기면 함수 전체를 복붙하게 되고, 이는 곧 ap-08의 중복 패턴으로 이어집니다.
+
+분리의 출발점은 "데이터를 가져오는 일"과 "데이터를 그리는 일"을 다른 모듈로 떼는 것입니다. 그 사이에 상태 객체나 [이벤트 디스패치](https://developer.mozilla.org/ko/docs/Web/API/EventTarget/dispatchEvent)를 두고, 핸들러는 "어떤 액션을 일으킬지" 결정만 하도록 줄입니다. 각 단계가 하나의 동사만 책임지면 함수 이름이 그 동사 그대로가 되어 가독성도 함께 올라갑니다.
+
+</details>
+
+## 개선 방향
+
+**Before**
+
+```ts
+const handleSearch = async () => {
+  state.isSearched = true;
+  state.searchPage = 1;
+  document.querySelector(".thumbnail-list")?.replaceChildren();
+  document.querySelector("#header")?.replaceChildren();
+  const movies = await fetchSearchMovies(query, 1);
+  renderList(movies);
+  if (!movies) alert("검색 실패");
+};
+```
+
+**After**
+
+```ts
+// 1) 핸들러는 상태 전이만 일으킨다
+const handleSearchSubmit = (query: string) => {
+  searchStore.start(query);
+};
+
+// 2) 상태 변경을 구독해 데이터를 가져온다
+searchStore.subscribe(async ({ query, page }) => {
+  try {
+    const movies = await searchMovies(query, page);
+    movieListView.render(movies);
+  } catch (error) {
+    errorView.show(error);
+  }
+});
+```
+
+핵심 변화는 핸들러는 상태 전이만 일으키고, 페칭과 렌더는 상태 변경에 반응하는 별도 모듈로 떼어내 책임을 한 가지씩 가지게 했다는 점입니다.
+
+## 더 알아볼 개념
+
+- [단일 책임 원칙](https://ko.wikipedia.org/wiki/%EB%8B%A8%EC%9D%BC_%EC%B1%85%EC%9E%84_%EC%9B%90%EC%B9%99)
+- [Fetch 사용하기](https://developer.mozilla.org/ko/docs/Web/API/Fetch_API/Using_Fetch)
+- [EventTarget.dispatchEvent](https://developer.mozilla.org/ko/docs/Web/API/EventTarget/dispatchEvent)

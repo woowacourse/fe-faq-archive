@@ -1,0 +1,100 @@
+# 이름 없이 흩어진 매직 넘버
+
+> 카테고리: naming-constants · 이 패턴은 8기 PR 26건 중 7건에서 관찰됩니다.
+
+**20, 500, 3000 같은 매직 넘버와 오타 상수가 코드 곳곳에 흩어진다.**
+
+페이지 사이즈 20, 임시 totalPages 500, 스켈레톤 지연 3000ms 같은 숫자가 여러 파일에 그대로 박혀 있는 패턴입니다. 동시에 `SHOW_MORE_TROTTLE_MS`, `FAIELD_GET_POPULAR` 같은 오타 상수가 함께 등장해, 의미 단위로 묶이지 않은 매직값이 변경 비용을 키웁니다.
+
+## 문제 코드
+
+다음은 실제 8기 크루 PR에서 추출한 코드입니다. 작성자는 익명 처리하고 원본 PR 링크만 남깁니다.
+
+### 사례 1
+
+```ts
+for (let i = 0; i < 20; i++) {
+  const skeletonCloneNode = skeletonTemplate.content.cloneNode(true) as DocumentFragment;
+  // ...
+}
+// ...
+setTimeout(() => { /* ... */ }, 3000);
+```
+
+> 페이지당 항목 수 20과 애니메이션 지연 3000ms가 의미 없이 그대로 박혀 있습니다.
+> 원본: [PR #271](https://github.com/woowacourse/javascript-movie-review/pull/271) · `src/renders/skeleton.ts`
+
+### 사례 2
+
+```ts
+private currentPage: number = 1;
+private totalPages: number = 500;
+```
+
+> API 응답 전 임시값 500이 isLastPage 계산에 그대로 영향을 주는 매직 넘버입니다.
+> 원본: [PR #279](https://github.com/woowacourse/javascript-movie-review/pull/279) · `src/domains/movie/MovieList.ts`
+
+### 사례 3
+
+```ts
+export const FETCH_OPTION = {
+  // ...
+}
+export const SHOW_MORE_TROTTLE_MS = 500;
+```
+
+> 파일명 constans, 상수명 TROTTLE 모두 오타라 검색이나 자동완성에 걸리지 않습니다.
+> 원본: [PR #265](https://github.com/woowacourse/javascript-movie-review/pull/265) · `src/constans.ts`
+
+## 스스로 진단해보기
+
+해설을 펼치기 전에 다음 질문에 답한다.
+
+1. 이 숫자가 의미하는 바를 한 단어로 적는다.
+2. 이 값을 바꿔야 한다면 코드베이스에서 몇 곳을 손대야 하는지 센다.
+3. 오타 상수가 자동완성에 걸리지 않을 때 발생할 수 있는 사고를 한 가지 떠올린다.
+
+## 해설
+
+<details>
+<summary>해설 보기</summary>
+
+매직 넘버는 단순히 "이름이 없는 숫자"를 넘어 **의도가 사라진 값**입니다. `20`이 페이지 사이즈인지 스켈레톤 개수인지 임의의 한도인지를 코드만 보고 판단할 수 없으면, 한 곳을 고칠 때 같은 의도를 가진 다른 곳을 함께 찾아 고칠 수 없습니다. [`const`](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Statements/const)로 이름을 붙이고 의미가 같은 값은 같은 이름을 공유해야 합니다.
+
+이 패턴은 두 가지 사고를 만듭니다. 첫째, **API 응답 전의 임시 기본값이 실제 동작에 영향**을 줍니다. `totalPages = 500`은 단순한 placeholder처럼 보이지만, 첫 응답이 오기 전 사용자가 More 버튼을 누르면 그 값이 그대로 비교에 사용되어 잘못된 페이지가 요청됩니다. 임시 기본값 대신 [`null`](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Operators/null) 또는 `undefined`를 두고 "아직 모름" 상태를 명시적으로 다루는 편이 안전합니다.
+
+둘째, **오타 상수는 검색을 무력화**합니다. `SHOW_MORE_TROTTLE_MS`처럼 오타가 박힌 상수는 IDE의 [Rename Symbol](https://developer.mozilla.org/ko/docs/Glossary/Refactoring) 기능에는 잡히지만, 다른 사람이 `THROTTLE`로 검색하면 발견되지 않습니다. 결국 같은 의미의 상수를 새로 또 만드는 사고가 따라옵니다. 상수 이름은 기능이 아니라 **검색 가능성** 관점에서 재검토해야 합니다. [TypeScript의 `as const`](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-4.html#const-assertions)로 묶어 두면 그룹 단위로 의미를 표현할 수도 있습니다.
+
+</details>
+
+## 개선 방향
+
+**Before**
+
+```ts
+for (let i = 0; i < 20; i++) { /* skeleton */ }
+setTimeout(hide, 3000);
+private totalPages = 500;
+```
+
+**After**
+
+```ts
+export const PAGINATION = {
+  PAGE_SIZE: 20,
+  SKELETON_DELAY_MS: 3_000,
+} as const;
+
+private totalPages: number | null = null;
+
+for (let i = 0; i < PAGINATION.PAGE_SIZE; i++) { /* skeleton */ }
+setTimeout(hide, PAGINATION.SKELETON_DELAY_MS);
+```
+
+핵심 변화는 의미 있는 이름의 상수 그룹으로 묶어 변경 지점을 한 곳으로 모으고, 임시 기본값 대신 `null`로 "아직 모름" 상태를 명시했다는 점입니다.
+
+## 더 알아볼 개념
+
+- [const](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Statements/const)
+- [TypeScript: as const](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-4.html#const-assertions)
+- [Refactoring (Glossary)](https://developer.mozilla.org/ko/docs/Glossary/Refactoring)

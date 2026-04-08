@@ -1,0 +1,100 @@
+# 이스케이프 없는 HTML 삽입
+
+> 카테고리: dom-rendering · 이 패턴은 8기 PR 26건 중 8건에서 관찰됩니다.
+
+**사용자 입력을 이스케이프 없이 HTML 템플릿 문자열에 삽입한다.**
+
+`movie.title`이나 검색 결과 메시지를 템플릿 문자열에 그대로 박아 `innerHTML`이나 `insertAdjacentHTML`로 렌더하는 패턴입니다. TMDB 응답이라 실제 위험은 낮아 보이지만, 동일 패턴으로 toast나 에러 메시지를 다루면 XSS 표면이 만들어지고 속성값 따옴표 누락으로 파싱 오류도 함께 발생합니다.
+
+## 문제 코드
+
+다음은 실제 8기 크루 PR에서 추출한 코드입니다. 작성자는 익명 처리하고 원본 PR 링크만 남깁니다.
+
+### 사례 1
+
+```ts
+toast.innerHTML = `
+  <div>
+    <p class="toast-title">${title}</p>
+    <p class="toast-message">${message}</p>
+  </div>
+  <button class="toast-close" aria-label="닫기">x</button>
+`;
+```
+
+> 사용자 메시지를 직접 받는 toast에서 이스케이프 없이 HTML로 삽입해 XSS 표면이 됩니다.
+> 원본: [PR #264](https://github.com/woowacourse/javascript-movie-review/pull/264) · `src/toast.ts`
+
+### 사례 2
+
+```ts
+const list = `<li id=${item.id}>...<img src=${thumbnailImage + item.poster_path} alt=${item.title} onerror="this.onerror=null; this.src='${noImage}'" />...<strong class="item-title">${item.title}</strong>...</li>`;
+```
+
+> 속성값을 따옴표로 감싸지 않아 공백이 있는 title에서 HTML 파싱이 깨지고, 인라인 onerror는 CSP 회피 패턴이 됩니다.
+> 원본: [PR #272](https://github.com/woowacourse/javascript-movie-review/pull/272) · `src/view/movieListView.ts`
+
+### 사례 3
+
+```ts
+showEmpty() {
+  this.movieContainer!.innerHTML = `
+    <div class="result-none">
+      <img src="${noSearchImg}" alt="검색 결과 없음" class="result-none-image" />
+      <p class="result-none-text">검색 결과가 없습니다.</p>
+    </div>
+  `;
+}
+```
+
+> 동일 메서드가 서버 에러 메시지를 받는 showError에도 쓰이기 때문에 응답 본문이 그대로 DOM에 들어갈 수 있습니다.
+> 원본: [PR #276](https://github.com/woowacourse/javascript-movie-review/pull/276) · `src/features/ui/MovieList.ts`
+
+## 스스로 진단해보기
+
+해설을 펼치기 전에 다음 질문에 답한다.
+
+1. 이 템플릿 문자열에서 외부 입력이 들어오는 자리를 모두 표시한다.
+2. 각 자리를 textContent나 setAttribute로 바꿨을 때 어떤 코드가 더 짧아지는지 비교한다.
+3. 공백이 두 개 들어간 영화 제목으로 동작을 추론한다.
+
+## 해설
+
+<details>
+<summary>해설 보기</summary>
+
+[`Element.innerHTML`](https://developer.mozilla.org/ko/docs/Web/API/Element/innerHTML)에 문자열을 대입하면 브라우저는 그 문자열을 HTML로 파싱합니다. 그 문자열에 사용자 입력이 끼어 있으면 입력 안의 `<script>`나 `onerror=` 같은 토큰이 그대로 활성 코드가 됩니다. 이것이 바로 [크로스 사이트 스크립팅(XSS)](https://developer.mozilla.org/ko/docs/Glossary/Cross-site_scripting)의 가장 흔한 유입 경로입니다.
+
+TMDB 응답만 다룰 때는 위험이 낮다고 느낄 수 있습니다. 그러나 같은 코드 모양이 toast 메시지, 검색 키워드, 서버 에러 본문으로 확장되는 순간 신뢰할 수 없는 입력이 같은 길로 들어옵니다. 보안은 "지금 위험한가"가 아니라 "어떤 입력이 이 경로로 들어올 수 있는가"의 문제입니다. 또한 따옴표로 감싸지 않은 속성값은 공백 한 칸에도 HTML 구조가 깨지므로, 신뢰할 수 있는 입력에서도 시각적인 버그를 만듭니다.
+
+대안은 두 갈래입니다. 텍스트만 바뀌는 자리는 [`Node.textContent`](https://developer.mozilla.org/ko/docs/Web/API/Node/textContent)로 갱신하면 모든 입력이 자동으로 이스케이프됩니다. 구조 자체를 새로 그려야 하는 자리는 [`document.createElement`](https://developer.mozilla.org/ko/docs/Web/API/Document/createElement)와 [`Element.replaceChildren`](https://developer.mozilla.org/ko/docs/Web/API/Element/replaceChildren)로 노드를 만들어 붙이거나, `<template>` 태그를 복제해 자리만 텍스트로 채우는 패턴을 씁니다.
+
+</details>
+
+## 개선 방향
+
+**Before**
+
+```ts
+toast.innerHTML = `<p class="toast-title">${title}</p><p>${message}</p>`;
+```
+
+**After**
+
+```ts
+const titleEl = document.createElement("p");
+titleEl.className = "toast-title";
+titleEl.textContent = title;
+const msgEl = document.createElement("p");
+msgEl.textContent = message;
+toast.replaceChildren(titleEl, msgEl);
+```
+
+핵심 변화는 사용자 입력을 HTML 파서로 보내지 않고 텍스트 노드로만 다루어 XSS 경로 자체를 닫았다는 점입니다.
+
+## 더 알아볼 개념
+
+- [Element.innerHTML](https://developer.mozilla.org/ko/docs/Web/API/Element/innerHTML)
+- [Node.textContent](https://developer.mozilla.org/ko/docs/Web/API/Node/textContent)
+- [Element.replaceChildren](https://developer.mozilla.org/ko/docs/Web/API/Element/replaceChildren)
+- [Cross-site scripting](https://developer.mozilla.org/ko/docs/Glossary/Cross-site_scripting)

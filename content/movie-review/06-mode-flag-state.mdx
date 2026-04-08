@@ -1,0 +1,105 @@
+# 모드 플래그로 수동 동기화하는 상태
+
+> 카테고리: state · 이 패턴은 8기 PR 26건 중 8건에서 관찰됩니다.
+
+**popular/search 모드 전환을 플래그와 분산된 페이지 슬롯으로 수동 동기화한다.**
+
+`popularMoviePage`, `searchMoviePage`, `isSearch`, `currentQuery` 같은 플래그를 상태 객체에 흩뿌려 두고 컨트롤러 곳곳에서 직접 set하는 패턴입니다. 동일한 "현재 목록" 개념이 여러 슬롯으로 분리되어, 모드 전환 한 번에 여러 곳을 수동으로 맞춰야 합니다.
+
+## 문제 코드
+
+다음은 실제 8기 크루 PR에서 추출한 코드입니다. 작성자는 익명 처리하고 원본 PR 링크만 남깁니다.
+
+### 사례 1
+
+```ts
+this.#state = {
+  popularMoviePage: 1,
+  searchMoviePage: 1,
+  searchString: "",
+};
+```
+
+> popular/search 페이지 번호가 별도 슬롯으로 분리되어 모드 전환 시 둘 다 손으로 갱신해야 합니다.
+> 원본: [PR #283](https://github.com/woowacourse/javascript-movie-review/pull/283) · `src/App.ts`
+
+### 사례 2
+
+```ts
+#popular = new PopularMovies();
+#searched = new SearchedMovies();
+#mode: AppMode = "popular";
+```
+
+> popular/searched 객체가 각자 currentPage를 들고, App은 mode를 따로 관리해 동일 개념이 세 군데로 흩어집니다.
+> 원본: [PR #269](https://github.com/woowacourse/javascript-movie-review/pull/269) · `src/App.ts`
+
+### 사례 3
+
+```ts
+async #handleSearch() {
+  this.#appState.resetSearch();
+  this.#addButtonView.show();
+  this.#appState.setValue(this.#searchView.getValue());
+  searchController();
+  this.#appState.setIsSearch(true);
+  this.#movieBannerView.hide();
+}
+```
+
+> isSearch/searchValue/page는 AppState에 있지만 뷰 표시 순서가 컨트롤러 곳곳으로 분산되어 상태 전이가 흩어집니다.
+> 원본: [PR #272](https://github.com/woowacourse/javascript-movie-review/pull/272) · `src/controller/mainController.ts`
+
+## 스스로 진단해보기
+
+해설을 펼치기 전에 다음 질문에 답한다.
+
+1. 현재 보여 주고 있는 목록을 표현하는 데 정말 필요한 최소한의 상태 변수를 적는다.
+2. isSearch 플래그를 없애고 query 문자열만 두면 어떤 분기가 사라지는지 판단한다.
+3. 두 페이지 카운트가 의미상 같은지 다른지 한 줄로 설명한다.
+
+## 해설
+
+<details>
+<summary>해설 보기</summary>
+
+이 패턴의 본질은 "같은 개념이 여러 슬롯으로 흩어져 있다"는 것입니다. 화면이 보여 주는 목록은 한 시점에 하나뿐인데, 그것을 표현하는 변수가 `popularMoviePage`, `searchMoviePage`, `isSearch`, `currentQuery`처럼 네 개로 나뉘어 있습니다. 이것은 [정규화되지 않은 데이터](https://ko.wikipedia.org/wiki/%EB%8D%B0%EC%9D%B4%ED%84%B0%EB%B2%A0%EC%9D%B4%EC%8A%A4_%EC%A0%95%EA%B7%9C%ED%99%94)와 같은 문제로, 모드를 바꿀 때마다 여러 슬롯의 정합성을 손으로 맞춰야 합니다.
+
+핵심 단서는 "필수가 아닌 플래그"입니다. `isSearch`는 사실 `query !== ""`라는 식으로 파생값으로 계산할 수 있고, popular와 search 페이지 번호도 "현재 모드의 페이지" 하나로 통합할 수 있습니다. 플래그가 줄어들면 그만큼 동기화 버그가 들어설 자리가 사라집니다.
+
+또한 [`URLSearchParams`](https://developer.mozilla.org/ko/docs/Web/API/URLSearchParams)와 [`History API`](https://developer.mozilla.org/ko/docs/Web/API/History_API)를 진실의 출처로 삼는 방법도 자주 쓰입니다. 검색어와 페이지가 URL에 들어가면 새로고침과 뒤로가기에서도 상태가 자연스럽게 복원되고, 메모리 안의 별도 슬롯과 동기화할 일도 함께 사라집니다.
+
+</details>
+
+## 개선 방향
+
+**Before**
+
+```ts
+state = {
+  popularMoviePage: 1,
+  searchMoviePage: 1,
+  searchString: "",
+  isSearch: false,
+};
+```
+
+**After**
+
+```ts
+// 단일 진실의 출처
+state = {
+  query: "",   // "" 이면 popular, 그 외엔 search
+  page: 1,
+};
+
+const isSearch = () => state.query !== "";
+```
+
+핵심 변화는 동일 개념을 여러 슬롯으로 쪼개지 않고 `query`와 `page` 두 개로 정규화하고, `isSearch` 같은 플래그를 파생값으로 계산하도록 바꿨다는 점입니다.
+
+## 더 알아볼 개념
+
+- [URLSearchParams](https://developer.mozilla.org/ko/docs/Web/API/URLSearchParams)
+- [History API](https://developer.mozilla.org/ko/docs/Web/API/History_API)
+- [State (Glossary)](https://developer.mozilla.org/ko/docs/Glossary/State)
