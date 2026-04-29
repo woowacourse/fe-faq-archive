@@ -17,36 +17,38 @@ import { Reveal } from '../../../components/Reveal'
 ## AS-IS 코드
 
 ```tsx
-// src/App.tsx
+// src/App.tsx (PR #439 데이지)
 import useCardCVC from './hooks/useCardCVC';
-  const {
-    cardNumber,
-    onChange,
-    checkCardNumberError,
-    isError,
-    errorMessage: cardNumberErrorMessage,
-  } = useCardNumber();
+const {
+  cardNumber,
+  onChange,
+  checkCardNumberError,
+  isError,
+  errorMessage: cardNumberErrorMessage,
+} = useCardNumber();
 
-  const {
-    cardValidityPeriod,
-    isErrorCardValidityPeriod,
-    onChangeCardValidityPeriod,
-    checkCardValidityPeriodError,
-    errorMessage: cardValidityPeriodErrorMessage,
-  } = useCardValidityPeriod();
+const {
+  cardValidityPeriod,
+  isErrorCardValidityPeriod,
+  onChangeCardValidityPeriod,
+  checkCardValidityPeriodError,
+  errorMessage: cardValidityPeriodErrorMessage,
+} = useCardValidityPeriod();
 
-  const {
-    cardCVC,
-    isCardCVCError,
-    onChangeCVC,
-    checkCardCVCError,
-    errorMessage: cardCVCErrorMessage,
-  } = useCardCVC();
+const {
+  cardCVC,
+  isCardCVCError,
+  onChangeCVC,
+  checkCardCVCError,
+  errorMessage: cardCVCErrorMessage,
+} = useCardCVC();
 ```
+
+App이 카드번호·만료일·CVC 세 종류 상태를 *모두* 알고 있다. 자식 컴포넌트들은 props로 받아 쓴다. *왜 여기까지 끌어올렸을까*와 *그 비용은 무엇이었을까*가 이 카드의 학습 자리다.
 
 ## 공식문서 단서 — *State 끌어올리기*
 
-React 공식문서 [Sharing State Between Components](https://react.dev/learn/sharing-state-between-components) 첫 단락:
+[Sharing State Between Components](https://react.dev/learn/sharing-state-between-components) 첫 단락 ([한글 번역](/react-payments/step1/q07-official-docs-ko#sharing-state-between-components)):
 
 > *Sometimes, you want the state of two components to always change together. To do it, remove state from both of them, move it to their closest common parent, and then pass it down to them via props. This is known as **lifting state up**, and it's one of the most common things you will do writing React code.*
 
@@ -60,20 +62,34 @@ React 공식문서 [Sharing State Between Components](https://react.dev/learn/sh
 
 ## 탐색 미션
 
-### 선배 PR — *state를 자식이 보유하는 패턴*
-[PR #496](https://github.com/woowacourse/react-payments/pull/496)
+### 선배 PR — *부모(App)로 끌어올린 뒤 비용을 발견한 패턴*
+[PR #439 데이지(@kimyou1102)](https://github.com/woowacourse/react-payments/pull/439) — 8기 직전 기수, 14개 리뷰 + 19개 인라인.
 
-**찾아볼 것:** "review/inline에서 `state`, `props`, `hook` 키워드가 함께 나오는 지점을 보세요. 입력 필드가 자체 상태를 가질 때 프리뷰·제출 버튼이 어떤 props를 추가로 요구하는지가 비교 포인트입니다."
+**정확히 봐야 할 자리:** `src/App.tsx:27` 인라인 스레드. 리뷰어 bassyu의 한 줄 질문이 시작 — *"CVC 관련 상태는 App이 몰라도 될 것 같습니다. 오히려 알고 있을 때 어떤 단점이 있을까요?"*
 
-### 선배 PR — *state를 부모로 끌어올린 패턴*
-[PR #439](https://github.com/woowacourse/react-payments/pull/439)
+**관점 1 — 끌어올림의 *이유*:** 데이지의 답에서 *"원래는 cvc 컴포넌트에서만 cvc 정보가 필요하기에 상태를 컴포넌트 내부에 뒀습니다. 하지만 ... checkCardCVCError가 필요해서 App으로 상태를 올렸습니다."* — 끌어올림이 *기능 요구사항을 따라 강제된 결정*이었음이 드러난다. 공식문서가 말하는 "공통 부모로 옮긴다"는 *처음부터 그렇게 짠* 게 아니라, *그래야만 했던 자리*를 의미한다.
 
-**찾아볼 것:** "부모 컴포넌트의 setter가 자식으로 내려가는 흐름을 따라가세요. 리뷰어가 props 전달 비용과 동기화 이점을 어느 컴포넌트 경계에서 비교하는지 확인하면 좋습니다."
+**관점 2 — 끌어올림의 *비용*:** 같은 스레드 끝에서 bassyu는 *"cardCVC 상태가 바뀌면 App 컴포넌트랑 App의 자식 컴포넌트가 리렌더링되는 단점도 있습니다."* — 데이지가 인지한 "복잡성 증가" 외에도 *리렌더링 범위*라는 비용이 추가로 노출된다. 공식문서는 이 비용을 직접 말하지 않는다.
 
-### 선배 PR — *custom hook으로 옮긴 패턴*
-[PR #361](https://github.com/woowacourse/react-payments/pull/361)
+**크루 입장에서 읽으면:** "아 나도 prop drilling이 싫어서 끌어올리려 했는데, 이 사람도 끌어올렸구나. 그런데 *왜 후회했지*? *어디까지* 끌어올린 게 적정선이었지?" — 자기 코드의 *현재 끌어올린 자리*를 다시 보게 된다. 데이지가 말한 *"CardInputSection과 CardCVCField를 묶은 새로운 컴포넌트를 만들고, 그 컴포넌트 내부에서만 cvc 상태를 두는 것도 하나의 방법"* 은 *컴포넌트 경계의 재설계*가 답일 수 있다는 힌트다.
 
-**찾아볼 것:** "custom hook이 상태와 변경 핸들러를 같이 반환하는 부분을 보세요. 중복 제거를 위해 추출했는지, 처음부터 추상화했는지가 PR 대화의 핵심 단서입니다."
+### 선배 PR — *custom hook을 *처음부터* 만들었다가 추상화의 가치 자체를 흔들리게 된 패턴*
+[PR #361 제이드(@skiende74)](https://github.com/woowacourse/react-payments/pull/361) — 30개 리뷰 + 53개 인라인. 데이터셋 안에서 가장 풍부한 학습 자료 중 하나.
+
+**정확히 봐야 할 자리:** `src/hooks/useInput.tsx`와 그것을 합성한 `src/hooks/useInputs.tsx`에 달린 인라인. 리뷰어 zigsong의 두 결정적인 코멘트 —
+
+1. *"useInput들을 조합한 또 다른 hook인 useInputs를 만드는 대신, 4개의 useInput을 가지고 있는 카드번호 컴포넌트, 2개의 useInput을 가지고 있는 유효기간 컴포넌트"* — *훅을 합치지 말고 컴포넌트 단위로 분리*하라는 권유.
+2. *"useInput hook을 직접 사용하고 있는 곳도 없어 존재 의미가 불분명한데요"* — *재사용되지 않는 훅*에 대한 직격.
+3. *"현재 상태에서 개선하려고 하지 말고, 처음부터 구조를 다시 생각해보고 작성하는 것이 더 도움이 될 것 같습니다."* — 이 한 줄이 페이먼츠 2단계 프로그래밍 요구사항의 *"처음부터 훅 구조를 설계하지 않는다"* 와 정확히 같은 자리.
+
+**관점 1 — 추상화의 *순서*:** 제이드는 *훅을 먼저 짜고* 그것을 컴포넌트에서 어떻게 쓸지 결정했다. 공식문서가 권하는 *"중복을 본 뒤 추출"* 순서와 정확히 반대. 그 결과로 *"존재 의미가 불분명한"* 훅이 만들어졌다.
+
+**관점 2 — 추상화의 *가치*:** 제이드의 답 *"카드번호 컴포넌트가 4개의 useInput을 가지게 고쳤습니다"* 는 *추상화 단위를 훅에서 컴포넌트로 옮긴* 결정이다. *훅이냐 컴포넌트냐*는 같은 무게의 두 도구가 아니다.
+
+**크루 입장에서 읽으면:** "나도 훅으로 뽑고 싶었는데, 이 사람은 *훅을 짠 다음에* 망했네. *언제* 빼야 하는지 어떻게 알지?" — 페이먼츠 2단계 시작 전에 *훅을 짜고 싶은 충동*을 한 박자 늦추게 된다. AHA(Avoid Hasty Abstractions)의 정확한 시연.
+
+### 추가 결: 자식이 자체 보유 / Context 사용
+*프리뷰 카드*가 모든 상태를 봐야 하는 페이먼츠 1단계의 구조상, *자식이 자체 보유한 채로 끝까지* 간 PR은 데이터셋에 드물다. 자기 가설이 *그 방향*이라면 [연관 PR 더 보기](#연관-pr-더-보기)에서 `state 위치`만 매핑된 PR(예: [#88](https://github.com/woowacourse/react-payments/pull/88) 코이, [#73](https://github.com/woowacourse/react-payments/pull/73) 앨버, [#195](https://github.com/woowacourse/react-payments/pull/195) 루루)을 골라 *왜 그 자식 보유가 멈출 수밖에 없었는지* 직접 확인해볼 수 있다.
 
 </Reveal>
 
@@ -197,6 +213,5 @@ React 공식문서 [Sharing State Between Components](https://react.dev/learn/sh
 | [#450](https://github.com/woowacourse/react-payments/pull/450) | @Daeun-100 | state 위치 / 검증·에러 처리 |
 | [#452](https://github.com/woowacourse/react-payments/pull/452) | @kaori-killer | state 위치 / 검증·에러 처리 |
 | [#453](https://github.com/woowacourse/react-payments/pull/453) | @ExceptAnyone | state 위치 / 검증·에러 처리 / 카드사/브랜드 판별 |
-| [#496](https://github.com/woowacourse/react-payments/pull/496) | @woowapark (대표) | custom hook / 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
 
-> 195개 전체 인덱스(다른 주제 포함)는 [부록](/react-payments/step1/appendix-all-prs)에서 확인할 수 있습니다.
+> 195개 전체 인덱스(다른 주제 포함)는 [부록](/react-payments/step1/q08-appendix-all-prs)에서 확인할 수 있습니다.

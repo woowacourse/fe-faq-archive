@@ -44,13 +44,13 @@ import { Reveal } from '../../../components/Reveal'
 
 ## 공식문서 단서 — *상태로 표현하는 사고*
 
-React 공식문서 [Reacting to Input with State](https://react.dev/learn/reacting-to-input-with-state)에서:
+React 공식문서 [Reacting to Input with State](https://react.dev/learn/reacting-to-input-with-state) ([한글 번역](/react-payments/step1/q07-official-docs-ko#reacting-to-input-with-state))에서:
 
 > *Thinking about a UI declaratively means describing the UI for each visual state rather than micromanaging the UI in response to user input.*
 
 에러도 *시각 상태(visual state)*다. *"이 input이 *유효한지*는 무엇으로 결정되는가"*가 결정 기준 — 그 결정에 필요한 모든 데이터가 *어디에 모여 있는지*가 검증 로직의 자연스러운 자리다.
 
-[You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect)는 한 발 더 — *"렌더링 도중 props/state로부터 계산할 수 있는 값은 useState에 두지 마라"* — 즉 **에러 메시지는 종종 *상태가 아니라 파생값*이다.** `state.cvc`로부터 *지금 유효한가*가 매번 계산되어 표시될 수 있다면, *에러 상태*라는 별도 state는 redundant.
+[You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect) ([한글 번역](/react-payments/step1/q07-official-docs-ko#you-might-not-need-an-effect))는 한 발 더 — *"렌더링 도중 props/state로부터 계산할 수 있는 값은 useState에 두지 마라"* — 즉 **에러 메시지는 종종 *상태가 아니라 파생값*이다.** `state.cvc`로부터 *지금 유효한가*가 매번 계산되어 표시될 수 있다면, *에러 상태*라는 별도 state는 redundant.
 
 ---
 
@@ -178,6 +178,5 @@ React 공식문서 [Reacting to Input with State](https://react.dev/learn/reacti
 | [#450](https://github.com/woowacourse/react-payments/pull/450) | @Daeun-100 | state 위치 / 검증·에러 처리 |
 | [#452](https://github.com/woowacourse/react-payments/pull/452) | @kaori-killer | state 위치 / 검증·에러 처리 |
 | [#453](https://github.com/woowacourse/react-payments/pull/453) | @ExceptAnyone | state 위치 / 검증·에러 처리 / 카드사/브랜드 판별 |
-| [#496](https://github.com/woowacourse/react-payments/pull/496) | @woowapark | custom hook / 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
 
-> 195개 전체 인덱스(다른 주제 포함)는 [부록](/react-payments/step1/appendix-all-prs)에서 확인할 수 있습니다.
+> 195개 전체 인덱스(다른 주제 포함)는 [부록](/react-payments/step1/q08-appendix-all-prs)에서 확인할 수 있습니다.
