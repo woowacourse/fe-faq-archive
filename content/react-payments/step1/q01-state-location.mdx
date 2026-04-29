@@ -56,6 +56,22 @@ App이 카드번호·만료일·CVC 세 종류 상태를 *모두* 알고 있다.
 
 또한 [Choosing the State Structure](https://react.dev/learn/choosing-the-state-structure)의 다섯 원칙 중 첫 번째 — *"Group related state. If you always update two or more state variables at the same time, consider merging them into a single state variable."* — 가 Q2와 직결된다.
 
+## 추가 읽을거리 — Dan Abramov · Kent C. Dodds
+
+이 주제와 결이 닿는 외부 글입니다. 필요한 글은 코치에게 알려주면 *전체 한글 번역 페이지*로 추가됩니다.
+
+### Kent C. Dodds — Application State Management with React
+- 원문: [kentcdodds.com/blog/application-state-management-with-react](https://kentcdodds.com/blog/application-state-management-with-react)
+- 한 줄 요약: state를 *로컬 → 끌어올림 → Context → 라이브러리* 네 단계로 나누고, *언제 어디로 옮기는가*에 대한 결정 가이드. 지오·코브 페어의 *"3단계 이상 props는 전역?"* 질문에 직접 답이 된다.
+
+### Dan Abramov — Writing Resilient Components
+- 원문: [overreacted.io/writing-resilient-components](https://overreacted.io/writing-resilient-components/)
+- 한 줄 요약: 컴포넌트가 *부모의 변경*에 잘 견디려면 어떤 원칙을 따라야 하는가. 끌어올린 state가 자식의 가정과 어긋날 때의 비용. PR #439 데이지가 *App에 끌어올린 뒤* 인식한 비용과 같은 자리.
+
+### Kent C. Dodds — AHA Programming
+- 원문: [kentcdodds.com/blog/aha-programming](https://kentcdodds.com/blog/aha-programming)
+- 한 줄 요약: *Avoid Hasty Abstractions* — 성급한 추상화를 피하라. 페이먼츠 2단계 프로그래밍 요구사항의 *"처음부터 훅 구조를 설계하지 않는다"*가 이 원칙의 정확한 적용. PR #361 제이드가 useInput을 *처음부터* 만들었다가 무너진 자리와 같은 결.
+
 ---
 
 <Reveal>

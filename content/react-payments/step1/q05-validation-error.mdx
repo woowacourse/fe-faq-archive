@@ -52,6 +52,16 @@ React 공식문서 [Reacting to Input with State](https://react.dev/learn/reacti
 
 [You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect) ([한글 번역](/react-payments/step1/q07-official-docs-ko#you-might-not-need-an-effect))는 한 발 더 — *"렌더링 도중 props/state로부터 계산할 수 있는 값은 useState에 두지 마라"* — 즉 **에러 메시지는 종종 *상태가 아니라 파생값*이다.** `state.cvc`로부터 *지금 유효한가*가 매번 계산되어 표시될 수 있다면, *에러 상태*라는 별도 state는 redundant.
 
+## 추가 읽을거리 — Kent C. Dodds · Dan Abramov
+
+### Kent C. Dodds — Don't Sync State. Derive It!
+- 원문: [kentcdodds.com/blog/dont-sync-state-derive-it](https://kentcdodds.com/blog/dont-sync-state-derive-it)
+- 한 줄 요약: *에러 메시지를 별도 state로 두고 동기화*하는 대신, 입력값으로부터 *파생*시켜라. 윤돌·아지 페어의 *"에러 책임을 어디서 관리할지"* 질문에 직접 답이 된다.
+
+### Dan Abramov — Before You memo()
+- 원문: [overreacted.io/before-you-memo](https://overreacted.io/before-you-memo/)
+- 한 줄 요약: 성능 최적화를 위해 `memo`를 쓰기 전에, *상태를 어디로 옮기는가*가 더 큰 영향을 준다. 검증·에러 책임이 어디에 있느냐가 *리렌더링 범위*에 미치는 비용을 다룬다.
+
 ---
 
 <Reveal>

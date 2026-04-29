@@ -47,7 +47,7 @@ function AddCard() {
 
 ## 공식문서 단서 — *State 구조 선택*
 
-React 공식문서 [Choosing the State Structure](https://react.dev/learn/choosing-the-state-structure) ([한글 번역](/react-payments/step1/q07-official-docs-ko#choosing-the-state-structure))는 다섯 원칙을 제시한다:
+React 공식문서 [Choosing the State Structure](https://react.dev/learn/choosing-the-state-structure) ([한글 번역](/react-payments/step1/q07-official-docs-ko/choosing-state-structure))는 다섯 원칙을 제시한다:
 
 > 1. **Group related state.** If you always update two or more state variables at the same time, consider merging them into a single state variable.
 > 2. **Avoid contradictions in state.** When the state is structured in a way that several pieces of state may contradict and "disagree" with each other, you leave room for mistakes. Try to avoid this.
@@ -56,6 +56,16 @@ React 공식문서 [Choosing the State Structure](https://react.dev/learn/choosi
 > 5. **Avoid deeply nested state.** Deeply hierarchical state is not very convenient to update. When possible, prefer to keep state flat.
 
 핵심: *"카드 번호와 유효기간이 항상 함께 바뀌나?"* — 답이 **No**라면 *그룹화하지 마라*. 이 원칙은 라바·도넛·아지의 고민에 직접적인 결정 기준을 준다.
+
+## 추가 읽을거리 — Kent C. Dodds
+
+### Stop using isLoading booleans
+- 원문: [kentcdodds.com/blog/stop-using-isloading-booleans](https://kentcdodds.com/blog/stop-using-isloading-booleans)
+- 한 줄 요약: `isLoading` / `isError` / `isSuccess` 같은 boolean 여러 개를 두면 *불가능한 상태*가 생긴다. 대신 `'idle' | 'pending' | 'resolved' | 'rejected'` 같은 *단일 status 상태*로 묶어라. 공식문서 5원칙의 *2번 — 모순 회피*와 정확히 같은 자리.
+
+### Don't Sync State. Derive It!
+- 원문: [kentcdodds.com/blog/dont-sync-state-derive-it](https://kentcdodds.com/blog/dont-sync-state-derive-it)
+- 한 줄 요약: 두 상태를 *동기화*하려고 useEffect를 쓰는 대신, *파생값으로* 계산해라. 공식문서 5원칙의 *3번 — 불필요한 state 회피*와 짝.
 
 ---
 

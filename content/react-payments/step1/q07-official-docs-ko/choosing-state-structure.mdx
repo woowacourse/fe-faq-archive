@@ -1,0 +1,791 @@
+---
+title: 'State 구조 선택 (전체 번역)'
+---
+
+# State 구조 선택
+
+> 원문: [Choosing the State Structure — react.dev](https://react.dev/learn/choosing-the-state-structure)
+>
+> 카드: [Q1. state는 어디서 관리하나](/react-payments/step1/q01-state-location), [Q2. state 구조](/react-payments/step1/q02-state-shape), [Q6. 카드 브랜드](/react-payments/step1/q06-card-brand-domain)
+>
+> 정확한 표현이 필요하면 항상 원문을 함께 보세요. 번역은 자연스럽게 풀어 옮긴 의역입니다.
+
+state를 잘 구조화하면 *수정과 디버깅이 즐거운 컴포넌트*와 *버그가 끊임없이 나오는 컴포넌트*의 차이를 만들 수 있습니다. state를 구조화할 때 고려하면 좋을 몇 가지 팁이 있습니다.
+
+## 이 문서에서 배우게 될 것
+
+- 단일 state 변수 vs 여러 state 변수, 언제 어떻게 쓸지
+- state를 조직할 때 피해야 할 것
+- state 구조의 흔한 문제를 어떻게 고치는지
+
+## state 구조의 다섯 가지 원칙
+
+state를 가지는 컴포넌트를 작성할 때, 몇 개의 state 변수를 쓸지, 그 데이터의 모양은 어때야 할지 결정해야 합니다. 최적화되지 않은 state 구조로도 정확한 프로그램은 작성할 수 있지만, 더 나은 선택을 안내해줄 몇 가지 원칙이 있습니다.
+
+1. **관련 있는 상태는 묶어라.** 두 개 이상의 state 변수를 *항상 같이* 업데이트하고 있다면, 하나의 state 변수로 합치는 것을 고려하세요.
+2. **state가 서로 모순되지 않게 하라.** 여러 state 조각이 *서로 다른 말을 할 수 있는* 구조라면, 실수가 생길 여지를 남기는 셈입니다. 그런 구조는 피하세요.
+3. **불필요한 state는 두지 마라.** 컴포넌트의 props나 다른 state 변수로부터 *렌더링 도중에 계산할 수 있는 정보*는, 그 컴포넌트의 state로 두지 말아야 합니다.
+4. **중복된 state는 두지 마라.** 같은 데이터가 여러 state 변수에, 혹은 중첩된 객체 안에 *복제되어* 있으면 동기화가 어려워집니다. 중복은 가능한 한 줄이세요.
+5. **너무 깊게 중첩된 state는 피하라.** 계층이 깊은 state는 업데이트가 불편합니다. 가능하면 *평평한* 구조를 선호하세요.
+
+이 원칙들의 목적은 *실수 없이 state를 쉽게 업데이트하도록* 만드는 것입니다. state에서 불필요한 데이터와 중복된 데이터를 제거하면 모든 조각이 동기화된 상태를 유지하기 쉬워집니다. 이는 데이터베이스 엔지니어가 버그 가능성을 줄이기 위해 [데이터베이스 구조를 "정규화"](https://docs.microsoft.com/en-us/office/troubleshoot/access/database-normalization-description)하려는 것과 비슷합니다. 알베르트 아인슈타인의 말을 빌리자면, **"state를 가능한 한 단순하게 만들어라 — 그러나 그보다 더 단순하게는 안 된다."**
+
+이제 이 원칙들이 실제로 어떻게 적용되는지 보겠습니다.
+
+---
+
+## 1. 관련 있는 상태는 묶어라
+
+단일 state 변수와 여러 state 변수 중 무엇을 쓸지 망설일 때가 있습니다.
+
+이렇게 해야 할까요?
+
+```js
+const [x, setX] = useState(0);
+const [y, setY] = useState(0);
+```
+
+아니면 이렇게?
+
+```js
+const [position, setPosition] = useState({ x: 0, y: 0 });
+```
+
+기술적으로는 두 방식 모두 가능합니다. 하지만 **두 state 변수가 항상 함께 바뀐다면, 하나의 state 변수로 합치는 것이 좋은 생각일 수 있습니다.** 그래야 둘을 동기화하는 것을 잊지 않을 수 있습니다. 아래 예제처럼 커서를 움직이면 빨간 점의 두 좌표가 함께 업데이트됩니다.
+
+```js
+import { useState } from 'react';
+
+export default function MovingDot() {
+  const [position, setPosition] = useState({
+    x: 0,
+    y: 0
+  });
+  return (
+    <div
+      onPointerMove={e => {
+        setPosition({
+          x: e.clientX,
+          y: e.clientY
+        });
+      }}
+      style={{
+        position: 'relative',
+        width: '100vw',
+        height: '100vh',
+      }}>
+      <div style={{
+        position: 'absolute',
+        backgroundColor: 'red',
+        borderRadius: '50%',
+        transform: `translate(${position.x}px, ${position.y}px)`,
+        left: -10,
+        top: -10,
+        width: 20,
+        height: 20,
+      }} />
+    </div>
+  )
+}
+```
+
+데이터를 객체나 배열로 묶는 또 다른 경우는, 필요한 state 조각이 *몇 개일지 미리 알 수 없을 때*입니다. 예를 들어 사용자가 임의로 필드를 추가할 수 있는 폼이 그렇습니다.
+
+> ⚠️ **함정**
+>
+> state 변수가 객체라면, [한 필드만 업데이트하려면 다른 필드를 명시적으로 복사해야 한다](https://react.dev/learn/updating-objects-in-state)는 것을 잊지 마세요. 위 예제에서 `setPosition({ x: 100 })`이라고 쓰면 `y` 속성이 아예 없어지므로 안 됩니다. 대신 `x`만 바꾸려면 `setPosition({ ...position, x: 100 })`처럼 쓰거나, 두 변수로 나눠서 `setX(100)`을 쓰세요.
+
+---
+
+## 2. state가 서로 모순되지 않게 하라
+
+다음은 `isSending`과 `isSent` state 변수를 가진 호텔 피드백 폼입니다.
+
+```js
+import { useState } from 'react';
+
+export default function FeedbackForm() {
+  const [text, setText] = useState('');
+  const [isSending, setIsSending] = useState(false);
+  const [isSent, setIsSent] = useState(false);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setIsSending(true);
+    await sendMessage(text);
+    setIsSending(false);
+    setIsSent(true);
+  }
+
+  if (isSent) {
+    return <h1>Thanks for feedback!</h1>
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <p>How was your stay at The Prancing Pony?</p>
+      <textarea
+        disabled={isSending}
+        value={text}
+        onChange={e => setText(e.target.value)}
+      />
+      <br />
+      <button
+        disabled={isSending}
+        type="submit"
+      >
+        Send
+      </button>
+      {isSending && <p>Sending...</p>}
+    </form>
+  );
+}
+```
+
+이 코드는 작동하긴 하지만, *불가능한* state가 생길 여지를 남깁니다. 예를 들어 `setIsSent`와 `setIsSending`을 같이 호출하는 것을 잊으면, `isSending`과 `isSent`가 *동시에 `true`*인 상황이 생길 수 있습니다. 컴포넌트가 복잡해질수록 무슨 일이 일어났는지 이해하기 어려워집니다.
+
+**`isSending`과 `isSent`가 동시에 `true`가 되어서는 안 되므로, 둘을 *세 가지 유효한 상태*만 가질 수 있는 하나의 `status` state 변수로 바꾸는 것이 낫습니다:** `'typing'` (초기), `'sending'`, `'sent'`.
+
+```js
+import { useState } from 'react';
+
+export default function FeedbackForm() {
+  const [text, setText] = useState('');
+  const [status, setStatus] = useState('typing');
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setStatus('sending');
+    await sendMessage(text);
+    setStatus('sent');
+  }
+
+  const isSending = status === 'sending';
+  const isSent = status === 'sent';
+
+  if (isSent) {
+    return <h1>Thanks for feedback!</h1>
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <p>How was your stay at The Prancing Pony?</p>
+      <textarea
+        disabled={isSending}
+        value={text}
+        onChange={e => setText(e.target.value)}
+      />
+      <br />
+      <button
+        disabled={isSending}
+        type="submit"
+      >
+        Send
+      </button>
+      {isSending && <p>Sending...</p>}
+    </form>
+  );
+}
+```
+
+가독성을 위해 상수를 따로 선언하는 것은 여전히 가능합니다.
+
+```js
+const isSending = status === 'sending';
+const isSent = status === 'sent';
+```
+
+이들은 state 변수가 아니므로, 서로 어긋날까봐 걱정할 필요가 없습니다.
+
+---
+
+## 3. 불필요한 state는 두지 마라
+
+컴포넌트의 props나 다른 state 변수로부터 *렌더링 도중에 계산할 수 있는 정보*는 그 컴포넌트의 state로 두지 **말아야** 합니다.
+
+예를 들어 다음 폼을 보세요. 작동은 하지만, 불필요한 state를 찾을 수 있나요?
+
+```js
+import { useState } from 'react';
+
+export default function Form() {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [fullName, setFullName] = useState('');
+
+  function handleFirstNameChange(e) {
+    setFirstName(e.target.value);
+    setFullName(e.target.value + ' ' + lastName);
+  }
+
+  function handleLastNameChange(e) {
+    setLastName(e.target.value);
+    setFullName(firstName + ' ' + e.target.value);
+  }
+
+  return (
+    <>
+      <h2>Let's check you in</h2>
+      <label>
+        First name:{' '}
+        <input
+          value={firstName}
+          onChange={handleFirstNameChange}
+        />
+      </label>
+      <label>
+        Last name:{' '}
+        <input
+          value={lastName}
+          onChange={handleLastNameChange}
+        />
+      </label>
+      <p>
+        Your ticket will be issued to: <b>{fullName}</b>
+      </p>
+    </>
+  );
+}
+```
+
+이 폼에는 세 개의 state 변수가 있습니다 — `firstName`, `lastName`, `fullName`. 그러나 `fullName`은 *불필요*합니다. **`firstName`과 `lastName`으로부터 렌더링 도중에 항상 `fullName`을 계산할 수 있으니, state에서 제거하세요.**
+
+이렇게 하면 됩니다.
+
+```js
+import { useState } from 'react';
+
+export default function Form() {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+
+  const fullName = firstName + ' ' + lastName;
+
+  function handleFirstNameChange(e) {
+    setFirstName(e.target.value);
+  }
+
+  function handleLastNameChange(e) {
+    setLastName(e.target.value);
+  }
+
+  return (
+    <>
+      <h2>Let's check you in</h2>
+      <label>
+        First name:{' '}
+        <input
+          value={firstName}
+          onChange={handleFirstNameChange}
+        />
+      </label>
+      <label>
+        Last name:{' '}
+        <input
+          value={lastName}
+          onChange={handleLastNameChange}
+        />
+      </label>
+      <p>
+        Your ticket will be issued to: <b>{fullName}</b>
+      </p>
+    </>
+  );
+}
+```
+
+여기서 `fullName`은 *state 변수가 아닙니다*. 대신 렌더링 도중에 계산됩니다.
+
+```js
+const fullName = firstName + ' ' + lastName;
+```
+
+그 결과, change 핸들러가 `fullName`을 업데이트하기 위해 별도로 무언가를 할 필요가 없습니다. `setFirstName`이나 `setLastName`을 호출하면 리렌더링이 발생하고, 다음 `fullName`은 새 데이터에서 계산됩니다.
+
+<details>
+<summary><b>더 깊게 — props를 state에 복제하지 마라</b></summary>
+
+불필요한 state의 흔한 예는 다음과 같은 코드입니다.
+
+```js
+function Message({ messageColor }) {
+  const [color, setColor] = useState(messageColor);
+```
+
+여기서 `color` state 변수는 `messageColor` prop의 초기값으로 초기화됩니다. 문제는, **부모 컴포넌트가 나중에 다른 `messageColor` 값을 전달하면 (예: `'blue'` 대신 `'red'`), `color` *state 변수*는 업데이트되지 않는다는 것입니다!** state는 첫 번째 렌더 때만 초기화됩니다.
+
+이것이 prop을 state 변수에 "복제"하는 것이 혼란을 일으키는 이유입니다. 대신, 코드에서 `messageColor` prop을 직접 사용하세요. 더 짧은 이름을 쓰고 싶다면 상수를 쓰세요.
+
+```js
+function Message({ messageColor }) {
+  const color = messageColor;
+```
+
+이렇게 하면 부모에서 전달된 prop과 어긋나지 않습니다.
+
+prop을 state로 "복제"하는 것은, 특정 prop의 *모든 업데이트를 무시*하고 싶을 때만 의미가 있습니다. 관습적으로 prop 이름을 `initial`이나 `default`로 시작해서, 새 값이 무시된다는 점을 분명히 합니다.
+
+```js
+function Message({ initialColor }) {
+  // `color` state 변수는 *첫* `initialColor` 값을 보유합니다.
+  // `initialColor` prop의 그 이후 변경은 무시됩니다.
+  const [color, setColor] = useState(initialColor);
+```
+
+</details>
+
+---
+
+## 4. 중복된 state는 두지 마라
+
+다음 메뉴 컴포넌트는 여러 여행 간식 중 하나를 고르게 합니다.
+
+```js
+import { useState } from 'react';
+
+const initialItems = [
+  { title: 'pretzels', id: 0 },
+  { title: 'crispy seaweed', id: 1 },
+  { title: 'granola bar', id: 2 },
+];
+
+export default function Menu() {
+  const [items, setItems] = useState(initialItems);
+  const [selectedItem, setSelectedItem] = useState(
+    items[0]
+  );
+
+  return (
+    <>
+      <h2>What's your travel snack?</h2>
+      <ul>
+        {items.map(item => (
+          <li key={item.id}>
+            {item.title}
+            {' '}
+            <button onClick={() => {
+              setSelectedItem(item);
+            }}>Choose</button>
+          </li>
+        ))}
+      </ul>
+      <p>You picked {selectedItem.title}.</p>
+    </>
+  );
+}
+```
+
+지금은 선택된 아이템을 `selectedItem` state 변수에 객체로 저장합니다. 그러나 이는 좋지 않습니다 — **`selectedItem`의 내용이 `items` 리스트 안의 아이템 *중 하나와 같은 객체*입니다.** 즉, 그 아이템에 대한 정보가 *두 곳에 중복*되어 있는 셈입니다.
+
+왜 이게 문제일까요? 각 아이템을 편집할 수 있게 만들어 봅시다.
+
+```js
+import { useState } from 'react';
+
+const initialItems = [
+  { title: 'pretzels', id: 0 },
+  { title: 'crispy seaweed', id: 1 },
+  { title: 'granola bar', id: 2 },
+];
+
+export default function Menu() {
+  const [items, setItems] = useState(initialItems);
+  const [selectedItem, setSelectedItem] = useState(
+    items[0]
+  );
+
+  function handleItemChange(id, e) {
+    setItems(items.map(item => {
+      if (item.id === id) {
+        return {
+          ...item,
+          title: e.target.value,
+        };
+      } else {
+        return item;
+      }
+    }));
+  }
+
+  return (
+    <>
+      <h2>What's your travel snack?</h2>
+      <ul>
+        {items.map((item, index) => (
+          <li key={item.id}>
+            <input
+              value={item.title}
+              onChange={e => {
+                handleItemChange(item.id, e)
+              }}
+            />
+            {' '}
+            <button onClick={() => {
+              setSelectedItem(item);
+            }}>Choose</button>
+          </li>
+        ))}
+      </ul>
+      <p>You picked {selectedItem.title}.</p>
+    </>
+  );
+}
+```
+
+먼저 한 아이템에 "Choose"를 누르고 *그다음에* 그것을 편집해보세요. **input은 업데이트되지만, 아래 라벨은 편집을 반영하지 않습니다.** 이는 state가 중복되어 있는데 `selectedItem`을 업데이트하는 것을 잊었기 때문입니다.
+
+`selectedItem`도 함께 업데이트할 수도 있지만, 더 쉬운 해결책은 *중복을 없애는 것*입니다. 이 예에서, `selectedItem` 객체(`items` 안의 객체와 중복을 만드는) 대신, `selectedId`만 state에 두고 *그다음에* 그 ID로 `items` 배열에서 찾아서 `selectedItem`을 얻으면 됩니다.
+
+```js
+import { useState } from 'react';
+
+const initialItems = [
+  { title: 'pretzels', id: 0 },
+  { title: 'crispy seaweed', id: 1 },
+  { title: 'granola bar', id: 2 },
+];
+
+export default function Menu() {
+  const [items, setItems] = useState(initialItems);
+  const [selectedId, setSelectedId] = useState(0);
+
+  const selectedItem = items.find(item =>
+    item.id === selectedId
+  );
+
+  function handleItemChange(id, e) {
+    setItems(items.map(item => {
+      if (item.id === id) {
+        return {
+          ...item,
+          title: e.target.value,
+        };
+      } else {
+        return item;
+      }
+    }));
+  }
+
+  return (
+    <>
+      <h2>What's your travel snack?</h2>
+      <ul>
+        {items.map((item, index) => (
+          <li key={item.id}>
+            <input
+              value={item.title}
+              onChange={e => {
+                handleItemChange(item.id, e)
+              }}
+            />
+            {' '}
+            <button onClick={() => {
+              setSelectedId(item.id);
+            }}>Choose</button>
+          </li>
+        ))}
+      </ul>
+      <p>You picked {selectedItem.title}.</p>
+    </>
+  );
+}
+```
+
+이전에는 state가 이렇게 중복되어 있었습니다.
+
+- `items = [{ id: 0, title: 'pretzels'}, ...]`
+- `selectedItem = {id: 0, title: 'pretzels'}`
+
+변경 후에는 이렇게 됩니다.
+
+- `items = [{ id: 0, title: 'pretzels'}, ...]`
+- `selectedId = 0`
+
+중복이 사라지고, 본질적인 state만 남았습니다.
+
+이제 *선택된* 아이템을 편집하면, 아래 메시지가 즉시 업데이트됩니다. `setItems`가 리렌더링을 일으키고, `items.find(...)`가 업데이트된 제목의 아이템을 찾기 때문입니다. *선택된 아이템*을 state에 보관할 필요가 없었던 것입니다 — *선택된 ID*만 본질이고, 나머지는 렌더링 도중에 계산할 수 있습니다.
+
+---
+
+## 5. 너무 깊게 중첩된 state는 피하라
+
+행성, 대륙, 국가로 이루어진 여행 계획을 상상해보세요. 다음 예제처럼 중첩된 객체와 배열로 state를 구조화하고 싶을 수 있습니다.
+
+```js
+// 트리 구조 — 각 place가 자신의 자식 places 배열을 가짐
+export const initialTravelPlan = {
+  id: 0,
+  title: '(Root)',
+  childPlaces: [{
+    id: 1,
+    title: 'Earth',
+    childPlaces: [{
+      id: 2,
+      title: 'Africa',
+      childPlaces: [
+        { id: 3, title: 'Botswana', childPlaces: [] },
+        { id: 4, title: 'Egypt', childPlaces: [] },
+        // ...
+      ]
+    }, /* ... */]
+  }, /* ... */]
+};
+```
+
+이미 방문한 장소를 삭제하는 버튼을 추가하고 싶다고 합시다. 어떻게 해야 할까요? [중첩된 state 업데이트](https://react.dev/learn/updating-objects-in-state#updating-a-nested-object)는 변경된 부분에서부터 *모든 상위까지* 객체를 복사하는 것을 의미합니다. 깊게 중첩된 장소를 삭제하려면 부모 장소 체인 전체를 복사해야 합니다. 이런 코드는 매우 장황해질 수 있습니다.
+
+**state가 너무 중첩되어 업데이트하기 어렵다면, "평평하게" 만드는 것을 고려하세요.** 다음은 데이터를 재구조화하는 한 가지 방법입니다. 각 `place`가 *자식 places의 배열*을 가지는 트리 구조 대신, 각 place가 *자식 place ID들의 배열*만 가지게 합니다. 그리고 각 place ID에서 해당 place로의 매핑을 따로 저장합니다.
+
+이 데이터 재구조화는 *데이터베이스 테이블*을 보는 것과 비슷합니다.
+
+```js
+// 평평한 구조 — 각 place는 자식 ID 배열만 가지고, 매핑은 따로
+export const initialTravelPlan = {
+  0: { id: 0, title: '(Root)', childIds: [1, 42, 46] },
+  1: { id: 1, title: 'Earth', childIds: [2, 10, 19, 26, 34] },
+  2: { id: 2, title: 'Africa', childIds: [3, 4, 5, 6, 7, 8, 9] },
+  3: { id: 3, title: 'Botswana', childIds: [] },
+  4: { id: 4, title: 'Egypt', childIds: [] },
+  // ...
+  42: { id: 42, title: 'Moon', childIds: [43, 44, 45] },
+  // ...
+};
+```
+
+**이제 state가 "평평"(또는 "정규화")되었으므로, 중첩된 아이템을 업데이트하기 쉬워집니다.**
+
+장소를 제거하려면 이제 *두 단계의 state*만 업데이트하면 됩니다.
+
+- 그 *부모* 장소의 업데이트 버전은 `childIds` 배열에서 제거된 ID를 빼야 합니다.
+- 루트 "테이블" 객체의 업데이트 버전은 업데이트된 부모 장소를 포함해야 합니다.
+
+```js
+function handleComplete(parentId, childId) {
+  const parent = plan[parentId];
+  // 부모 장소의 새 버전을 만든다 — 이 자식 ID를 빼고
+  const nextParent = {
+    ...parent,
+    childIds: parent.childIds
+      .filter(id => id !== childId)
+  };
+  // 루트 state 객체를 업데이트...
+  setPlan({
+    ...plan,
+    // ...업데이트된 부모를 포함하도록
+    [parentId]: nextParent
+  });
+}
+```
+
+state는 원하는 만큼 중첩할 수 있지만, "평평하게" 만들면 많은 문제를 해결할 수 있습니다. state 업데이트가 쉬워지고, 중첩된 객체의 다른 부분에 중복이 생기지 않도록 도와줍니다.
+
+<details>
+<summary><b>더 깊게 — 메모리 사용 개선</b></summary>
+
+이상적으로는, 메모리 사용을 개선하기 위해 *삭제된 아이템들과 그 자식들을* "테이블" 객체에서도 제거하면 좋습니다. 다음 버전이 그것을 합니다. 또한 [Immer를 사용](https://react.dev/learn/updating-objects-in-state#write-concise-update-logic-with-immer)해서 업데이트 로직을 더 간결하게 만듭니다.
+
+```js
+import { useImmer } from 'use-immer';
+
+export default function TravelPlan() {
+  const [plan, updatePlan] = useImmer(initialTravelPlan);
+
+  function handleComplete(parentId, childId) {
+    updatePlan(draft => {
+      // 부모 장소의 자식 ID에서 제거
+      const parent = draft[parentId];
+      parent.childIds = parent.childIds
+        .filter(id => id !== childId);
+
+      // 이 장소와 그 모든 하위 트리를 잊는다
+      deleteAllChildren(childId);
+      function deleteAllChildren(id) {
+        const place = draft[id];
+        place.childIds.forEach(deleteAllChildren);
+        delete draft[id];
+      }
+    });
+  }
+  // ...
+}
+```
+
+</details>
+
+때로는 중첩된 state의 일부를 *자식 컴포넌트로 옮겨서* state 중첩을 줄일 수 있습니다. 호버 여부처럼 저장할 필요가 없는 *일시적 UI state*에 잘 맞습니다.
+
+---
+
+## 요약
+
+- 두 state 변수가 항상 함께 업데이트된다면, 하나로 합치는 것을 고려하세요.
+- "불가능한" state가 생기지 않도록 state 변수를 신중하게 고르세요.
+- 업데이트 시 실수할 가능성이 줄어드는 방향으로 state를 구조화하세요.
+- 동기화할 필요가 없도록 *불필요하고 중복된 state*는 피하세요.
+- 업데이트를 *명시적으로 막고 싶지 않다면* prop을 state에 *복제하지 마세요*.
+- 선택 같은 UI 패턴에서는 객체 자체 대신 *ID나 인덱스*를 state에 두세요.
+- 깊게 중첩된 state를 업데이트하기 복잡하면, 평평하게 만드는 것을 시도하세요.
+
+---
+
+## 연습 문제
+
+### 문제 1 — 업데이트되지 않는 컴포넌트 고치기
+
+이 `Clock` 컴포넌트는 `color`와 `time` 두 prop을 받습니다. select 박스에서 다른 색을 고르면, `Clock` 컴포넌트는 부모 컴포넌트로부터 다른 `color` prop을 받습니다. 그러나 무슨 이유에서인지 표시된 색이 업데이트되지 않습니다. 왜일까요? 문제를 고치세요.
+
+```js
+// src/Clock.js — 버그 있는 버전
+import { useState } from 'react';
+
+export default function Clock(props) {
+  const [color, setColor] = useState(props.color);
+  return (
+    <h1 style={{ color: color }}>
+      {props.time}
+    </h1>
+  );
+}
+```
+
+<details>
+<summary><b>풀이 보기</b></summary>
+
+문제는 이 컴포넌트가 `color` prop의 *초기값*으로 `color` state를 초기화한다는 것입니다. 그러나 `color` prop이 바뀌어도, state 변수에는 영향이 없습니다! 그래서 어긋납니다. 이를 고치려면 state 변수를 통째로 제거하고, `color` prop을 직접 사용하세요.
+
+```js
+import { useState } from 'react';
+
+export default function Clock(props) {
+  return (
+    <h1 style={{ color: props.color }}>
+      {props.time}
+    </h1>
+  );
+}
+```
+
+또는 구조 분해 문법을 쓸 수도 있습니다.
+
+```js
+import { useState } from 'react';
+
+export default function Clock({ color, time }) {
+  return (
+    <h1 style={{ color: color }}>
+      {time}
+    </h1>
+  );
+}
+```
+
+</details>
+
+### 문제 2 — 망가진 짐 리스트 고치기
+
+이 짐 리스트에는 *몇 개를 쌌는지*와 *전체 몇 개인지*를 보여주는 footer가 있습니다. 처음엔 작동하는 것 같지만, 버그가 있습니다. 예를 들어 한 아이템을 *쌌다*고 표시한 뒤 그것을 *삭제*하면, 카운터가 정확히 업데이트되지 않습니다. 카운터가 항상 정확하도록 고치세요.
+
+> 💡 **힌트:** 이 예제에서 *불필요한* state는 어떤 것인가요?
+
+```js
+// src/App.js — 버그 있는 버전
+import { useState } from 'react';
+import AddItem from './AddItem.js';
+import PackingList from './PackingList.js';
+
+let nextId = 3;
+const initialItems = [
+  { id: 0, title: 'Warm socks', packed: true },
+  { id: 1, title: 'Travel journal', packed: false },
+  { id: 2, title: 'Watercolors', packed: false },
+];
+
+export default function TravelPlan() {
+  const [items, setItems] = useState(initialItems);
+  const [total, setTotal] = useState(3);
+  const [packed, setPacked] = useState(1);
+
+  function handleAddItem(title) {
+    setTotal(total + 1);
+    setItems([...items, { id: nextId++, title, packed: false }]);
+  }
+
+  function handleChangeItem(nextItem) {
+    if (nextItem.packed) setPacked(packed + 1);
+    else setPacked(packed - 1);
+    setItems(items.map(item => item.id === nextItem.id ? nextItem : item));
+  }
+
+  function handleDeleteItem(itemId) {
+    setTotal(total - 1);
+    setItems(items.filter(item => item.id !== itemId));
+  }
+
+  return (
+    <>
+      <AddItem onAddItem={handleAddItem} />
+      <PackingList items={items} onChangeItem={handleChangeItem} onDeleteItem={handleDeleteItem} />
+      <hr />
+      <b>{packed} out of {total} packed!</b>
+    </>
+  );
+}
+```
+
+<details>
+<summary><b>풀이 보기</b></summary>
+
+각 이벤트 핸들러에서 `total`과 `packed` 카운터가 정확히 업데이트되도록 신중하게 바꿀 수도 있겠지만, 근본적인 문제는 이 state 변수들이 *처음부터 존재하는 것* 자체입니다. 그것들은 불필요합니다 — 아이템 개수(쌌든 전체든)는 *언제나 `items` 배열 자체로부터 계산할 수 있기 때문*입니다. 불필요한 state를 제거해서 버그를 고치세요.
+
+```js
+import { useState } from 'react';
+import AddItem from './AddItem.js';
+import PackingList from './PackingList.js';
+
+let nextId = 3;
+const initialItems = [
+  { id: 0, title: 'Warm socks', packed: true },
+  { id: 1, title: 'Travel journal', packed: false },
+  { id: 2, title: 'Watercolors', packed: false },
+];
+
+export default function TravelPlan() {
+  const [items, setItems] = useState(initialItems);
+
+  const total = items.length;
+  const packed = items.filter(item => item.packed).length;
+
+  function handleAddItem(title) {
+    setItems([...items, { id: nextId++, title, packed: false }]);
+  }
+
+  function handleChangeItem(nextItem) {
+    setItems(items.map(item => item.id === nextItem.id ? nextItem : item));
+  }
+
+  function handleDeleteItem(itemId) {
+    setItems(items.filter(item => item.id !== itemId));
+  }
+
+  return (
+    <>
+      <AddItem onAddItem={handleAddItem} />
+      <PackingList items={items} onChangeItem={handleChangeItem} onDeleteItem={handleDeleteItem} />
+      <hr />
+      <b>{packed} out of {total} packed!</b>
+    </>
+  );
+}
+```
+
+이 변경 후에는 이벤트 핸들러가 `setItems`만 호출하면 충분하다는 점을 주목하세요. 아이템 개수는 다음 렌더링에서 `items`로부터 계산되니, 항상 최신 상태입니다.
+
+</details>
+
+### 문제 3 — 사라지는 선택 강조 고치기
+
+> 이 문제는 원문이 매우 길어 *원문 페이지에서 직접* 따라가는 것을 권장합니다 — [원문 Challenges 섹션](https://react.dev/learn/choosing-the-state-structure#challenges)에서 마지막 두 연습 문제(highlighted letter 사라짐 / 선택된 letter 카운트 따라가기)를 풀어보세요.
+
+---
+
+> 이 페이지의 번역은 자연스럽게 풀어 옮긴 의역입니다. 정확한 표현이 필요하면 항상 [원문](https://react.dev/learn/choosing-the-state-structure)을 함께 보세요.
