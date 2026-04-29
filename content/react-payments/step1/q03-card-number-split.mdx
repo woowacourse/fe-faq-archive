@@ -14,13 +14,32 @@ import { Reveal } from '../../../components/Reveal'
 
 ## AS-IS 코드
 
-```jsx
-// TBD — 크루 PR에서 발췌 예정
-// 두 패턴을 나란히:
-//   (a) 데이터: 단일 문자열 "1234567890123456"
-//       UI: 4개 input이 각각 substring(0,4), substring(4,8) ... 을 보여줌
-//   (b) 데이터: ["1234", "5678", "9012", "3456"]
-//       UI: 각 input이 자기 인덱스의 문자열을 직접 받음
+```tsx
+// src/components/CardAdditionForm.js
+const formatCardNumbers = (numbers) => {
+  const [...firstTwoNumbers] = numbers.slice(0, 2);
+  const [...secondTwoNumbers] = numbers.slice(2);
+
+  const hiddenNumbers = secondTwoNumbers.map((value) =>
+    FORMAT_CHAR.HIDDEN_NUMBER.repeat(value.length)
+  );
+
+  return [...firstTwoNumbers, ...hiddenNumbers]
+    .map((number) => (number ? number : ""))
+    .join(FORMAT_CHAR.CARD_NUMBERS_SEPARATOR);
+};
+
+const formatExpirationDate = (expirationDate) => {
+  return Object.values(expirationDate)
+    .filter((value) => value !== "")
+    .join(FORMAT_CHAR.EXPIRATION_DATE_SEPARATOR);
+};
+
+const CardAdditionForm = (props) => {
+  const [
+    cardNumbers,
+    cardNumbersInputRef,
+    onCardNumbersChange,
 ```
 
 ## 공식문서 단서 — *Reacting to Input with State*
@@ -44,17 +63,120 @@ React 공식문서 [Reacting to Input with State](https://react.dev/learn/reacti
 ## 탐색 미션
 
 ### 선배 PR — *단일 문자열 + UI 분할 패턴*
-[PR 링크 TBD](https://github.com/woowacourse/react-payments/pull/TBD)
+[PR #9](https://github.com/woowacourse/react-payments/pull/9)
 
-**찾아볼 것:** "리뷰어가 *데이터의 단위*와 *UI의 단위*를 어떻게 구분해서 설명했나요? 카드번호의 *도메인 본질*이 1개라는 것을 어떤 단어로 표현했나요?"
+**찾아볼 것:** "`cardNumber`를 하나의 값으로 보고 화면에서만 4칸으로 나누는지 확인하세요. 리뷰에서 데이터의 단위와 UI 입력칸의 단위를 구분하는 표현을 찾아보면 좋습니다."
 
 ### 선배 PR — *배열 4개로 분리한 패턴*
-[PR 링크 TBD](https://github.com/woowacourse/react-payments/pull/TBD)
+[PR #430](https://github.com/woowacourse/react-payments/pull/430)
 
-**찾아볼 것:** "분리해서 관리할 때 *focus 자동 이동*과 *유효성 검사*가 어떻게 단순해지는지, 또는 *카드 미리보기*가 어떻게 복잡해지는지 PR 대화에서 어떤 trade-off가 노출되었나요?"
+**찾아볼 것:** "네 개 input의 `maxLength`, ref, focus 이동 코드가 검증 로직과 어떻게 묶이는지 보세요. 분리 state가 편해지는 지점과 프리뷰 조합이 복잡해지는 지점을 같이 비교하세요."
 
 </Reveal>
 
 ## 연관 PR 더 보기
 
-> 코덱스 후속 채움 예정 — Q03 주제로 매핑된 다른 PR 목록이 여기 들어갑니다. 195개 전체 인덱스는 [부록](/react-payments/step1/appendix-all-prs)에서 확인할 수 있습니다.
+이 주제에 매핑된 1단계 PR 전체 목록입니다. 자기 가설에 가까운 PR을 골라 추가로 탐색해보세요.
+
+| PR | 작성자 | 핵심 키워드 |
+|----|--------|------------|
+| [#3](https://github.com/woowacourse/react-payments/pull/3) | @jho2301 | 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#4](https://github.com/woowacourse/react-payments/pull/4) | @SunYoungKwon | 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#8](https://github.com/woowacourse/react-payments/pull/8) | @goni-ssi | 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 |
+| [#9](https://github.com/woowacourse/react-payments/pull/9) | @0307kwon (대표) | state 위치 / 객체/배열 state 구조 / 카드번호 4분할 / 카드사/브랜드 판별 |
+| [#11](https://github.com/woowacourse/react-payments/pull/11) | @Tanney-102 | state 위치 / 객체/배열 state 구조 / 카드번호 4분할 / 카드사/브랜드 판별 |
+| [#17](https://github.com/woowacourse/react-payments/pull/17) | @zigsong | 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 카드사/브랜드 판별 |
+| [#18](https://github.com/woowacourse/react-payments/pull/18) | @0imbean0 | 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#22](https://github.com/woowacourse/react-payments/pull/22) | @ddongule | 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 |
+| [#29](https://github.com/woowacourse/react-payments/pull/29) | @swon3210 | state 위치 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 카드사/브랜드 판별 |
+| [#71](https://github.com/woowacourse/react-payments/pull/71) | @DomMorello | state 위치 / 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 |
+| [#74](https://github.com/woowacourse/react-payments/pull/74) | @LAH1203 | custom hook / 카드번호 4분할 |
+| [#75](https://github.com/woowacourse/react-payments/pull/75) | @intae92 | state 위치 / 카드번호 4분할 |
+| [#77](https://github.com/woowacourse/react-payments/pull/77) | @JUDONGHYEOK | state 위치 / 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 |
+| [#78](https://github.com/woowacourse/react-payments/pull/78) | @soyi47 | state 위치 / 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 |
+| [#82](https://github.com/woowacourse/react-payments/pull/82) | @hwangstar156 | state 위치 / 카드번호 4분할 / 카드사/브랜드 판별 |
+| [#84](https://github.com/woowacourse/react-payments/pull/84) | @greenblues1190 | 객체/배열 state 구조 / 카드번호 4분할 / 검증·에러 처리 |
+| [#89](https://github.com/woowacourse/react-payments/pull/89) | @onschan | state 위치 / 객체/배열 state 구조 / 카드번호 4분할 / 검증·에러 처리 |
+| [#90](https://github.com/woowacourse/react-payments/pull/90) | @prefer2 | 카드번호 4분할 / 공통 Input/컴포넌트 합성 |
+| [#91](https://github.com/woowacourse/react-payments/pull/91) | @moonheekim0118 | custom hook / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 |
+| [#94](https://github.com/woowacourse/react-payments/pull/94) | @euijinkk | state 위치 / 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#95](https://github.com/woowacourse/react-payments/pull/95) | @KangYunHo1221 | state 위치 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 |
+| [#96](https://github.com/woowacourse/react-payments/pull/96) | @jhy979 | state 위치 / 객체/배열 state 구조 / 카드번호 4분할 / 검증·에러 처리 |
+| [#97](https://github.com/woowacourse/react-payments/pull/97) | @kamwoo | state 위치 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 |
+| [#100](https://github.com/woowacourse/react-payments/pull/100) | @woose28 | state 위치 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 |
+| [#102](https://github.com/woowacourse/react-payments/pull/102) | @liswktjs | state 위치 / 카드번호 4분할 / 검증·에러 처리 |
+| [#103](https://github.com/woowacourse/react-payments/pull/103) | @kkojae91 | 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 |
+| [#105](https://github.com/woowacourse/react-payments/pull/105) | @ronci | custom hook / 카드번호 4분할 / 카드사/브랜드 판별 |
+| [#106](https://github.com/woowacourse/react-payments/pull/106) | @jin7969 | 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 |
+| [#187](https://github.com/woowacourse/react-payments/pull/187) | @gabrielyoon7 | 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 |
+| [#189](https://github.com/woowacourse/react-payments/pull/189) | @nlom0218 | state 위치 / 객체/배열 state 구조 / 카드번호 4분할 / 검증·에러 처리 |
+| [#190](https://github.com/woowacourse/react-payments/pull/190) | @dladncks1217 | state 위치 / 객체/배열 state 구조 / 카드번호 4분할 / 카드사/브랜드 판별 |
+| [#191](https://github.com/woowacourse/react-payments/pull/191) | @kyw0716 | 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 |
+| [#193](https://github.com/woowacourse/react-payments/pull/193) | @suyoungj | state 위치 / 객체/배열 state 구조 / 카드번호 4분할 |
+| [#194](https://github.com/woowacourse/react-payments/pull/194) | @shackstack | 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 |
+| [#197](https://github.com/woowacourse/react-payments/pull/197) | @xodms0309 | state 위치 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 |
+| [#199](https://github.com/woowacourse/react-payments/pull/199) | @guridaek | state 위치 / 카드번호 4분할 |
+| [#200](https://github.com/woowacourse/react-payments/pull/200) | @hae-on | 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 |
+| [#201](https://github.com/woowacourse/react-payments/pull/201) | @HyeryongChoi | state 위치 / 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 |
+| [#205](https://github.com/woowacourse/react-payments/pull/205) | @2yunseong | state 위치 / 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 |
+| [#210](https://github.com/woowacourse/react-payments/pull/210) | @chsua | 카드번호 4분할 / 공통 Input/컴포넌트 합성 |
+| [#212](https://github.com/woowacourse/react-payments/pull/212) | @jw-r | state 위치 / 객체/배열 state 구조 / 카드번호 4분할 |
+| [#213](https://github.com/woowacourse/react-payments/pull/213) | @wzrabbit | state 위치 / 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 |
+| [#218](https://github.com/woowacourse/react-payments/pull/218) | @tkdrb12 | 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#227](https://github.com/woowacourse/react-payments/pull/227) | @jeongwusi | 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 |
+| [#230](https://github.com/woowacourse/react-payments/pull/230) | @gyeongza | state 위치 / 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 |
+| [#232](https://github.com/woowacourse/react-payments/pull/232) | @Gilpop8663 | custom hook / 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 |
+| [#332](https://github.com/woowacourse/react-payments/pull/332) | @seongjinme | 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#333](https://github.com/woowacourse/react-payments/pull/333) | @jinyoung234 | 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#334](https://github.com/woowacourse/react-payments/pull/334) | @vi-wolhwa | state 위치 / 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#336](https://github.com/woowacourse/react-payments/pull/336) | @jaeml06 | 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#337](https://github.com/woowacourse/react-payments/pull/337) | @jinhokim98 | custom hook / 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#338](https://github.com/woowacourse/react-payments/pull/338) | @Largopie | custom hook / 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#340](https://github.com/woowacourse/react-payments/pull/340) | @chosim-dvlpr | 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#341](https://github.com/woowacourse/react-payments/pull/341) | @simorimi | state 위치 / 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#343](https://github.com/woowacourse/react-payments/pull/343) | @brgndyy | custom hook / 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#344](https://github.com/woowacourse/react-payments/pull/344) | @soi-ha | state 위치 / 객체/배열 state 구조 / 카드번호 4분할 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#345](https://github.com/woowacourse/react-payments/pull/345) | @lurgi | 객체/배열 state 구조 / 카드번호 4분할 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#348](https://github.com/woowacourse/react-payments/pull/348) | @pp449 | state 위치 / 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#349](https://github.com/woowacourse/react-payments/pull/349) | @BadaHertz52 | state 위치 / 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 |
+| [#351](https://github.com/woowacourse/react-payments/pull/351) | @novice0840 | 객체/배열 state 구조 / 카드번호 4분할 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#353](https://github.com/woowacourse/react-payments/pull/353) | @ooherin | custom hook / 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 |
+| [#355](https://github.com/woowacourse/react-payments/pull/355) | @greetings1012 | 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#357](https://github.com/woowacourse/react-payments/pull/357) | @00kang | state 위치 / 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#359](https://github.com/woowacourse/react-payments/pull/359) | @rbgksqkr | custom hook / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#360](https://github.com/woowacourse/react-payments/pull/360) | @llqqssttyy | 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#362](https://github.com/woowacourse/react-payments/pull/362) | @Jaymyong66 | 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#364](https://github.com/woowacourse/react-payments/pull/364) | @soosoo22 | 객체/배열 state 구조 / 카드번호 4분할 / 검증·에러 처리 |
+| [#365](https://github.com/woowacourse/react-payments/pull/365) | @ImxYJL | 객체/배열 state 구조 / 카드번호 4분할 / 카드사/브랜드 판별 |
+| [#366](https://github.com/woowacourse/react-payments/pull/366) | @Parkhanyoung | custom hook / 카드번호 4분할 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#368](https://github.com/woowacourse/react-payments/pull/368) | @Todari | 객체/배열 state 구조 / 카드번호 4분할 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#411](https://github.com/woowacourse/react-payments/pull/411) | @AHHYUNJU | state 위치 / 카드번호 4분할 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#412](https://github.com/woowacourse/react-payments/pull/412) | @mlnwns | state 위치 / 객체/배열 state 구조 / 카드번호 4분할 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#413](https://github.com/woowacourse/react-payments/pull/413) | @Beomtae | custom hook / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 |
+| [#414](https://github.com/woowacourse/react-payments/pull/414) | @ohgus | custom hook / 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 |
+| [#415](https://github.com/woowacourse/react-payments/pull/415) | @eunoia-jaxson | 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 |
+| [#416](https://github.com/woowacourse/react-payments/pull/416) | @jeongyou | state 위치 / 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 |
+| [#417](https://github.com/woowacourse/react-payments/pull/417) | @sooyeoniya | custom hook / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#418](https://github.com/woowacourse/react-payments/pull/418) | @MinSungJe | state 위치 / 객체/배열 state 구조 / 카드번호 4분할 / 카드사/브랜드 판별 |
+| [#419](https://github.com/woowacourse/react-payments/pull/419) | @spoyodevelop | 객체/배열 state 구조 / 카드번호 4분할 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#420](https://github.com/woowacourse/react-payments/pull/420) | @ShinjungOh | state 위치 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#422](https://github.com/woowacourse/react-payments/pull/422) | @thgml05 | 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#424](https://github.com/woowacourse/react-payments/pull/424) | @guesung | 카드번호 4분할 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#427](https://github.com/woowacourse/react-payments/pull/427) | @sanghee01 | 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#430](https://github.com/woowacourse/react-payments/pull/430) | @yeongipark (대표) | state 위치 / 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#432](https://github.com/woowacourse/react-payments/pull/432) | @ha-kuku | 카드번호 4분할 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#433](https://github.com/woowacourse/react-payments/pull/433) | @eunsoA | state 위치 / 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#434](https://github.com/woowacourse/react-payments/pull/434) | @minji2219 | state 위치 / 카드번호 4분할 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#435](https://github.com/woowacourse/react-payments/pull/435) | @dev-dino22 | state 위치 / 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#436](https://github.com/woowacourse/react-payments/pull/436) | @bunju20 | 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#437](https://github.com/woowacourse/react-payments/pull/437) | @aydenote | 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#438](https://github.com/woowacourse/react-payments/pull/438) | @wo-o29 | 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 |
+| [#439](https://github.com/woowacourse/react-payments/pull/439) | @kimyou1102 | custom hook / 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#440](https://github.com/woowacourse/react-payments/pull/440) | @dlsxjzld | custom hook / 객체/배열 state 구조 / 카드번호 4분할 / 검증·에러 처리 |
+| [#441](https://github.com/woowacourse/react-payments/pull/441) | @hanheel | 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#443](https://github.com/woowacourse/react-payments/pull/443) | @jin123457 | 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#444](https://github.com/woowacourse/react-payments/pull/444) | @mun-kyeong | state 위치 / 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#445](https://github.com/woowacourse/react-payments/pull/445) | @Daeun-100 | state 위치 / 카드번호 4분할 / 검증·에러 처리 / 카드사/브랜드 판별 |
+| [#496](https://github.com/woowacourse/react-payments/pull/496) | @woowapark | custom hook / 객체/배열 state 구조 / 카드번호 4분할 / 공통 Input/컴포넌트 합성 / 검증·에러 처리 / 카드사/브랜드 판별 |
+
+> 195개 전체 인덱스(다른 주제 포함)는 [부록](/react-payments/step1/appendix-all-prs)에서 확인할 수 있습니다.
