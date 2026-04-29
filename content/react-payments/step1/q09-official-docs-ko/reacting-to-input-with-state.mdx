@@ -1,0 +1,71 @@
+---
+title: 'Reacting to Input with State (전체 번역)'
+---
+
+# Reacting to Input with State — 전체 번역
+
+> 원문: [react.dev/learn/reacting-to-input-with-state](https://react.dev/learn/reacting-to-input-with-state)
+>
+> 카드: [Q3. 카드번호 4영역](/react-payments/step1/q03-card-number-split), [Q5. 검증과 에러 책임](/react-payments/step1/q05-validation-error)
+>
+> 정확한 표현이 필요하면 항상 원문을 함께 보세요. 번역은 자연스럽게 풀어 옮긴 의역입니다.
+
+## 들어가며
+
+React는 *선언적인* 방식으로 UI를 다룹니다. UI의 각 부분을 직접 조작하는 대신, 컴포넌트가 가질 수 있는 *서로 다른 상태*를 기술하고, 사용자 입력에 반응해 그 상태를 *전환*합니다. 이는 디자이너가 UI에 대해 생각하는 방식과 비슷합니다.
+
+## 이 문서에서 배우게 될 것
+
+- 선언적 UI 프로그래밍이 명령적 UI 프로그래밍과 어떻게 다른지
+- 컴포넌트가 가질 수 있는 *서로 다른 시각 상태*를 어떻게 나열하는지
+- 코드에서 그 다른 시각 상태들 사이의 변화를 어떻게 trigger하는지
+
+---
+
+> ⚠️ **이 페이지는 전체 번역 진행 중**
+>
+> 핵심 도입부와 *5단계*만 옮겨두었습니다. *How declarative UI compares to imperative*, *Thinking about UI declaratively*, *Recap*, *Try out some challenges* 등 나머지 섹션 전체 번역이 필요하면 [원문](https://react.dev/learn/reacting-to-input-with-state)에서 페이지 raw markdown을 *copy page*해서 코치에게 보내주세요.
+
+## 핵심 발췌 (요약 번역)
+
+### 명령적 UI vs 선언적 UI
+
+명령적으로 UI를 짠다는 것은, 일어나는 일에 따라 UI에 *어떻게* 도달하는지를 정확히 적는 것입니다. 화면의 각 요소를 직접 *어디에 두고, 어떻게 보이게 할지* 명령하는 식입니다.
+
+선언적으로 UI를 짠다는 것은, *각 시각적 상태에 대해 UI를 어떻게 보여줄지를 기술*하는 것입니다 — 사용자 입력에 *일일이 반응해 UI를 미세 조작하는 것이 아니라*. React는 그 시각적 상태에 따라 *적절한 UI*를 선택합니다.
+
+### 선언형 사고로 옮기기 — 다섯 단계
+
+UI를 React로 다시 구현할 때, 다음 다섯 단계를 따라보세요.
+
+1. 컴포넌트가 가질 수 있는 *시각적 상태*를 모두 식별합니다.
+2. 그 상태 변화를 *무엇이 일으키는지* 정합니다.
+3. `useState`를 써서 상태를 *메모리에 표현*합니다.
+4. 본질적이지 않은 상태 변수는 *제거*합니다.
+5. 이벤트 핸들러를 *상태를 설정하도록* 연결합니다.
+
+### Step 1 — 시각적 상태 식별
+
+먼저, 사용자가 볼 수 있는 *서로 다른 모든 상태*를 시각화해야 합니다.
+
+- *Empty*: 폼이 비어 있음. 제출 버튼 비활성.
+- *Typing*: 사용자가 입력 중. 제출 버튼 활성.
+- *Submitting*: 폼이 제출 중. 폼 비활성, 스피너 노출.
+- *Success*: "감사합니다" 메시지 노출.
+- *Error*: Typing과 같지만 에러 메시지 추가.
+
+### Step 4 — 본질적이지 않은 상태 변수 제거
+
+state에 *중복*을 만들지 않도록 다음을 자문해보세요:
+
+- *모순*을 만드는가? 예를 들어 `isTyping`과 `isSubmitting`은 동시에 `true`가 될 수 없음.
+- *다른 변수에 같은 정보가 있나?* 예를 들어 `isEmpty`와 `isTyping`은 서로 모순될 수 없음 → 둘 중 하나만 두면 됨.
+- *그 정보를 다른 변수의 반대로 얻을 수 있나?* `isError`는 `error !== null`로 알 수 있으니 별도 state 불필요.
+
+> 페이먼츠 1단계의 *4분할 입력 (클라우디·해니 페어)*과 *에러 메시지 책임 (윤돌·아지 페어)*이 이 4단계와 직접 만납니다.
+
+---
+
+> 🇬🇧 *원문 전체*를 따라가려면 [Reacting to Input with State — react.dev](https://react.dev/learn/reacting-to-input-with-state)로 이동하세요.
+>
+> 🛠 *전체 번역*을 원하면 코치에게 raw markdown을 보내주세요.
