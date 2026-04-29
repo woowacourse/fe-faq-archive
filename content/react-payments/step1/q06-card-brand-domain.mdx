@@ -1,0 +1,60 @@
+---
+title: 'Q6. 카드 브랜드 — 폼 vs 도메인'
+---
+
+import { Reveal } from '../../../components/Reveal'
+
+# Q6. 카드 브랜드 식별 로직 — 폼 값일까, 도메인 모델일까?
+
+## 크루의 질문
+
+> "브랜드 로직은 어디에서 알고 있는 게 맞는가." — 포도·레스 페어
+
+> "cardBrand 값을 formValue로써 관리해야 할지 별도 변수로 관리해야 할지." — 아지·애니 페어
+
+## AS-IS 코드
+
+```jsx
+// TBD — 크루 PR에서 발췌 예정
+// 세 가지 패턴을 비교:
+//   (a) cardBrand를 useState로 폼 상태에 같이 둠
+//       const [form, setForm] = useState({ cardNumber, cardBrand, ... })
+//   (b) cardNumber로부터 *매번 계산*하는 파생값
+//       const cardBrand = identifyBrand(form.cardNumber)
+//   (c) 도메인 모듈로 분리
+//       /domain/cardBrand.ts — { identify(numbers): Brand, validate(numbers, brand): boolean }
+// 사용자가 직접 카드사를 선택하는 요구사항(2단계)과 *자동 식별*이 만났을 때 어디가 더 견디는지.
+```
+
+## 공식문서 단서 + *도메인 노트*
+
+React 공식문서 [Avoid redundant state](https://react.dev/learn/choosing-the-state-structure#avoid-redundant-state):
+
+> *If you can calculate some information from the component's props or its existing state variables during rendering, you should not put that information into that component's state.*
+
+`cardBrand`가 `cardNumber`로부터 *결정 가능*하다면 별도 상태로 두는 것은 redundant. 그러나 2단계 요구사항(*"사용자는 카드사를 선택할 수 있고, 선택에 따라 프리뷰 카드의 색상이 변경된다"*)은 *사용자 선택*도 입력원이 된다 — 즉 brand는 *(자동 식별 ∪ 사용자 선택)* 두 입력의 *해소*다.
+
+도메인 노트: 카드 브랜드 *식별 규칙*은 React가 모르는 영역이다. 페이먼츠 2단계의 카드사 식별 번호 규칙(Diners 36/14자리, AMEX 34·37/15자리, UnionPay 622126~622925 등)은 *순수 함수*로 분리할 수 있다. **컴포넌트 외부의 도메인 모듈에 두면 React 16/17/18/19가 어떻게 바뀌든 영향받지 않는다.** 이게 1단계에서 *지금* 도메인 분리를 시작할 가치다.
+
+---
+
+<Reveal>
+
+## 탐색 미션
+
+### 선배 PR — *폼 상태에 cardBrand를 같이 둔 패턴*
+[PR 링크 TBD](https://github.com/woowacourse/react-payments/pull/TBD)
+
+**찾아볼 것:** "리뷰어가 *폼 상태와 파생값*의 차이를 어떻게 설명했나요? '항상 같이 바뀌는가'를 어떤 기준으로 들었나요?"
+
+### 선배 PR — *cardNumber로부터 매번 계산하는 패턴*
+[PR 링크 TBD](https://github.com/woowacourse/react-payments/pull/TBD)
+
+**찾아볼 것:** "사용자가 직접 카드사를 *선택하는 시점*이 들어왔을 때(2단계) 이 패턴이 어떻게 변형되었나요? *식별*과 *선택*이 만나는 자리에서 어떤 단어로 해소했나요?"
+
+### 선배 PR — *도메인 모듈로 분리한 패턴*
+[PR 링크 TBD](https://github.com/woowacourse/react-payments/pull/TBD)
+
+**찾아볼 것:** "도메인 모듈로 분리했을 때 *테스트*가 어떻게 단순해졌나요? 컴포넌트가 알아야 할 것이 *무엇으로 줄었는가*에 대해 PR 대화에서 어떤 표현이 나왔나요?"
+
+</Reveal>

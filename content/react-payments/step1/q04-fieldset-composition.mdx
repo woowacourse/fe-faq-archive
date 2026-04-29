@@ -1,0 +1,53 @@
+---
+title: 'Q4. 공통 Input 컴포넌트 — 합성'
+---
+
+import { Reveal } from '../../../components/Reveal'
+
+# Q4. 공통 Input/Fieldset 컴포넌트 — 합성을 위해 만드는 게 맞을까?
+
+## 크루의 질문
+
+> "공통 fieldset 컴포넌트를 사용하여 카드번호, 유효기간, cvc의 컴포넌트를 만들었습니다. payment에서 이 컴포넌트들을 합성하여 사용하였고, value 상태랑 유효성 검사 값이 payment에 있는데, 공통 fieldset 컴포넌트가 필요한지 궁금합니다." — 콘티·먼지 페어
+
+> "컴포넌트 쪼개는 기준에 대해 얘기를 많이 했습니다." — 파라디·피트·이현 페어
+
+## AS-IS 코드
+
+```jsx
+// TBD — 크루 PR에서 발췌 예정
+// 두 패턴을 비교:
+//   (a) 공통 Fieldset/Input 컴포넌트를 만들어 합성
+//       <Fieldset label="카드 번호"><Input ... /><Input ... /></Fieldset>
+//   (b) 각 영역(카드번호, 만료일, CVC)을 *그 영역 전용 컴포넌트*로 작성
+//       <CardNumberInput ... /> <ExpiryInput ... /> <CvcInput ... />
+// 어느 쪽이 *지금 손에서 더 단순*하고, 어느 쪽이 *변경에 더 잘 견디는*지 본다.
+```
+
+## 공식문서 단서 — *children으로 합성하기*
+
+React 공식문서 [Passing JSX as children](https://react.dev/learn/passing-props-to-a-component#passing-jsx-as-children)이 합성의 기초를 보여준다:
+
+> *Some components don't know their children ahead of time. ... Components that use children as a "hole" in their JSX get filled with anything the parent passes. This is most often used for layouts, modals, and similar wrappers.*
+
+페이먼츠에서 fieldset은 *시각적 묶음(레이블 + 입력 영역)*이라는 *구조 역할*만 가질 수 있다. 그 안에 들어가는 input의 종류·검증·자동 이동이 다르다면, *합성의 단위*는 fieldset이 아니라 *각 도메인 영역*일 수 있다.
+
+추가로 [You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect)와 짝지어 — *"코드 재사용을 원한다면, custom hook으로 추출한다"* — Q1·Q2에서 본 AHA 원칙(*먼저 1단계 스타일로 완성한 뒤 중복을 본 뒤 추출*)이 컴포넌트 추출에도 그대로 적용된다. **공통 컴포넌트는 중복을 *본 뒤* 만든다.**
+
+---
+
+<Reveal>
+
+## 탐색 미션
+
+### 선배 PR — *공통 Input 컴포넌트로 합성한 패턴*
+[PR 링크 TBD](https://github.com/woowacourse/react-payments/pull/TBD)
+
+**찾아볼 것:** "리뷰어가 공통 컴포넌트의 *prop 인터페이스*가 너무 넓어진 자리를 어떻게 짚었나요? '범용성을 위해 prop이 늘어날 때' 어디서부터 비용으로 보였나요?"
+
+### 선배 PR — *도메인 영역별 컴포넌트로 분리한 패턴*
+[PR 링크 TBD](https://github.com/woowacourse/react-payments/pull/TBD)
+
+**찾아볼 것:** "분리한 컴포넌트 사이에 *반복되는 코드 모양*이 있다면 리뷰어는 어떤 시점에 *추출*을 권했나요? '먼저 중복을 본 뒤'라는 단서가 PR 대화에 어떻게 드러나나요?"
+
+</Reveal>

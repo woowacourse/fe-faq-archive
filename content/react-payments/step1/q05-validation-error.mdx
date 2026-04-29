@@ -1,0 +1,57 @@
+---
+title: 'Q5. 검증과 에러 책임'
+---
+
+import { Reveal } from '../../../components/Reveal'
+
+# Q5. 검증 로직과 에러 메시지 책임 — 어느 컴포넌트에 둘까?
+
+## 크루의 질문
+
+> "에러 책임을 어떤 컴포넌트에서 관리할지 고민했습니다." — 윤돌·비비빙 페어
+
+> "input의 검증 규칙 및 로직을 어디에서 관리해야 할지." — 아지·애니 페어
+
+## AS-IS 코드
+
+```jsx
+// TBD — 크루 PR에서 발췌 예정
+// 세 가지 책임 분배 패턴을 비교:
+//   (a) 자식 input 컴포넌트가 *자신의 검증·에러*를 보유
+//   (b) 부모(payment) 컴포넌트가 *모든 검증·에러*를 보유, 자식은 표시만
+//   (c) custom hook(useCardForm 류)이 *검증과 에러 상태*를 함께 보유
+// 검증 *시점*(blur / change / submit)도 함께 비교한다.
+```
+
+## 공식문서 단서 — *상태로 표현하는 사고*
+
+React 공식문서 [Reacting to Input with State](https://react.dev/learn/reacting-to-input-with-state)에서:
+
+> *Thinking about a UI declaratively means describing the UI for each visual state rather than micromanaging the UI in response to user input.*
+
+에러도 *시각 상태(visual state)*다. *"이 input이 *유효한지*는 무엇으로 결정되는가"*가 결정 기준 — 그 결정에 필요한 모든 데이터가 *어디에 모여 있는지*가 검증 로직의 자연스러운 자리다.
+
+[You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect)는 한 발 더 — *"렌더링 도중 props/state로부터 계산할 수 있는 값은 useState에 두지 마라"* — 즉 **에러 메시지는 종종 *상태가 아니라 파생값*이다.** `state.cvc`로부터 *지금 유효한가*가 매번 계산되어 표시될 수 있다면, *에러 상태*라는 별도 state는 redundant.
+
+---
+
+<Reveal>
+
+## 탐색 미션
+
+### 선배 PR — *자식이 자기 에러를 보유한 패턴*
+[PR 링크 TBD](https://github.com/woowacourse/react-payments/pull/TBD)
+
+**찾아볼 것:** "리뷰어가 자식 컴포넌트가 *언제 검증해야 하는지*에 대해 어떤 시점을 권했나요? blur / change / submit의 차이가 *사용자 경험*에 어떻게 드러나는지 어떤 단어로 설명했나요?"
+
+### 선배 PR — *부모가 모든 에러를 보유한 패턴*
+[PR 링크 TBD](https://github.com/woowacourse/react-payments/pull/TBD)
+
+**찾아볼 것:** "부모가 에러를 보유하니 *확인 버튼 활성화*가 어떻게 단순해졌나요? 동시에 자식의 *재사용성*에 어떤 비용이 생겼나요?"
+
+### 선배 PR — *custom hook이 검증을 보유한 패턴*
+[PR 링크 TBD](https://github.com/woowacourse/react-payments/pull/TBD)
+
+**찾아볼 것:** "리뷰어가 hook으로 *언제* 추출했냐고 물었을 때 PR 작성자는 어떻게 답했나요? *처음부터 hook으로 시작*과 *중복을 본 뒤 추출*의 차이가 PR 대화에 드러났나요?"
+
+</Reveal>
