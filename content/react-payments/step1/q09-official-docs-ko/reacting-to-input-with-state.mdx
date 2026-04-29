@@ -8,7 +8,9 @@ title: 'Reacting to Input with State (전체 번역)'
 >
 > 카드: [Q3. 카드번호 4영역](/react-payments/step1/q03-card-number-split), [Q5. 검증과 에러 책임](/react-payments/step1/q05-validation-error)
 >
-> 정확한 표현이 필요하면 항상 원문을 함께 보세요. 번역은 자연스럽게 풀어 옮긴 의역입니다.
+> 정확한 표현이 필요하면 항상 원문을 함께 보세요. 번역은 자연스럽게 풀어 옮긴 의역이며, 코드 안의 영문 식별자·UI 문구(`Submit`, `City quiz` 등)는 원문 그대로 둡니다.
+>
+> *원문은 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) 라이선스로 react.dev에서 발행되었으며, 본 번역은 그 라이선스에 따라 출처를 표시하고 재배포합니다.*
 
 ## 들어가며
 
@@ -22,50 +24,848 @@ React는 *선언적인* 방식으로 UI를 다룹니다. UI의 각 부분을 직
 
 ---
 
-> ⚠️ **이 페이지는 전체 번역 진행 중**
->
-> 핵심 도입부와 *5단계*만 옮겨두었습니다. *How declarative UI compares to imperative*, *Thinking about UI declaratively*, *Recap*, *Try out some challenges* 등 나머지 섹션 전체 번역이 필요하면 [원문](https://react.dev/learn/reacting-to-input-with-state)에서 페이지 raw markdown을 *copy page*해서 코치에게 보내주세요.
+## 선언적 UI vs 명령적 UI 비교
 
-## 핵심 발췌 (요약 번역)
+UI 인터랙션을 설계할 때, 여러분은 아마 *사용자 동작에 반응해 UI가 어떻게 바뀌는지*를 떠올릴 것입니다. 사용자가 답을 제출할 수 있는 폼을 생각해봅시다.
 
-### 명령적 UI vs 선언적 UI
+- 폼에 무언가를 입력하면, "Submit" 버튼이 **활성화됩니다.**
+- "Submit"을 누르면, 폼과 버튼이 모두 **비활성화되고**, 스피너가 **나타납니다.**
+- 네트워크 요청이 성공하면, 폼이 **숨겨지고**, "Thank you" 메시지가 **나타납니다.**
+- 네트워크 요청이 실패하면, 에러 메시지가 **나타나고**, 폼이 다시 **활성화됩니다.**
 
-명령적으로 UI를 짠다는 것은, 일어나는 일에 따라 UI에 *어떻게* 도달하는지를 정확히 적는 것입니다. 화면의 각 요소를 직접 *어디에 두고, 어떻게 보이게 할지* 명령하는 식입니다.
+**명령적 프로그래밍**에서는 위 인터랙션을 그대로 *어떻게 구현할지*가 코드가 됩니다. 방금 일어난 일에 따라 UI를 조작하기 위한 *정확한 명령*을 일일이 적어야 합니다. 다르게 비유하자면, 차에 타고 있는 누군가에게 길마다 *어디서 좌회전하고, 어디서 우회전할지*를 직접 알려주는 것과 같습니다.
 
-선언적으로 UI를 짠다는 것은, *각 시각적 상태에 대해 UI를 어떻게 보여줄지를 기술*하는 것입니다 — 사용자 입력에 *일일이 반응해 UI를 미세 조작하는 것이 아니라*. React는 그 시각적 상태에 따라 *적절한 UI*를 선택합니다.
+> 🚗 *명령적 UI 프로그래밍의 비유* — 운전자(JavaScript)는 어디로 가고 싶은지 모르고, 그저 명령을 따를 뿐입니다. (그리고 길을 잘못 알려주면 엉뚱한 곳에 도착합니다!)
 
-### 선언형 사고로 옮기기 — 다섯 단계
+이를 *명령적*이라고 부르는 이유는, 스피너부터 버튼까지 *각 요소에게 일일이 명령*해서 컴퓨터에게 *UI를 어떻게 갱신할지*를 직접 알려주기 때문입니다.
 
-UI를 React로 다시 구현할 때, 다음 다섯 단계를 따라보세요.
+다음은 *React 없이* 브라우저 [DOM](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model)만으로 작성된 명령적 UI 프로그래밍 예제입니다.
 
-1. 컴포넌트가 가질 수 있는 *시각적 상태*를 모두 식별합니다.
-2. 그 상태 변화를 *무엇이 일으키는지* 정합니다.
-3. `useState`를 써서 상태를 *메모리에 표현*합니다.
-4. 본질적이지 않은 상태 변수는 *제거*합니다.
-5. 이벤트 핸들러를 *상태를 설정하도록* 연결합니다.
+```js
+// src/index.js
+async function handleFormSubmit(e) {
+  e.preventDefault();
+  disable(textarea);
+  disable(button);
+  show(loadingMessage);
+  hide(errorMessage);
+  try {
+    await submitForm(textarea.value);
+    show(successMessage);
+    hide(form);
+  } catch (err) {
+    show(errorMessage);
+    errorMessage.textContent = err.message;
+  } finally {
+    hide(loadingMessage);
+    enable(textarea);
+    enable(button);
+  }
+}
 
-### Step 1 — 시각적 상태 식별
+function handleTextareaChange() {
+  if (textarea.value.length === 0) {
+    disable(button);
+  } else {
+    enable(button);
+  }
+}
 
-먼저, 사용자가 볼 수 있는 *서로 다른 모든 상태*를 시각화해야 합니다.
+function hide(el) {
+  el.style.display = 'none';
+}
 
-- *Empty*: 폼이 비어 있음. 제출 버튼 비활성.
-- *Typing*: 사용자가 입력 중. 제출 버튼 활성.
-- *Submitting*: 폼이 제출 중. 폼 비활성, 스피너 노출.
-- *Success*: "감사합니다" 메시지 노출.
-- *Error*: Typing과 같지만 에러 메시지 추가.
+function show(el) {
+  el.style.display = '';
+}
 
-### Step 4 — 본질적이지 않은 상태 변수 제거
+function enable(el) {
+  el.disabled = false;
+}
 
-state에 *중복*을 만들지 않도록 다음을 자문해보세요:
+function disable(el) {
+  el.disabled = true;
+}
 
-- *모순*을 만드는가? 예를 들어 `isTyping`과 `isSubmitting`은 동시에 `true`가 될 수 없음.
-- *다른 변수에 같은 정보가 있나?* 예를 들어 `isEmpty`와 `isTyping`은 서로 모순될 수 없음 → 둘 중 하나만 두면 됨.
-- *그 정보를 다른 변수의 반대로 얻을 수 있나?* `isError`는 `error !== null`로 알 수 있으니 별도 state 불필요.
+function submitForm(answer) {
+  // 네트워크 호출 흉내
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (answer.toLowerCase() === 'istanbul') {
+        resolve();
+      } else {
+        reject(new Error('Good guess but a wrong answer. Try again!'));
+      }
+    }, 1500);
+  });
+}
 
-> 페이먼츠 1단계의 *4분할 입력 (클라우디·해니 페어)*과 *에러 메시지 책임 (윤돌·아지 페어)*이 이 4단계와 직접 만납니다.
+let form = document.getElementById('form');
+let textarea = document.getElementById('textarea');
+let button = document.getElementById('button');
+let loadingMessage = document.getElementById('loading');
+let errorMessage = document.getElementById('error');
+let successMessage = document.getElementById('success');
+form.onsubmit = handleFormSubmit;
+textarea.oninput = handleTextareaChange;
+```
+
+```html
+<!-- public/index.html -->
+<form id="form">
+  <h2>City quiz</h2>
+  <p>What city is located on two continents?</p>
+  <textarea id="textarea"></textarea>
+  <br />
+  <button id="button" disabled>Submit</button>
+  <p id="loading" style="display: none">Loading...</p>
+  <p id="error" style="display: none; color: red;"></p>
+</form>
+<h1 id="success" style="display: none">That's right!</h1>
+```
+
+UI를 명령적으로 조작하는 방식은 *고립된 작은 예제*에서는 잘 작동하지만, 더 복잡한 시스템에서는 관리가 *기하급수적으로* 어려워집니다. 위 같은 폼이 여러 개 있는 페이지를 갱신한다고 상상해보세요. 새 UI 요소나 새 인터랙션을 추가하려면 *모든 기존 코드*를 신중히 살펴 버그가 들어가지 않았는지 확인해야 합니다 (예: 어떤 요소를 *보이거나 숨기는 것*을 잊지 않았는지).
+
+React는 바로 이 문제를 해결하기 위해 만들어졌습니다.
+
+React에서는 UI를 직접 조작하지 않습니다 — 즉, 컴포넌트를 직접 *활성화·비활성화·표시·숨기지* 않습니다. 대신, **무엇을 보여주고 싶은지를 *선언*하면**, React가 UI를 어떻게 갱신할지 알아냅니다. 택시에 타서 운전자에게 *어디서 좌회전하라고 일일이 말하지 않고* 가고 싶은 *목적지만 말하는 것*과 같습니다. 운전자가 데려다주는 일을 맡고, 여러분이 미처 모르는 지름길도 알고 있을지 모릅니다!
+
+> 🚖 *선언적 UI 프로그래밍의 비유* — 승객(여러분)은 React에게 지도 위 *목적지*만 말합니다. 그곳에 어떻게 도달할지는 React가 알아서 합니다.
 
 ---
 
-> 🇬🇧 *원문 전체*를 따라가려면 [Reacting to Input with State — react.dev](https://react.dev/learn/reacting-to-input-with-state)로 이동하세요.
+## 선언형 사고로 옮기기
+
+위에서 폼을 명령적으로 구현하는 방법을 봤습니다. React에서 어떻게 사고하는지 더 잘 이해하기 위해, 같은 UI를 React로 다시 구현해봅니다.
+
+1. 컴포넌트의 *서로 다른 시각 상태*를 모두 식별합니다 (Identify).
+2. 그 상태 변화를 *무엇이 trigger*하는지 정합니다 (Determine).
+3. `useState`로 상태를 *메모리에 표현*합니다 (Represent).
+4. 본질적이지 않은 상태 변수를 *제거*합니다 (Remove).
+5. 이벤트 핸들러를 *상태를 설정하도록* 연결합니다 (Connect).
+
+### Step 1: 컴포넌트의 서로 다른 시각 상태를 식별하기
+
+컴퓨터 과학에서는 ["상태 기계(state machine)"](https://en.wikipedia.org/wiki/Finite-state_machine)가 여러 *상태* 중 하나에 있다는 표현을 들어보셨을 것입니다. 디자이너와 일해본 적이 있다면 *서로 다른 시각 상태*에 대한 목업을 봤을 수도 있고요. React는 디자인과 컴퓨터 과학의 교차점에 서 있어서, 두 아이디어 모두에서 영감을 받습니다.
+
+먼저, 사용자가 볼 수 있는 *서로 다른 모든 UI 상태*를 시각화해봅니다.
+
+- **Empty (비어 있음)**: 폼의 "Submit" 버튼이 비활성.
+- **Typing (입력 중)**: 폼의 "Submit" 버튼이 활성.
+- **Submitting (제출 중)**: 폼이 완전히 비활성. 스피너 노출.
+- **Success (성공)**: 폼 대신 "Thank you" 메시지 노출.
+- **Error (에러)**: Typing 상태와 같지만, 에러 메시지가 추가로 노출.
+
+디자이너처럼, 로직을 붙이기 전에 *각 상태*에 대한 *목업*을 만들고 싶을 것입니다. 다음은 폼의 *시각적 부분만*을 위한 목업입니다. 이 목업은 `'empty'`라는 기본값을 가진 `status` prop으로 제어됩니다.
+
+```js
+export default function Form({
+  status = 'empty'
+}) {
+  if (status === 'success') {
+    return <h1>That's right!</h1>
+  }
+  return (
+    <>
+      <h2>City quiz</h2>
+      <p>
+        In which city is there a billboard that turns air into drinkable water?
+      </p>
+      <form>
+        <textarea />
+        <br />
+        <button>
+          Submit
+        </button>
+      </form>
+    </>
+  )
+}
+```
+
+이 prop의 이름은 무엇이든 상관없습니다 — 이름 자체는 중요하지 않습니다. `status = 'empty'`를 `status = 'success'`로 바꿔보세요. 성공 메시지가 나타나는 것을 볼 수 있습니다. 목업을 만들어두면 *로직을 붙이기 전에* UI를 빠르게 반복 개선할 수 있습니다. 같은 컴포넌트를 좀 더 살을 붙여 만든 프로토타입은 다음과 같습니다 (여전히 `status` prop으로 *제어*됩니다).
+
+```js
+export default function Form({
+  // 'submitting', 'error', 'success' 도 시도해보세요.
+  status = 'empty'
+}) {
+  if (status === 'success') {
+    return <h1>That's right!</h1>
+  }
+  return (
+    <>
+      <h2>City quiz</h2>
+      <p>
+        In which city is there a billboard that turns air into drinkable water?
+      </p>
+      <form>
+        <textarea disabled={
+          status === 'submitting'
+        } />
+        <br />
+        <button disabled={
+          status === 'empty' ||
+          status === 'submitting'
+        }>
+          Submit
+        </button>
+        {status === 'error' &&
+          <p className="Error">
+            Good guess but a wrong answer. Try again!
+          </p>
+        }
+      </form>
+    </>
+  );
+}
+```
+
+```css
+.Error { color: red; }
+```
+
+<details>
+<summary><b>더 깊게 — 여러 시각 상태를 한 번에 보여주기</b></summary>
+
+컴포넌트가 시각 상태를 많이 가진다면, 그 모두를 한 페이지에 보여주는 것이 편할 수 있습니다.
+
+```js
+// src/App.js
+import Form from './Form.js';
+
+let statuses = [
+  'empty',
+  'typing',
+  'submitting',
+  'success',
+  'error',
+];
+
+export default function App() {
+  return (
+    <>
+      {statuses.map(status => (
+        <section key={status}>
+          <h4>Form ({status}):</h4>
+          <Form status={status} />
+        </section>
+      ))}
+    </>
+  );
+}
+```
+
+```js
+// src/Form.js
+export default function Form({ status }) {
+  if (status === 'success') {
+    return <h1>That's right!</h1>
+  }
+  return (
+    <form>
+      <textarea disabled={
+        status === 'submitting'
+      } />
+      <br />
+      <button disabled={
+        status === 'empty' ||
+        status === 'submitting'
+      }>
+        Submit
+      </button>
+      {status === 'error' &&
+        <p className="Error">
+          Good guess but a wrong answer. Try again!
+        </p>
+      }
+    </form>
+  );
+}
+```
+
+```css
+section { border-bottom: 1px solid #aaa; padding: 20px; }
+h4 { color: #222; }
+body { margin: 0; }
+.Error { color: red; }
+```
+
+이런 페이지는 보통 *living styleguide* 또는 *storybook*이라고 부릅니다.
+
+</details>
+
+### Step 2: 상태 변화를 무엇이 trigger하는지 정하기
+
+상태 갱신은 두 종류의 입력에 반응해 일으킬 수 있습니다.
+
+- **사람의 입력 (human input)**: 버튼 클릭, 필드에 입력, 링크로 이동 등.
+- **컴퓨터의 입력 (computer input)**: 네트워크 응답 도착, 타임아웃 완료, 이미지 로딩 완료 등.
+
+> 🖐️ *사람의 입력* — 손가락으로 누르는 자리.
 >
-> 🛠 *전체 번역*을 원하면 코치에게 raw markdown을 보내주세요.
+> 0️⃣1️⃣ *컴퓨터의 입력* — 0과 1로 도착하는 자리.
+
+두 경우 모두, **UI를 갱신하려면 [상태 변수](https://react.dev/learn/state-a-components-memory#anatomy-of-usestate)를 설정해야 합니다.** 지금 만들고 있는 폼에서는 다음 입력들에 반응해 상태를 바꿔야 합니다.
+
+- **텍스트 input의 변경** (사람) → 텍스트박스가 비어 있는지에 따라 *Empty* 상태와 *Typing* 상태를 오갑니다.
+- **Submit 버튼 클릭** (사람) → *Submitting* 상태로 전환.
+- **네트워크 응답 성공** (컴퓨터) → *Success* 상태로 전환.
+- **네트워크 응답 실패** (컴퓨터) → 해당 에러 메시지와 함께 *Error* 상태로 전환.
+
+> 💡 **참고**
+>
+> 사람의 입력은 보통 [이벤트 핸들러](https://react.dev/learn/responding-to-events)가 필요합니다.
+
+이 흐름을 시각화하기 위해, 종이에 *각 상태를 라벨이 붙은 원으로*, *두 상태 사이의 변화를 화살표로* 그려보세요. 이렇게 여러 흐름을 미리 그려두면, 구현하기 훨씬 전에 버그를 잡을 수 있습니다.
+
+> 📊 *폼 상태 흐름도* — `empty` → (`start typing`) → `typing` → (`press submit`) → `submitting` → 두 갈래로 (`network error` → `error`) 또는 (`network success` → `success`)
+
+### Step 3: `useState`로 상태를 메모리에 표현하기
+
+다음으로, 컴포넌트의 시각 상태를 [`useState`](https://react.dev/reference/react/useState)로 메모리에 표현해야 합니다. *단순함*이 핵심입니다 — 각 상태 조각은 *움직이는 부품*이고, **움직이는 부품은 적을수록 좋습니다.** 복잡할수록 버그도 늘어납니다!
+
+먼저 *반드시 있어야 하는* 상태부터 시작하세요. 예를 들어, 입력값 `answer`와 (있다면) 마지막 에러를 담을 `error`가 필요합니다.
+
+```js
+const [answer, setAnswer] = useState('');
+const [error, setError] = useState(null);
+```
+
+그다음, *어떤 시각 상태를 보여줄지*를 표현하는 상태 변수가 필요합니다. 이를 메모리에 표현하는 방법은 보통 *하나 이상*이므로, 여러 가지를 시도해봐야 합니다.
+
+처음부터 가장 좋은 방법이 떠오르지 않는다면, 가능한 모든 시각 상태가 *분명히* 다 표현되도록 *충분한 상태*를 일단 추가해서 시작하세요.
+
+```js
+const [isEmpty, setIsEmpty] = useState(true);
+const [isTyping, setIsTyping] = useState(false);
+const [isSubmitting, setIsSubmitting] = useState(false);
+const [isSuccess, setIsSuccess] = useState(false);
+const [isError, setIsError] = useState(false);
+```
+
+처음 떠올린 아이디어가 최선은 아닐 가능성이 큽니다 — 하지만 괜찮습니다. *상태 구조를 리팩토링*하는 것은 작업의 일부입니다!
+
+### Step 4: 본질적이지 않은 상태 변수 제거하기
+
+상태에 *중복*을 두지 않고, *본질적인 것*만 추적하고 싶을 것입니다. 상태 구조를 리팩토링하는 데 시간을 조금 쓰면, 컴포넌트가 더 이해하기 쉬워지고, 중복이 줄고, 의도치 않은 의미가 생기지 않습니다. 목표는 **메모리 안의 상태가 *사용자에게 보여주고 싶지 않은 어떤 UI*도 표현하지 않게 하는 것**입니다. (예를 들어, 에러 메시지를 보여주면서 동시에 input을 비활성화하는 일은 절대 원치 않습니다 — 그러면 사용자가 에러를 고칠 수 없으니까요!)
+
+상태 변수에 대해 다음과 같은 질문을 던져볼 수 있습니다.
+
+- **이 상태가 모순(paradox)을 만드는가?** 예를 들어 `isTyping`과 `isSubmitting`은 동시에 `true`가 될 수 없습니다. 모순은 보통 상태가 *충분히 좁혀지지 않았다*는 신호입니다. boolean 두 개의 가능한 조합은 4가지인데, 그중 *유효한 상태는 3가지*뿐입니다. *불가능한* 상태를 없애려면, 둘을 합쳐 `'typing'`·`'submitting'`·`'success'` 세 값 중 하나여야 하는 `status`로 만들 수 있습니다.
+- **같은 정보가 다른 상태 변수에 이미 있는가?** 또 다른 모순: `isEmpty`와 `isTyping`은 동시에 `true`가 될 수 없습니다. 별도 상태 변수로 두면 *서로 어긋나서* 버그가 생길 위험이 있습니다. 다행히 `isEmpty`를 제거하고 `answer.length === 0`을 검사할 수 있습니다.
+- **다른 상태 변수의 *반대*에서 같은 정보를 얻을 수 있는가?** `isError`는 필요 없습니다 — `error !== null`로 확인할 수 있으니까요.
+
+이렇게 정리하고 나면, *본질적인* 상태 변수가 3개(7개에서 줄어든!) 남습니다.
+
+```js
+const [answer, setAnswer] = useState('');
+const [error, setError] = useState(null);
+const [status, setStatus] = useState('typing'); // 'typing', 'submitting', 'success'
+```
+
+이들이 본질적이라는 것을 알 수 있는 이유는, *어느 하나라도 빼면* 기능이 깨지기 때문입니다.
+
+<details>
+<summary><b>더 깊게 — reducer로 "불가능한" 상태 없애기</b></summary>
+
+이 세 변수만으로도 폼의 상태를 충분히 표현합니다. 그러나 여전히 *완전히 말이 되지 않는* 중간 상태들이 있습니다. 예를 들어 `status`가 `'success'`인데 `error`가 null이 아닌 것은 말이 안 됩니다. 상태를 더 정확히 모델링하려면 [reducer로 추출](https://react.dev/learn/extracting-state-logic-into-a-reducer)할 수 있습니다. reducer는 여러 상태 변수를 *하나의 객체*로 통합하고, 관련 로직을 *한 자리에 모을* 수 있게 해줍니다!
+
+</details>
+
+### Step 5: 이벤트 핸들러를 상태를 설정하도록 연결하기
+
+마지막으로, 상태를 갱신하는 이벤트 핸들러를 만듭니다. 다음은 모든 이벤트 핸들러가 연결된 *최종 폼*입니다.
+
+```js
+import { useState } from 'react';
+
+export default function Form() {
+  const [answer, setAnswer] = useState('');
+  const [error, setError] = useState(null);
+  const [status, setStatus] = useState('typing');
+
+  if (status === 'success') {
+    return <h1>That's right!</h1>
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setStatus('submitting');
+    try {
+      await submitForm(answer);
+      setStatus('success');
+    } catch (err) {
+      setStatus('typing');
+      setError(err);
+    }
+  }
+
+  function handleTextareaChange(e) {
+    setAnswer(e.target.value);
+  }
+
+  return (
+    <>
+      <h2>City quiz</h2>
+      <p>
+        In which city is there a billboard that turns air into drinkable water?
+      </p>
+      <form onSubmit={handleSubmit}>
+        <textarea
+          value={answer}
+          onChange={handleTextareaChange}
+          disabled={status === 'submitting'}
+        />
+        <br />
+        <button disabled={
+          answer.length === 0 ||
+          status === 'submitting'
+        }>
+          Submit
+        </button>
+        {error !== null &&
+          <p className="Error">
+            {error.message}
+          </p>
+        }
+      </form>
+    </>
+  );
+}
+
+function submitForm(answer) {
+  // 네트워크 호출 흉내
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      let shouldError = answer.toLowerCase() !== 'lima'
+      if (shouldError) {
+        reject(new Error('Good guess but a wrong answer. Try again!'));
+      } else {
+        resolve();
+      }
+    }, 1500);
+  });
+}
+```
+
+```css
+.Error { color: red; }
+```
+
+이 코드는 원래 명령형 예제보다 *길지만*, 훨씬 *덜 깨지기 쉽습니다*. 모든 인터랙션을 *상태 변화*로 표현해두면, 나중에 *기존 상태를 깨뜨리지 않고* 새 시각 상태를 추가할 수 있습니다. 또 *각 상태에서 무엇을 보여줄지*를 인터랙션 로직 자체를 바꾸지 않고 변경할 수 있습니다.
+
+---
+
+## 요약
+
+- 선언적 프로그래밍은 UI를 *명령적*으로 미세 조작하는 대신, *각 시각 상태에 대해 UI를 어떻게 보여줄지*를 기술하는 것입니다.
+- 컴포넌트를 만들 때:
+  1. 모든 시각 상태를 식별합니다.
+  2. 사람과 컴퓨터 trigger를 정합니다.
+  3. `useState`로 상태를 모델링합니다.
+  4. 버그와 모순을 피하기 위해 본질적이지 않은 상태를 제거합니다.
+  5. 이벤트 핸들러를 *상태를 설정하도록* 연결합니다.
+
+---
+
+## 연습 문제
+
+### 문제 1 — CSS 클래스 추가/제거
+
+그림을 클릭하면 바깥 `<div>`에서 `background--active` CSS 클래스가 *제거*되고, `<img>`에는 `picture--active` 클래스가 *추가*되도록 만드세요. 배경을 다시 클릭하면 원래 CSS 클래스로 복원되어야 합니다.
+
+시각적으로는, 그림을 클릭하면 보라색 배경이 사라지고 그림 테두리가 강조됩니다. 그림 바깥을 클릭하면 배경이 다시 강조되고 그림 테두리 강조는 사라집니다.
+
+```js
+export default function Picture() {
+  return (
+    <div className="background background--active">
+      <img
+        className="picture"
+        alt="Rainbow houses in Kampung Pelangi, Indonesia"
+        src="https://react.dev/images/docs/scientists/5qwVYb1.jpeg"
+      />
+    </div>
+  );
+}
+```
+
+```css
+body { margin: 0; padding: 0; height: 250px; }
+
+.background {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #eee;
+}
+
+.background--active {
+  background: #a6b5ff;
+}
+
+.picture {
+  width: 200px;
+  height: 200px;
+  border-radius: 10px;
+  border: 5px solid transparent;
+}
+
+.picture--active {
+  border: 5px solid #a6b5ff;
+}
+```
+
+<details>
+<summary><b>풀이 보기</b></summary>
+
+이 컴포넌트는 두 시각 상태를 가집니다 — 이미지가 활성일 때, 그리고 비활성일 때입니다.
+
+- 이미지가 활성일 때: CSS 클래스는 `background`와 `picture picture--active`.
+- 이미지가 비활성일 때: CSS 클래스는 `background background--active`와 `picture`.
+
+이미지가 활성인지 기억하기 위해서는 *boolean 상태 변수 하나*면 충분합니다. 원래 과제는 CSS 클래스를 추가하거나 제거하는 것이었습니다. 그러나 React에서는 UI 요소를 *조작*하지 않고, *어떤 모습을 원하는지*를 기술해야 합니다. 따라서 *현재 상태*에 따라 두 CSS 클래스를 *계산*해야 합니다. 또한 이미지를 클릭한 것이 배경 클릭으로 *전파되지 않도록* [전파를 멈춰야](https://react.dev/learn/responding-to-events#stopping-propagation) 합니다.
+
+이미지를 클릭하고 그 바깥을 클릭해서 이 버전이 작동하는지 확인하세요.
+
+```js
+import { useState } from 'react';
+
+export default function Picture() {
+  const [isActive, setIsActive] = useState(false);
+
+  let backgroundClassName = 'background';
+  let pictureClassName = 'picture';
+  if (isActive) {
+    pictureClassName += ' picture--active';
+  } else {
+    backgroundClassName += ' background--active';
+  }
+
+  return (
+    <div
+      className={backgroundClassName}
+      onClick={() => setIsActive(false)}
+    >
+      <img
+        onClick={e => {
+          e.stopPropagation();
+          setIsActive(true);
+        }}
+        className={pictureClassName}
+        alt="Rainbow houses in Kampung Pelangi, Indonesia"
+        src="https://react.dev/images/docs/scientists/5qwVYb1.jpeg"
+      />
+    </div>
+  );
+}
+```
+
+또는, 두 개의 *별도 JSX 덩어리*를 반환할 수도 있습니다.
+
+```js
+import { useState } from 'react';
+
+export default function Picture() {
+  const [isActive, setIsActive] = useState(false);
+  if (isActive) {
+    return (
+      <div
+        className="background"
+        onClick={() => setIsActive(false)}
+      >
+        <img
+          className="picture picture--active"
+          alt="Rainbow houses in Kampung Pelangi, Indonesia"
+          src="https://react.dev/images/docs/scientists/5qwVYb1.jpeg"
+          onClick={e => e.stopPropagation()}
+        />
+      </div>
+    );
+  }
+  return (
+    <div className="background background--active">
+      <img
+        className="picture"
+        alt="Rainbow houses in Kampung Pelangi, Indonesia"
+        src="https://react.dev/images/docs/scientists/5qwVYb1.jpeg"
+        onClick={() => setIsActive(true)}
+      />
+    </div>
+  );
+}
+```
+
+기억할 점: 두 개의 서로 다른 JSX 덩어리가 *같은 트리*를 기술한다면, 그 중첩 구조(첫 `<div>` → 첫 `<img>`)가 일치해야 합니다. 그렇지 않으면 `isActive`를 토글할 때 그 아래 트리 *전체가 다시 만들어지고* [상태가 초기화](https://react.dev/learn/preserving-and-resetting-state)됩니다. 이 때문에, 두 경우 모두에서 비슷한 JSX 트리를 반환한다면, *하나의 JSX*로 작성하는 것이 더 좋습니다.
+
+</details>
+
+### 문제 2 — 프로필 편집기
+
+다음은 plain JavaScript와 DOM으로 구현된 작은 폼입니다. 어떻게 동작하는지 가지고 놀아보세요.
+
+```js
+// src/index.js
+function handleFormSubmit(e) {
+  e.preventDefault();
+  if (editButton.textContent === 'Edit Profile') {
+    editButton.textContent = 'Save Profile';
+    hide(firstNameText);
+    hide(lastNameText);
+    show(firstNameInput);
+    show(lastNameInput);
+  } else {
+    editButton.textContent = 'Edit Profile';
+    hide(firstNameInput);
+    hide(lastNameInput);
+    show(firstNameText);
+    show(lastNameText);
+  }
+}
+
+function handleFirstNameChange() {
+  firstNameText.textContent = firstNameInput.value;
+  helloText.textContent = (
+    'Hello ' +
+    firstNameInput.value + ' ' +
+    lastNameInput.value + '!'
+  );
+}
+
+function handleLastNameChange() {
+  lastNameText.textContent = lastNameInput.value;
+  helloText.textContent = (
+    'Hello ' +
+    firstNameInput.value + ' ' +
+    lastNameInput.value + '!'
+  );
+}
+
+function hide(el) {
+  el.style.display = 'none';
+}
+
+function show(el) {
+  el.style.display = '';
+}
+
+let form = document.getElementById('form');
+let editButton = document.getElementById('editButton');
+let firstNameInput = document.getElementById('firstNameInput');
+let firstNameText = document.getElementById('firstNameText');
+let lastNameInput = document.getElementById('lastNameInput');
+let lastNameText = document.getElementById('lastNameText');
+let helloText = document.getElementById('helloText');
+form.onsubmit = handleFormSubmit;
+firstNameInput.oninput = handleFirstNameChange;
+lastNameInput.oninput = handleLastNameChange;
+```
+
+```html
+<!-- public/index.html -->
+<form id="form">
+  <label>
+    First name:
+    <b id="firstNameText">Jane</b>
+    <input
+      id="firstNameInput"
+      value="Jane"
+      style="display: none">
+  </label>
+  <label>
+    Last name:
+    <b id="lastNameText">Jacobs</b>
+    <input
+      id="lastNameInput"
+      value="Jacobs"
+      style="display: none">
+  </label>
+  <button type="submit" id="editButton">Edit Profile</button>
+  <p><i id="helloText">Hello, Jane Jacobs!</i></p>
+</form>
+```
+
+이 폼은 *두 모드*를 오갑니다. 편집 모드에서는 input이 보이고, 보기 모드에서는 결과만 보입니다. 버튼 라벨은 모드에 따라 "Edit"과 "Save"로 바뀝니다. input을 바꾸면 아래의 환영 메시지가 *실시간*으로 업데이트됩니다.
+
+여러분의 과제는 이를 React로 다시 구현하는 것입니다. 편의를 위해 마크업은 이미 JSX로 변환되어 있지만, 원본처럼 input을 *보이거나 숨기게* 만들어야 합니다.
+
+아래 텍스트도 *함께 업데이트*되도록 만드세요!
+
+```js
+export default function EditProfile() {
+  return (
+    <form>
+      <label>
+        First name:{' '}
+        <b>Jane</b>
+        <input />
+      </label>
+      <label>
+        Last name:{' '}
+        <b>Jacobs</b>
+        <input />
+      </label>
+      <button type="submit">
+        Edit Profile
+      </button>
+      <p><i>Hello, Jane Jacobs!</i></p>
+    </form>
+  );
+}
+```
+
+<details>
+<summary><b>풀이 보기</b></summary>
+
+input 값을 담을 두 상태 변수가 필요합니다 — `firstName`과 `lastName`. 또 input을 보여줄지 말지를 담을 `isEditing` 상태 변수도 필요합니다. `fullName` 변수는 *필요하지 않습니다* — fullName은 항상 `firstName`과 `lastName`으로부터 계산할 수 있기 때문입니다.
+
+마지막으로, [조건부 렌더링](https://react.dev/learn/conditional-rendering)을 사용해 `isEditing`에 따라 input을 *보이거나 숨겨야* 합니다.
+
+```js
+import { useState } from 'react';
+
+export default function EditProfile() {
+  const [isEditing, setIsEditing] = useState(false);
+  const [firstName, setFirstName] = useState('Jane');
+  const [lastName, setLastName] = useState('Jacobs');
+
+  return (
+    <form onSubmit={e => {
+      e.preventDefault();
+      setIsEditing(!isEditing);
+    }}>
+      <label>
+        First name:{' '}
+        {isEditing ? (
+          <input
+            value={firstName}
+            onChange={e => {
+              setFirstName(e.target.value)
+            }}
+          />
+        ) : (
+          <b>{firstName}</b>
+        )}
+      </label>
+      <label>
+        Last name:{' '}
+        {isEditing ? (
+          <input
+            value={lastName}
+            onChange={e => {
+              setLastName(e.target.value)
+            }}
+          />
+        ) : (
+          <b>{lastName}</b>
+        )}
+      </label>
+      <button type="submit">
+        {isEditing ? 'Save' : 'Edit'} Profile
+      </button>
+      <p><i>Hello, {firstName} {lastName}!</i></p>
+    </form>
+  );
+}
+```
+
+이 풀이를 *원래 명령적 코드*와 비교해보세요. 둘은 어떻게 다른가요?
+
+</details>
+
+### 문제 3 — React 없이 명령적 풀이를 리팩토링하기
+
+다음은 이전 문제의 *원본 sandbox*로, React 없이 명령적으로 작성된 코드입니다 (위 문제 2 참조).
+
+React가 *없다고* 상상해보세요. 로직을 *덜 깨지게* 하고 React 버전과 *비슷하게* 만들도록 이 코드를 리팩토링할 수 있을까요? React에서처럼 *상태가 명시적*이라면 어떤 모습일까요?
+
+어디서부터 시작할지 막막하다면, 다음 stub에 이미 대부분의 구조가 들어 있습니다. 여기서 시작한다면, `updateDOM` 함수의 빠진 로직을 채우세요. (필요하면 원본 코드를 참고하세요.)
+
+```js
+// src/index.js
+let firstName = 'Jane';
+let lastName = 'Jacobs';
+let isEditing = false;
+
+function handleFormSubmit(e) {
+  e.preventDefault();
+  setIsEditing(!isEditing);
+}
+
+function handleFirstNameChange(e) {
+  setFirstName(e.target.value);
+}
+
+function handleLastNameChange(e) {
+  setLastName(e.target.value);
+}
+
+function setFirstName(value) {
+  firstName = value;
+  updateDOM();
+}
+
+function setLastName(value) {
+  lastName = value;
+  updateDOM();
+}
+
+function setIsEditing(value) {
+  isEditing = value;
+  updateDOM();
+}
+
+function updateDOM() {
+  if (isEditing) {
+    editButton.textContent = 'Save Profile';
+    // TODO: input을 보이고, 텍스트를 숨김
+  } else {
+    editButton.textContent = 'Edit Profile';
+    // TODO: input을 숨기고, 텍스트를 보임
+  }
+  // TODO: 텍스트 라벨 업데이트
+}
+```
+
+<details>
+<summary><b>풀이 보기</b></summary>
+
+빠진 로직은 input과 텍스트의 표시 토글, 그리고 라벨 업데이트입니다.
+
+```js
+function updateDOM() {
+  if (isEditing) {
+    editButton.textContent = 'Save Profile';
+    hide(firstNameText);
+    hide(lastNameText);
+    show(firstNameInput);
+    show(lastNameInput);
+  } else {
+    editButton.textContent = 'Edit Profile';
+    hide(firstNameInput);
+    hide(lastNameInput);
+    show(firstNameText);
+    show(lastNameText);
+  }
+  firstNameText.textContent = firstName;
+  lastNameText.textContent = lastName;
+  helloText.textContent = (
+    'Hello ' +
+    firstName + ' ' +
+    lastName + '!'
+  );
+}
+```
+
+여러분이 작성한 `updateDOM` 함수는, 상태를 설정할 때 *React가 내부에서 무엇을 하는지*를 보여줍니다. (다만 React는 *이전과 비교해 변하지 않은 속성*에 대해서는 DOM을 건드리지 않습니다.)
+
+</details>
+
+---
+
+> 🇬🇧 *원문 페이지*: [Reacting to Input with State — react.dev](https://react.dev/learn/reacting-to-input-with-state)
+>
+> 본 번역은 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) 하에 react.dev 커뮤니티가 작성한 원문을 한국어로 옮긴 것입니다. 정확한 표현이 필요하면 항상 원문을 참고하세요.
