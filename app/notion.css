@@ -422,6 +422,8 @@ article strong {
 
 article em {
   color: var(--notion-text);
+  font-style: normal;
+  font-weight: 650;
 }
 
 article a:not(.subheading-anchor) {

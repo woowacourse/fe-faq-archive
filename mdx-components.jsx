@@ -13,10 +13,12 @@ const ILLUSTRATION = {
   idea: '/heading-illustrations/idea.png',
   improve: '/heading-illustrations/improve.png',
   learning: '/heading-illustrations/learning.png',
+  pr: '/heading-illustrations/pr.png',
   question: '/heading-illustrations/question.png',
   reading: '/heading-illustrations/reading.png',
   review: '/heading-illustrations/review.png',
   search: '/heading-illustrations/search.png',
+  seniorPrGuide: '/heading-illustrations/senior-pr-guide.png',
 }
 
 const headingIllustrationRules = [
@@ -29,8 +31,16 @@ const headingIllustrationRules = [
     terms: ['추가 읽을거리', '원문에서 더 읽을거리', '더 알아볼 개념'],
   },
   {
+    src: ILLUSTRATION.pr,
+    terms: ['연관 pr'],
+  },
+  {
+    src: ILLUSTRATION.seniorPrGuide,
+    terms: ['선배 pr 읽기 가이드'],
+  },
+  {
     src: ILLUSTRATION.files,
-    terms: ['연관 pr', '매핑 표', '카테고리별 목차', '분류 표', '카드와 어떻게 연결', '페이먼츠 카드와 어떻게 연결'],
+    terms: ['매핑 표', '카테고리별 목차', '분류 표', '카드와 어떻게 연결', '페이먼츠 카드와 어떻게 연결'],
   },
   {
     src: ILLUSTRATION.check,
@@ -38,7 +48,7 @@ const headingIllustrationRules = [
   },
   {
     src: ILLUSTRATION.guide,
-    terms: ['선배 pr 읽기 가이드', '리뷰어의 피드백', '댄 아브라모브', 'kent c. dodds', 'sharing state between components'],
+    terms: ['리뷰어의 피드백', '댄 아브라모브', 'kent c. dodds', 'sharing state between components'],
   },
   {
     src: ILLUSTRATION.docs,
