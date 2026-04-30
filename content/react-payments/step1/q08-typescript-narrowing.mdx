@@ -63,9 +63,10 @@ const joined = messages.reduce((acc, m) => acc + m); // 빈 배열일 때 never 
 
 ---
 
-<Reveal>
-
 ## 선배 PR 읽기 가이드
+
+<details>
+<summary><b>선배 PR 읽기 가이드 — 펼쳐보기</b></summary>
 
 ### 선배 PR — *TypeScript 사용 PR (errormode 또는 status union)*
 [PR #211](https://github.com/woowacourse/react-payments/pull/211), [PR #189](https://github.com/woowacourse/react-payments/pull/189)
@@ -77,7 +78,7 @@ const joined = messages.reduce((acc, m) => acc + m); // 빈 배열일 때 never 
 
 **읽는 관점:** "두 PR 모두 TS로 작성. `useState<T | null>` 또는 *discriminated union*을 어떻게 사용하는지 코드를 직접 따라가세요. 또 PR #439의 `src/components/common/Input/Input.tsx:12` 인라인에서 *React.InputHTMLAttributes 타입 확장*에 대한 리뷰가 있는데, 이는 *공통 input의 타입을 어떻게 넓히고 좁히는가*에 대한 단서입니다."
 
-</Reveal>
+</details>
 
 ## 추가 읽을거리 — Dan Abramov · Kent C. Dodds
 

@@ -316,19 +316,16 @@ article h2 {
 
 .heading-illustration {
   display: inline-grid;
-  width: 2.2rem;
-  height: 2.2rem;
-  flex: 0 0 2.2rem;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 2rem;
   place-items: center;
-  border: 1px solid var(--notion-border-soft);
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--notion-bg) 88%, var(--notion-hover));
 }
 
 .heading-illustration img {
   display: block;
-  width: 1.9rem;
-  height: 1.9rem;
+  width: 2rem;
+  height: 2rem;
   object-fit: contain;
 }
 
@@ -862,13 +859,13 @@ article details > summary + div h3:first-child {
   }
 
   .heading-illustration {
-    width: 2rem;
-    height: 2rem;
-    flex-basis: 2rem;
+    width: 1.85rem;
+    height: 1.85rem;
+    flex-basis: 1.85rem;
   }
 
   .heading-illustration img {
-    width: 1.72rem;
-    height: 1.72rem;
+    width: 1.85rem;
+    height: 1.85rem;
   }
 }
