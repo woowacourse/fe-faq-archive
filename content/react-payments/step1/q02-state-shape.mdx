@@ -71,17 +71,17 @@ React 공식문서 [Choosing the State Structure](https://react.dev/learn/choosi
 <summary><b>선배 PR 읽기 가이드 — 펼쳐보기</b></summary>
 
 ### 선배 PR — *각 필드를 개별 state로 분리한 패턴*
-[PR #106](https://github.com/woowacourse/react-payments/pull/106) · [인라인 리뷰 모음 →](https://github.com/woowacourse/react-payments/pull/106/files)
+[PR #106](https://github.com/woowacourse/react-payments/pull/106) · [인라인 리뷰 모음 →](https://github.com/woowacourse/react-payments/pull/106#pullrequestreview-958533640)
 
 **읽는 관점:** "카드번호·만료일·CVC가 개별 `useState`로 흩어진 부분과 한 번에 갱신되는 부분을 비교하세요. 리뷰에서는 같이 변하는 값인지가 주요 기준으로 등장합니다."
 
 ### 선배 PR — *객체 하나로 묶은 패턴*
-[PR #22](https://github.com/woowacourse/react-payments/pull/22) · [인라인 리뷰 모음 →](https://github.com/woowacourse/react-payments/pull/22/files)
+[PR #22](https://github.com/woowacourse/react-payments/pull/22) · [인라인 리뷰 모음 →](https://github.com/woowacourse/react-payments/pull/22#pullrequestreview-650389891)
 
 **읽는 관점:** "`cardInfo`, `cardData`, `formData`처럼 객체로 묶은 상태의 setter를 보세요. 부분 업데이트 반복이 어디에서 생기고, 필드 이름 문자열이 어떤 위험을 만드는지 찾으면 좋습니다."
 
 ### 선배 PR — *배열 + index 패턴*
-[PR #433](https://github.com/woowacourse/react-payments/pull/433) · [인라인 리뷰 모음 →](https://github.com/woowacourse/react-payments/pull/433/files)
+[PR #433](https://github.com/woowacourse/react-payments/pull/433) · [인라인 리뷰 모음 →](https://github.com/woowacourse/react-payments/pull/433#pullrequestreview-2778091044)
 
 **읽는 관점:** "배열/index로 카드번호나 비밀번호를 다루는 코드에서 index가 도메인 의미를 대신하는 지점을 보세요. 순서 기반 접근이 읽기 쉬운지, 실수하기 쉬운지가 읽는 포인트입니다."
 

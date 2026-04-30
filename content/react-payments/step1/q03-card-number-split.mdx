@@ -70,12 +70,12 @@ React 공식문서 [Reacting to Input with State](https://react.dev/learn/reacti
 <summary><b>선배 PR 읽기 가이드 — 펼쳐보기</b></summary>
 
 ### 선배 PR — *단일 문자열 + UI 분할 패턴*
-[PR #9](https://github.com/woowacourse/react-payments/pull/9) · [인라인 리뷰 모음 →](https://github.com/woowacourse/react-payments/pull/9/files)
+[PR #9](https://github.com/woowacourse/react-payments/pull/9) · [인라인 리뷰 모음 →](https://github.com/woowacourse/react-payments/pull/9#pullrequestreview-647136910)
 
 **읽는 관점:** "`cardNumber`를 하나의 값으로 보고 화면에서만 4칸으로 나누는지 확인하세요. 리뷰에서 데이터의 단위와 UI 입력칸의 단위를 구분하는 표현을 찾아보면 좋습니다."
 
 ### 선배 PR — *배열 4개로 분리한 패턴*
-[PR #430](https://github.com/woowacourse/react-payments/pull/430) · [인라인 리뷰 모음 →](https://github.com/woowacourse/react-payments/pull/430/files)
+[PR #430](https://github.com/woowacourse/react-payments/pull/430) · [인라인 리뷰 모음 →](https://github.com/woowacourse/react-payments/pull/430#pullrequestreview-2778017454)
 
 **읽는 관점:** "네 개 input의 `maxLength`, ref, focus 이동 코드가 검증 로직과 어떻게 묶이는지 보세요. 분리 state가 편해지는 지점과 프리뷰 조합이 복잡해지는 지점을 같이 비교하세요."
 
@@ -88,7 +88,7 @@ React 공식문서 [Reacting to Input with State](https://react.dev/learn/reacti
 
 ### Don't Sync State. Derive It!
 - 원문: [kentcdodds.com/blog/dont-sync-state-derive-it](https://kentcdodds.com/blog/dont-sync-state-derive-it)
-- 한 줄 요약: *4분할이 UI 표현일 뿐*이라면, 4개의 state를 *동기화*할 게 아니라 *1개 state에서 파생*시켜야 한다. 클라우디·해니의 직관과 같은 방향이다.
+- 한 줄 요약: 글의 직접 예시는 *tic-tac-toe의 winner/status*나 *form의 warning message*처럼 *명확한 파생값*이다. 같은 정신을 카드번호 4분할에 한 단계 옮겨 적용하면 — *4분할 UI가 단지 표현*이라면 4개를 *동기화*하지 말고 *1개의 source(또는 그 반대)에서 파생*시키는 쪽이 동기화 비용을 없애 준다. 클라우디·해니의 직관과 같은 방향.
 
 ### useState lazy initialization and function updates
 - 원문: [kentcdodds.com/blog/use-state-lazy-initialization-and-function-updates](https://kentcdodds.com/blog/use-state-lazy-initialization-and-function-updates)
