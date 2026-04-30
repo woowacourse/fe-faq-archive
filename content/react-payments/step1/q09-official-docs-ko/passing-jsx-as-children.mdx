@@ -14,15 +14,15 @@ title: 'Passing JSX as children (요약)'
 
 ## 한 문장으로 요약하면
 
-**컴포넌트는 자기 자식이 무엇인지 *미리 몰라도* 된다.** `children`을 *비어 있는 자리*처럼 두면, 부모가 그 자리에 무엇이든 채워 넣을 수 있다.
+**JSX 태그 안에 콘텐츠를 중첩하면, 부모 컴포넌트는 그 콘텐츠를 `children` prop으로 받는다.** `children`을 *비어 있는 자리*처럼 비워 두면, 부모가 그 자리에 무엇이든 채울 수 있다.
 
 원문 핵심 한 줄:
 
-> *Some components don't know their children ahead of time.*
+> *When you nest content inside a JSX tag, the parent component will receive that content in a prop called `children`.*
 
 번역:
 
-> 어떤 컴포넌트는 자기 자식이 무엇이 될지 *미리 알지 못합니다*.
+> JSX 태그 안에 콘텐츠를 중첩하면, 부모 컴포넌트는 그 콘텐츠를 `children`이라는 prop으로 받습니다.
 
 ---
 

@@ -61,7 +61,7 @@ React 공식문서 [Choosing the State Structure](https://react.dev/learn/choosi
 > 4. **Avoid duplication in state.** When the same data is duplicated between multiple state variables, or within nested objects, it is difficult to keep them in sync. Reduce duplication when you can.
 > 5. **Avoid deeply nested state.** Deeply hierarchical state is not very convenient to update. When possible, prefer to keep state flat.
 
-핵심: *"카드 번호와 유효기간이 항상 함께 바뀌나?"* — 답이 **No**라면 *그룹화하지 마라*. 이 원칙은 라바·도넛·아지의 고민에 직접적인 결정 기준을 준다.
+핵심: *"카드 번호와 유효기간이 항상 함께 바뀌나?"* — 답이 **No**라면 *한 state로 묶을 이유가 약하다*. 이 원칙은 라바·도넛·아지의 고민에 적용해볼 수 있는 결정 기준이다.
 
 ---
 

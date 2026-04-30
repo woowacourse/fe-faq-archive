@@ -58,7 +58,7 @@ React 공식문서 [Reacting to Input with State](https://react.dev/learn/reacti
 > 4. **Remove** any non-essential state variables.
 > 5. **Connect** the event handlers to set the state.
 
-특히 4단계 — *"Avoid duplication in content. If you can calculate something from the component's props or its existing state during rendering, you don't need state for it."* — 가 클라우디·해니 페어의 고민과 직접 만난다. *4분할은 UI 표현일 뿐 데이터의 본질은 1개의 문자열*이라면, 4분할은 *파생*이고 *상태로 둘 필요가 없다*.
+특히 4단계의 *"필수적이지 않은 state를 제거한다"* 는 기준이 클라우디·해니 페어의 고민과 직접 만난다. 여기에 [Choosing the State Structure](https://react.dev/learn/choosing-the-state-structure#avoid-redundant-state)의 *"렌더링 중 기존 props/state로 계산할 수 있으면 state에 두지 않는다"* 는 원칙을 함께 적용해볼 수 있다. *4분할은 UI 표현일 뿐 데이터의 본질은 1개의 문자열*이라면, 4분할은 *파생*이고 *상태로 둘 필요가 없다*.
 
 > 이 카드는 Q2와 함께 읽으면 좋다. Q2가 *"여러 종류의 상태를 묶을까"* 를 묻는다면, Q3은 *"같은 종류의 상태를 UI 단위에 맞춰 나눌까"* 를 묻는다.
 

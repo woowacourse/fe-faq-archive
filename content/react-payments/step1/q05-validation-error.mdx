@@ -50,9 +50,9 @@ import { Reveal } from '../../../components/Reveal'
 
 ## 공식문서 단서 — *상태로 표현하는 사고*
 
-React 공식문서 [Reacting to Input with State](https://react.dev/learn/reacting-to-input-with-state) ([한글 번역](/react-payments/step1/q09-official-docs-ko/reacting-to-input-with-state))에서:
+React 공식문서 [Reacting to Input with State](https://react.dev/learn/reacting-to-input-with-state) ([한글 번역](/react-payments/step1/q09-official-docs-ko/reacting-to-input-with-state)) *Recap*에서:
 
-> *Thinking about a UI declaratively means describing the UI for each visual state rather than micromanaging the UI in response to user input.*
+> *Declarative programming means describing the UI for each visual state rather than micromanaging the UI (imperative).*
 
 에러도 *시각 상태(visual state)*다. *"이 input이 *유효한지*는 무엇으로 결정되는가"*가 결정 기준 — 그 결정에 필요한 모든 데이터가 *어디에 모여 있는지*가 검증 로직의 자연스러운 자리다.
 
@@ -89,7 +89,7 @@ React 공식문서 [Reacting to Input with State](https://react.dev/learn/reacti
 
 ### Kent C. Dodds — Don't Sync State. Derive It!
 - 원문: [kentcdodds.com/blog/dont-sync-state-derive-it](https://kentcdodds.com/blog/dont-sync-state-derive-it)
-- 한 줄 요약: *에러 메시지를 별도 state로 두고 동기화*하는 대신, 입력값으로부터 *파생*시켜라. 윤돌·아지 페어의 *"에러 책임을 어디서 관리할지"* 질문에 직접 답이 된다.
+- 한 줄 요약: *에러 메시지를 별도 state로 두고 동기화*하는 대신, 입력값으로부터 *파생*시킬 수 있는지 먼저 보라. 윤돌·아지 페어의 *"에러 책임을 어디서 관리할지"* 질문에 적용해볼 수 있는 기준이다.
 
 ### Dan Abramov — Before You memo()
 - 원문: [overreacted.io/before-you-memo](https://overreacted.io/before-you-memo/)
