@@ -50,7 +50,7 @@ React 공식문서 [Reacting to Input with State](https://react.dev/learn/reacti
 
 에러도 *시각 상태(visual state)*다. *"이 input이 *유효한지*는 무엇으로 결정되는가"*가 결정 기준 — 그 결정에 필요한 모든 데이터가 *어디에 모여 있는지*가 검증 로직의 자연스러운 자리다.
 
-[You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect) ([한글 번역](/react-payments/step1/q09-official-docs-ko#you-might-not-need-an-effect))는 한 발 더 — *"렌더링 도중 props/state로부터 계산할 수 있는 값은 useState에 두지 마라"* — 즉 **에러 메시지는 종종 *상태가 아니라 파생값*이다.** `state.cvc`로부터 *지금 유효한가*가 매번 계산되어 표시될 수 있다면, *에러 상태*라는 별도 state는 redundant.
+[You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect) ([한글 번역](/react-payments/step1/q09-official-docs-ko/you-might-not-need-an-effect))는 한 발 더 — *"렌더링 도중 props/state로부터 계산할 수 있는 값은 useState에 두지 마라"* — 즉 **에러 메시지는 종종 *상태가 아니라 파생값*이다.** `state.cvc`로부터 *지금 유효한가*가 매번 계산되어 표시될 수 있다면, *에러 상태*라는 별도 state는 redundant.
 
 ## 추가 읽을거리 — Kent C. Dodds · Dan Abramov
 

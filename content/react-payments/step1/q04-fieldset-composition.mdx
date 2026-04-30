@@ -44,13 +44,13 @@ function InputItem({ children }: PropsWithChildren) {
 
 ## 공식문서 단서 — *children으로 합성하기*
 
-React 공식문서 [Passing JSX as children](https://react.dev/learn/passing-props-to-a-component#passing-jsx-as-children) ([한글 번역](/react-payments/step1/q09-official-docs-ko#passing-jsx-as-children-composition))이 합성의 기초를 보여준다:
+React 공식문서 [Passing JSX as children](https://react.dev/learn/passing-props-to-a-component#passing-jsx-as-children) ([한글 번역](/react-payments/step1/q09-official-docs-ko/passing-jsx-as-children))이 합성의 기초를 보여준다:
 
 > *Some components don't know their children ahead of time. ... Components that use children as a "hole" in their JSX get filled with anything the parent passes. This is most often used for layouts, modals, and similar wrappers.*
 
 페이먼츠에서 fieldset은 *시각적 묶음(레이블 + 입력 영역)*이라는 *구조 역할*만 가질 수 있다. 그 안에 들어가는 input의 종류·검증·자동 이동이 다르다면, *합성의 단위*는 fieldset이 아니라 *각 도메인 영역*일 수 있다.
 
-추가로 [You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect) ([한글 번역](/react-payments/step1/q09-official-docs-ko#you-might-not-need-an-effect))와 짝지어 — *"코드 재사용을 원한다면, custom hook으로 추출한다"* — Q1·Q2에서 본 AHA 원칙(*먼저 1단계 스타일로 완성한 뒤 중복을 본 뒤 추출*)이 컴포넌트 추출에도 그대로 적용된다. **공통 컴포넌트는 중복을 *본 뒤* 만든다.**
+추가로 [You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect) ([한글 번역](/react-payments/step1/q09-official-docs-ko/you-might-not-need-an-effect))와 짝지어 — *"코드 재사용을 원한다면, custom hook으로 추출한다"* — Q1·Q2에서 본 AHA 원칙(*먼저 1단계 스타일로 완성한 뒤 중복을 본 뒤 추출*)이 컴포넌트 추출에도 그대로 적용된다. **공통 컴포넌트는 중복을 *본 뒤* 만든다.**
 
 ## 추가 읽을거리 — Kent C. Dodds · Dan Abramov
 

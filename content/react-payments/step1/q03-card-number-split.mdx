@@ -54,39 +54,39 @@ React 공식문서 [Reacting to Input with State](https://react.dev/learn/reacti
 
 특히 4단계 — *"Avoid duplication in content. If you can calculate something from the component's props or its existing state during rendering, you don't need state for it."* — 가 클라우디·해니 페어의 고민과 직접 만난다. *4분할은 UI 표현일 뿐 데이터의 본질은 1개의 문자열*이라면, 4분할은 *파생*이고 *상태로 둘 필요가 없다*.
 
-> 이 카드는 Q2와 짝이다. Q2가 *"여러 종류의 상태를 묶을까"* 였다면, Q3은 *"같은 종류의 상태를 어떻게 분해할까"* 다.
+> 이 카드는 Q2와 함께 읽으면 좋다. Q2가 *"여러 종류의 상태를 묶을까"* 를 묻는다면, Q3은 *"같은 종류의 상태를 UI 단위에 맞춰 나눌까"* 를 묻는다.
 
 ## 추가 읽을거리 — Kent C. Dodds
 
 ### Don't Sync State. Derive It!
 - 원문: [kentcdodds.com/blog/dont-sync-state-derive-it](https://kentcdodds.com/blog/dont-sync-state-derive-it)
-- 한 줄 요약: *4분할이 UI 표현일 뿐*이라면, 4개의 state를 *동기화*할 게 아니라 *1개 state에서 파생*시켜야 한다. 클라우디·해니의 직관과 정확히 같은 결.
+- 한 줄 요약: *4분할이 UI 표현일 뿐*이라면, 4개의 state를 *동기화*할 게 아니라 *1개 state에서 파생*시켜야 한다. 클라우디·해니의 직관과 같은 방향이다.
 
 ### useState lazy initialization and function updates
 - 원문: [kentcdodds.com/blog/use-state-lazy-initialization-and-function-updates](https://kentcdodds.com/blog/use-state-lazy-initialization-and-function-updates)
-- 한 줄 요약: *4분할 input의 setter*가 이전 값을 참조해야 할 때, `setX(prev => ...)` 함수형 업데이트가 왜 필요한지. 자동 포커스 이동 같은 *연속된 업데이트*에서 흔히 만나는 자리.
+- 한 줄 요약: *4분할 input의 setter*가 이전 값을 참조해야 할 때, `setX(prev => ...)` 함수형 업데이트가 왜 필요한지. 자동 포커스 이동 같은 *연속된 업데이트*에서 자주 만나는 상황.
 
 ---
 
 <Reveal>
 
-## 탐색 미션
+## 선배 PR 읽기 가이드
 
 ### 선배 PR — *단일 문자열 + UI 분할 패턴*
 [PR #9](https://github.com/woowacourse/react-payments/pull/9)
 
-**찾아볼 것:** "`cardNumber`를 하나의 값으로 보고 화면에서만 4칸으로 나누는지 확인하세요. 리뷰에서 데이터의 단위와 UI 입력칸의 단위를 구분하는 표현을 찾아보면 좋습니다."
+**읽는 관점:** "`cardNumber`를 하나의 값으로 보고 화면에서만 4칸으로 나누는지 확인하세요. 리뷰에서 데이터의 단위와 UI 입력칸의 단위를 구분하는 표현을 찾아보면 좋습니다."
 
 ### 선배 PR — *배열 4개로 분리한 패턴*
 [PR #430](https://github.com/woowacourse/react-payments/pull/430)
 
-**찾아볼 것:** "네 개 input의 `maxLength`, ref, focus 이동 코드가 검증 로직과 어떻게 묶이는지 보세요. 분리 state가 편해지는 지점과 프리뷰 조합이 복잡해지는 지점을 같이 비교하세요."
+**읽는 관점:** "네 개 input의 `maxLength`, ref, focus 이동 코드가 검증 로직과 어떻게 묶이는지 보세요. 분리 state가 편해지는 지점과 프리뷰 조합이 복잡해지는 지점을 같이 비교하세요."
 
 </Reveal>
 
 ## 연관 PR 더 보기
 
-이 주제에 매핑된 1단계 PR 전체 목록입니다. 자기 가설에 가까운 PR을 골라 추가로 탐색해보세요.
+이 주제에 매핑된 1단계 PR 전체 목록입니다. 자기 가설에 가까운 PR을 골라 추가로 비교해보세요.
 
 | PR | 작성자 | 핵심 키워드 |
 |----|--------|------------|

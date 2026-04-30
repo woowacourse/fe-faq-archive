@@ -1,0 +1,89 @@
+---
+title: 'You Might Not Need an Effect (요약)'
+---
+
+# You Might Not Need an Effect — 페이먼츠 코치 요약
+
+> 원문: [react.dev/learn/you-might-not-need-an-effect](https://react.dev/learn/you-might-not-need-an-effect)
+>
+> 카드: [Q5. 검증과 에러 책임](/react-payments/step1/q05-validation-error), [Q6. 카드 브랜드](/react-payments/step1/q06-card-brand-domain)
+>
+> 이 페이지는 *전체 번역이 아닌 코치의 요약 가이드*입니다. 원문은 매우 길고 다양한 사례를 다루므로, 페이먼츠 1단계 학습 자리와 직접 만나는 부분만 추렸습니다. 정확한 표현이나 다른 사례가 필요하면 항상 [원문](https://react.dev/learn/you-might-not-need-an-effect)을 함께 보세요.
+
+---
+
+## 한 문장으로 요약하면
+
+**`useEffect`가 필요한 자리는 생각보다 적다.** Effect는 *React 외부 시스템과의 동기화*에만 필요하고, *컴포넌트 내부의 데이터 흐름*에는 대부분 필요 없다.
+
+원문의 핵심 한 줄 인용:
+
+> *Effects are typically used to "step out" of your React code and synchronize with some external system.*
+
+번역:
+
+> Effect는 보통 React 코드를 *벗어나* 어떤 외부 시스템과 *동기화*할 때 사용합니다.
+
+---
+
+## 페이먼츠 1단계와 만나는 두 자리
+
+### 1. 파생값은 Effect가 아니다 (Q5·Q6)
+
+`firstName`과 `lastName`이 있을 때, `fullName`은 Effect로 만들 필요가 없다.
+
+```jsx
+// ❌ 안 좋은 패턴
+const [fullName, setFullName] = useState('');
+useEffect(() => {
+  setFullName(firstName + ' ' + lastName);
+}, [firstName, lastName]);
+
+// ✅ 좋은 패턴 — 렌더링 도중 계산
+const fullName = firstName + ' ' + lastName;
+```
+
+페이먼츠 1단계에 적용하면:
+
+- *에러 메시지*는 input 값으로부터 *매번 계산*할 수 있다 → Q5
+- *카드 브랜드*는 `cardNumber`로부터 *매번 식별*할 수 있다 → Q6
+
+원문 인용:
+
+> *If you can calculate something from existing props or state, [don't put it in state.](/learn/choosing-the-state-structure#avoid-redundant-state) Instead, calculate it during rendering.*
+
+번역: *기존 props나 state로부터 무언가를 계산할 수 있다면, state에 두지 마라. 대신 렌더링 도중에 계산하라.*
+
+### 2. 비싼 계산만 `useMemo`로 캐싱
+
+파생값 계산이 *정말 느릴 때*만 `useMemo`로 결과를 기억해둔다. 그러나 페이먼츠 1단계의 카드번호 식별·간단한 검증은 *충분히 빠르므로* `useMemo`가 거의 필요 없다.
+
+---
+
+## 카드와 어떻게 연결되나
+
+| 카드 | 연결 |
+|---|---|
+| [Q5. 검증과 에러 책임](/react-payments/step1/q05-validation-error) | 에러 메시지를 *별도 state*로 두고 Effect로 동기화하지 말고, *입력값으로부터 파생*시킴 |
+| [Q6. 카드 브랜드](/react-payments/step1/q06-card-brand-domain) | `cardBrand`를 *별도 state*로 두고 Effect로 동기화하지 말고, *cardNumber로부터 식별 함수*로 매번 계산 |
+
+[Choosing the State Structure 전체 번역](/react-payments/step1/q09-official-docs-ko/choosing-state-structure)의 *3번 원칙(Avoid redundant state)*과 짝지어 읽으면 한 자리에서 닫힌다.
+
+---
+
+## 원문에서 더 읽을거리
+
+원문은 다양한 *Effect 안티패턴*을 사례별로 다룹니다. 자주 만나는 자리:
+
+- 부모로부터 받은 props로 state를 *초기화*하는 자리
+- prop이 바뀌면 state를 *리셋*해야 하는 자리
+- 사용자 이벤트가 일어났을 때 *외부 함수를 호출*하는 자리 (이건 Effect가 아니라 *이벤트 핸들러*에서)
+- 부모에 데이터를 알려주는 자리 (Effect가 아니라 *상태 끌어올리기*로)
+
+각 사례의 *코드 비교 + 안티패턴 vs 좋은 패턴*은 [원문](https://react.dev/learn/you-might-not-need-an-effect)에서 직접 확인하세요.
+
+---
+
+> 🇬🇧 *원문 페이지*: [You Might Not Need an Effect — react.dev](https://react.dev/learn/you-might-not-need-an-effect)
+>
+> 인용은 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) 하에 react.dev 커뮤니티가 작성한 원문에서 짧게 옮긴 것입니다.

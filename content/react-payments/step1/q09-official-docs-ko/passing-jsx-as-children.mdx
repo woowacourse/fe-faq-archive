@@ -1,0 +1,102 @@
+---
+title: 'Passing JSX as children (요약)'
+---
+
+# Passing JSX as children — 페이먼츠 코치 요약
+
+> 원문: [react.dev/learn/passing-props-to-a-component#passing-jsx-as-children](https://react.dev/learn/passing-props-to-a-component#passing-jsx-as-children)
+>
+> 카드: [Q4. 공통 Input 컴포넌트 — 합성](/react-payments/step1/q04-fieldset-composition)
+>
+> 이 페이지는 *전체 번역이 아닌 코치의 요약 가이드*입니다. 페이먼츠 1단계의 *공통 컴포넌트 합성* 학습 자리에 직접 만나는 부분만 추렸습니다. 정확한 표현이 필요하면 항상 [원문](https://react.dev/learn/passing-props-to-a-component)을 함께 보세요.
+
+---
+
+## 한 문장으로 요약하면
+
+**컴포넌트는 자기 자식이 무엇인지 *미리 몰라도* 된다.** `children`을 *비어 있는 자리*처럼 두면, 부모가 그 자리에 무엇이든 채워 넣을 수 있다.
+
+원문 핵심 한 줄:
+
+> *Some components don't know their children ahead of time.*
+
+번역:
+
+> 어떤 컴포넌트는 자기 자식이 무엇이 될지 *미리 알지 못합니다*.
+
+---
+
+## 페이먼츠 1단계와 만나는 자리 — Q4
+
+콘티·먼지 페어가 만든 *공통 fieldset 컴포넌트*는 정확히 이 패턴이다.
+
+```jsx
+// 부모는 이 컴포넌트의 "자식이 무엇이 될지" 미리 모른다
+function Fieldset({ label, children }) {
+  return (
+    <section>
+      <h3>{label}</h3>
+      {children}  {/* 이 자리에 부모가 무엇이든 채울 수 있다 */}
+    </section>
+  );
+}
+
+// 사용처 — 카드번호 영역
+<Fieldset label="카드 번호">
+  <Input maxLength={4} />
+  <Input maxLength={4} />
+  <Input maxLength={4} />
+  <Input maxLength={4} />
+</Fieldset>
+
+// 사용처 — CVC 영역
+<Fieldset label="CVC">
+  <Input maxLength={3} />
+</Fieldset>
+```
+
+이 패턴이 잘 맞는 자리:
+- *레이아웃·구조 역할*만 가진 컴포넌트 (감싸는 박스, 모달, 사이드바 등)
+- *자식의 종류·개수가 가변적*인 자리
+
+---
+
+## 그러나 *합성의 단위*가 fieldset이 맞는가?
+
+콘티·먼지 페어의 진짜 질문은 *"`Fieldset` 컴포넌트가 필요한가"* 였다. 이 카드의 학습 자리는 *children 패턴 자체가 아니라*, **언제 children 패턴을 쓰는 게 맞는지**다.
+
+| 결정 기준 | 신호 |
+|---|---|
+| `children`으로 가는 게 맞다 | 부모는 *자식이 어떤 종류인지 알 필요가 없다*. 시각적·구조적 감싸기만 한다 |
+| 도메인 영역별 컴포넌트가 더 맞다 | 카드번호·만료일·CVC는 *각각 검증·자동 이동·포맷이 다르다*. 한 자리에서 *다 다른 행동*을 한다면 *공통화의 가치가 적다* |
+
+> 페이먼츠 1단계에서 fieldset을 만들었는데 그 안의 input들이 *모두 다른 행동*을 한다면, 차라리 `<CardNumberInput />`, `<ExpiryInput />`, `<CvcInput />` 같이 *도메인 영역별*로 자르는 게 학습 자리에 더 가깝다.
+
+---
+
+## 카드와 어떻게 연결되나
+
+| 카드 | 연결 |
+|---|---|
+| [Q4. 공통 Input 컴포넌트](/react-payments/step1/q04-fieldset-composition) | children 패턴은 *시각적 감싸기*에 강하지만, *각자 다른 행동*을 가진 자식들의 모음에는 약하다 |
+
+[Reusing Logic with Custom Hooks 요약](/react-payments/step1/q09-official-docs-ko/reusing-logic-with-custom-hooks)과 짝지어 — *언제 컴포넌트로 빼고, 언제 훅으로 빼는가* — Q4의 결정 기준이 더 분명해진다.
+
+---
+
+## 원문에서 더 읽을거리
+
+원문은 *props로 무엇을 전달할 수 있는지* 전반을 다룹니다.
+
+- 객체·배열·함수도 props가 될 수 있음
+- *기본값(default value)* 지정
+- props로 *JSX 자체*를 전달 (이 섹션이 children)
+- props는 *불변*이라는 규칙
+
+[원문](https://react.dev/learn/passing-props-to-a-component)에서 직접 확인하세요.
+
+---
+
+> 🇬🇧 *원문 페이지*: [Passing JSX as children — react.dev](https://react.dev/learn/passing-props-to-a-component#passing-jsx-as-children)
+>
+> 인용은 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) 하에 react.dev 커뮤니티가 작성한 원문에서 짧게 옮긴 것입니다.
