@@ -2,65 +2,36 @@
 
 import { useState } from 'react'
 
-export function Reveal({ label = '탐색 미션 열기', children }) {
+export function Reveal({
+  label = '선배 PR 읽기 가이드 열기',
+  title = '선배 PR 읽기 가이드',
+  children,
+}) {
   const [open, setOpen] = useState(false)
 
   return (
-    <div style={{ marginTop: '2rem' }}>
+    <div className={open ? 'notion-reveal notion-reveal--open' : 'notion-reveal'}>
       {!open ? (
-        <button
-          onClick={() => setOpen(true)}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.6rem 1.2rem',
-            fontSize: '0.95rem',
-            fontWeight: 600,
-            color: '#fff',
-            background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-          }}
-        >
-          {label} →
+        <button className="notion-reveal__trigger" onClick={() => setOpen(true)}>
+          <span className="notion-reveal__caret" aria-hidden="true">
+            ▸
+          </span>
+          {label}
         </button>
       ) : (
         <div>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: '1rem',
-            }}
-          >
-            <span
-              style={{
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                color: '#8b5cf6',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-              }}
-            >
-              탐색 미션
+          <div className="notion-reveal__header">
+            <span className="notion-reveal__title">
+              <span className="notion-reveal__caret" aria-hidden="true">
+                ▾
+              </span>
+              {title}
             </span>
-            <button
-              onClick={() => setOpen(false)}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '0.85rem',
-                color: '#9ca3af',
-              }}
-            >
+            <button className="notion-reveal__close" onClick={() => setOpen(false)}>
               닫기
             </button>
           </div>
-          {children}
+          <div className="notion-reveal__content">{children}</div>
         </div>
       )}
     </div>

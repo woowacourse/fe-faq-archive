@@ -1,0 +1,135 @@
+---
+title: '공식문서 단서 — 한글 번역'
+---
+
+# 공식문서 단서 — 한글 번역
+
+각 카드의 공식문서 단서 섹션에서 인용한 React 공식문서를 *한글로 풀어 옮긴* 페이지입니다.
+
+> 정확한 표현이 필요하면 항상 각 섹션 상단의 원문 링크를 함께 보세요. 번역은 의도가 흐려지지 않는 선에서 자연스럽게 풀었습니다.
+
+---
+
+## Sharing State Between Components
+
+> 원문: [react.dev/learn/sharing-state-between-components](https://react.dev/learn/sharing-state-between-components)
+>
+> **전체 번역 페이지 → [Sharing State Between Components (전체 번역)](/react-payments/step1/q09-official-docs-ko/sharing-state-between-components)**
+>
+> 카드: [Q1. state는 어디서 관리하나](/react-payments/step1/q01-state-location)
+
+### 첫 단락 — *State 끌어올리기*
+
+두 컴포넌트의 상태가 *항상 함께* 바뀌어야 할 때가 있습니다. 그럴 때는 두 컴포넌트에서 상태를 *모두 제거*하고, *가장 가까운 공통 부모 컴포넌트*로 옮긴 다음, props로 다시 두 컴포넌트에 내려주세요. 이를 **상태 끌어올리기(lifting state up)** 라고 부르며, React 코드를 짜면서 가장 자주 하게 될 일 중 하나입니다.
+
+페이먼츠에서 *프리뷰 카드*가 카드번호·만료일·CVC·브랜드를 모두 *동시에* 보여주므로, 입력 컴포넌트와 프리뷰의 *공통 부모*가 어디인지가 결정의 기준이 됩니다.
+
+---
+
+## Choosing the State Structure
+
+> 원문: [react.dev/learn/choosing-the-state-structure](https://react.dev/learn/choosing-the-state-structure)
+>
+> **전체 번역 페이지 → [State 구조 선택 (전체 번역)](/react-payments/step1/q09-official-docs-ko/choosing-state-structure)** — 다섯 원칙·예제 코드·연습 문제까지 한 페이지로
+>
+> 카드: [Q1. state는 어디서 관리하나](/react-payments/step1/q01-state-location), [Q2. state 구조](/react-payments/step1/q02-state-shape), [Q6. 카드 브랜드](/react-payments/step1/q06-card-brand-domain)
+
+### 다섯 가지 원칙 (요약)
+
+1. **관련 있는 상태는 묶어라.** 두 개 이상의 상태 변수를 *항상 같이* 업데이트하고 있다면, 하나의 상태 변수로 합치는 것을 고려하세요.
+2. **상태가 서로 모순되지 않게 하라.** 여러 상태 조각이 *서로 다른 말을 할 수 있는* 구조라면, 실수가 생길 여지를 남기는 셈입니다. 그런 구조는 피하세요.
+3. **불필요한 상태는 두지 마라.** props나 다른 상태 변수로부터 *렌더링 도중에 계산할 수 있는 값*은 상태에 두지 않습니다.
+4. **중복된 상태는 두지 마라.** 같은 데이터가 여러 상태 변수에, 혹은 중첩된 객체 안에 *복제되어* 있으면 동기화가 어려워집니다. 중복은 가능한 한 줄이세요.
+5. **너무 깊게 중첩된 상태는 피하라.** 계층이 깊은 상태는 업데이트가 불편합니다. 가능하면 *평평한* 구조를 선호하세요.
+
+핵심: *"카드 번호와 유효기간이 항상 함께 바뀌나?"* — 답이 No라면 *한 state로 묶을 이유가 약하다*. 라바·도넛·아지 페어의 고민에 적용해볼 수 있는 기준입니다.
+
+또한 *3번 원칙*은 카드 브랜드 식별처럼 *카드번호로부터 계산 가능한 값*을 별도 상태로 둘지 말지의 결정 기준이 됩니다.
+
+---
+
+## Reacting to Input with State
+
+> 원문: [react.dev/learn/reacting-to-input-with-state](https://react.dev/learn/reacting-to-input-with-state)
+>
+> **전체 번역 페이지 → [Reacting to Input with State (전체 번역)](/react-payments/step1/q09-official-docs-ko/reacting-to-input-with-state)**
+>
+> 카드: [Q3. 카드번호 4영역](/react-payments/step1/q03-card-number-split), [Q5. 검증과 에러 책임](/react-payments/step1/q05-validation-error)
+
+### 선언형 사고로 옮기기 — 다섯 단계
+
+1. 컴포넌트가 가질 수 있는 *시각적 상태*를 모두 식별합니다.
+2. 그 상태 변화를 *무엇이 일으키는지* 정합니다.
+3. `useState`를 써서 상태를 *메모리에 표현*합니다.
+4. 본질적이지 않은 상태 변수는 *제거*합니다.
+5. 이벤트 핸들러를 *상태를 설정하도록* 연결합니다.
+
+### 선언형의 의미
+
+UI를 선언적으로 생각한다는 것은, *사용자 입력에 일일이 반응해 UI를 미세 조작*하는 것이 아니라, *각 시각적 상태에 대해 UI를 어떻게 보여줄지를 기술*한다는 뜻입니다.
+
+에러도 *시각 상태*입니다. 검증 결과가 *유효한지/유효하지 않은지*가 결정되는 데 필요한 모든 데이터가 *어디에 모여 있는지*가, 검증 로직이 자연스럽게 자리잡는 곳입니다. (Q5와 직결)
+
+또한 *4단계의 본질적이지 않은 상태 제거*는 클라우디·해니 페어의 고민 — *4분할은 UI 표현일 뿐 데이터 본질은 1개*라는 인식 — 과 직접 만납니다. (Q3과 직결)
+
+---
+
+## Passing JSX as children (Composition)
+
+> 원문: [react.dev/learn/passing-props-to-a-component#passing-jsx-as-children](https://react.dev/learn/passing-props-to-a-component#passing-jsx-as-children)
+>
+> **요약 페이지 → [Passing JSX as children (요약)](/react-payments/step1/q09-official-docs-ko/passing-jsx-as-children)**
+>
+> 카드: [Q4. 공통 Input 컴포넌트](/react-payments/step1/q04-fieldset-composition)
+
+### 합성의 기초
+
+JSX 태그 안에 콘텐츠를 중첩하면, 부모 컴포넌트는 그 콘텐츠를 `children`이라는 prop으로 받습니다. `children`을 *비어 있는 자리*처럼 비워 두면, 부모가 어떤 자식을 전달하든 그 자리에 채워 넣을 수 있습니다 — 레이아웃, 모달처럼 *겉을 감싸는 컴포넌트*에서 자주 쓰는 패턴입니다.
+
+페이먼츠에서 fieldset은 *시각적 묶음(레이블 + 입력 영역)* 이라는 *구조 역할*만 가질 수 있습니다. 그 안의 input 종류·검증·자동 이동이 다르다면, *합성의 단위*는 fieldset이 아니라 *각 도메인 영역*일 수 있습니다.
+
+---
+
+## You Might Not Need an Effect
+
+> 원문: [react.dev/learn/you-might-not-need-an-effect](https://react.dev/learn/you-might-not-need-an-effect)
+>
+> **요약 페이지 → [You Might Not Need an Effect (요약)](/react-payments/step1/q09-official-docs-ko/you-might-not-need-an-effect)**
+>
+> 카드: [Q5. 검증과 에러 책임](/react-payments/step1/q05-validation-error), [Q6. 카드 브랜드](/react-payments/step1/q06-card-brand-domain)
+
+### 파생값은 상태가 아니다
+
+props나 다른 상태 변수로부터 *렌더링 도중에 계산할 수 있는 정보*는, 그 컴포넌트의 상태로 두지 말아야 합니다.
+
+핵심: 에러 메시지는 *종종 상태가 아니라 파생값*입니다. `state.cvc`로부터 *지금 유효한가*를 매번 계산해 표시할 수 있다면, *에러 상태*라는 별도 state는 redundant — 즉 *없어도 됩니다*. (Q5)
+
+같은 원칙이 카드 브랜드에도 적용됩니다 — `cardNumber`로부터 식별 가능한 `cardBrand`를 *별도 상태*로 두는 것은 redundant. 단 2단계에서 *사용자가 직접 카드사를 선택*할 수 있는 요구사항이 들어오면, 이때는 *(자동 식별 ∪ 사용자 선택)* 이라는 두 입력의 해소가 필요해집니다. (Q6)
+
+### 도메인 분리의 가치
+
+카드 브랜드 *식별 규칙*은 React가 모르는 영역입니다. 페이먼츠 2단계의 카드사 식별 번호 규칙(Diners 36으로 시작 14자리, AMEX 34·37로 시작 15자리, UnionPay 622126부터 622925까지 등)은 *순수 함수*로 분리할 수 있습니다. 컴포넌트 외부의 도메인 모듈에 두면 React 16·17·18·19가 어떻게 바뀌든 영향받지 않습니다. 이게 1단계에서 *지금* 도메인 분리를 시작할 가치입니다.
+
+---
+
+## Reusing Logic with Custom Hooks (참고)
+
+> 원문: [react.dev/learn/reusing-logic-with-custom-hooks](https://react.dev/learn/reusing-logic-with-custom-hooks)
+>
+> **요약 페이지 → [Reusing Logic with Custom Hooks (요약)](/react-payments/step1/q09-official-docs-ko/reusing-logic-with-custom-hooks)**
+>
+> 카드: 페이먼츠 2단계 시작 직전 보조 자료
+
+### 커스텀 훅이 공유하는 것
+
+커스텀 훅은 컴포넌트들 사이에서 *로직*을 공유하게 해줍니다. 단, *상태가 있는 로직*을 공유할 뿐 *상태 자체*를 공유하지는 않습니다. 같은 훅을 여러 번 호출해도, 각 호출은 다른 호출들과 완전히 독립적입니다.
+
+### 훅 추출 시점
+
+같은 코드를 *여러 곳에서 반복*하고 있다는 것을 발견하면, 그것을 커스텀 훅으로 추출할 수 있습니다.
+
+페이먼츠 2단계 프로그래밍 요구사항의 *"처음부터 훅 구조를 설계하지 않는다. 먼저 1단계 스타일로 완성한 뒤 중복을 확인하고 추출한다"* 는 이 원칙과 같은 방향으로 읽을 수 있습니다. *반복을 본 뒤* 추출 — 그 반대 순서가 [Q1 카드의 PR #361](https://github.com/woowacourse/react-payments/pull/361)에서 어떤 비용을 만들었는지 직접 볼 수 있습니다.
+
+---
+
+> 원문 페이지에서 더 깊이 읽고 싶다면 각 섹션 상단의 [원문] 링크를 따라가세요. 번역이 의도를 살짝 비껴가는 부분은 다음 갱신에 반영할 수 있습니다.

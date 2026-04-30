@@ -1,0 +1,43 @@
+---
+title: '페이먼츠 1단계 FAQ 카드'
+---
+
+# 1단계 FAQ 카드
+
+8기 크루가 페이먼츠 1단계 페어 진행 중에 직접 적어 보낸 고민을 정리했습니다. 여러 페어에서 반복된 고민을 중심으로, 이 미션에서 함께 짚어볼 학습 포인트를 묶었습니다.
+
+> 12쌍 페어의 고민 원본과 그것이 8장 카드로 어떻게 묶였는지는 [8기 페어 고민 → 8장 카드 매핑](/react-payments/step1/crew-pain-points)에서 볼 수 있습니다.
+
+---
+
+## 주제 고르기
+
+내 고민과 가장 가까운 주제를 골라 카드를 열어보세요.
+
+### A. state를 어디에 두고, 어떻게 묶을까
+
+| 번호 | 주제 | 크루 고민 |
+|------|------|-------------|
+| [Q1. state 위치](/react-payments/step1/q01-state-location) | state는 어느 컴포넌트에서 관리하나 | "state 관리(제어)를 어느 컴포넌트에서 해야 할지 오래 고민했습니다" |
+| [Q2. state 구조](/react-payments/step1/q02-state-shape) | 여러 input 상태 — 묶을까 나눌까 | "비슷한 여러 상태 데이터를 하나로 만들어야 할지, 각각 만들어야 할지" |
+| [Q3. 카드번호 4영역](/react-payments/step1/q03-card-number-split) | 분할 vs 단일 | "굳이 카드 번호를 4개의 영역으로 나눠 관리해야 하는지 고민이 듭니다" |
+
+### B. 컴포넌트와 책임을 어떻게 나눌까
+
+| 번호 | 주제 | 크루 고민 |
+|------|------|-------------|
+| [Q4. 공통 Input 컴포넌트](/react-payments/step1/q04-fieldset-composition) | 공통 fieldset이 필요할까 | "공통 fieldset 컴포넌트가 필요한지 궁금합니다" |
+| [Q5. 검증과 에러 책임](/react-payments/step1/q05-validation-error) | 검증 로직과 에러 메시지 위치 | "에러 책임을 어떤 컴포넌트에서 관리할지 고민했습니다" |
+
+### C. 도메인 규칙은 어디 둘까
+
+| 번호 | 주제 | 크루 고민 |
+|------|------|-------------|
+| [Q6. 카드 브랜드](/react-payments/step1/q06-card-brand-domain) | 폼 값일까, 도메인 모델일까 | "브랜드 로직은 어디에서 알고 있는 게 맞는가" |
+
+### D. 도구 자체와 마주하기
+
+| 번호 | 주제 | 크루 고민 |
+|------|------|-------------|
+| [Q7. input 제약](/react-payments/step1/q07-input-constraints) | maxLength vs type=number | "*최대 길이 제한* vs *문자열 입력 제한* 중 선택해야 했어서…" |
+| [Q8. TypeScript 타입 좁히기](/react-payments/step1/q08-typescript-narrowing) | never 회피 | "조건부 렌더링에서 errormode 타입이 *never*로 떨어지는 문제…" |

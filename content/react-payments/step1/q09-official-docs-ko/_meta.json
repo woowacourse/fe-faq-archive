@@ -1,0 +1,9 @@
+{
+  "index": "한글 번역 모음 — 홈",
+  "sharing-state-between-components": "Sharing State Between Components (전체 번역)",
+  "choosing-state-structure": "Choosing the State Structure (전체 번역)",
+  "reacting-to-input-with-state": "Reacting to Input with State (전체 번역)",
+  "you-might-not-need-an-effect": "You Might Not Need an Effect (요약)",
+  "passing-jsx-as-children": "Passing JSX as children (요약)",
+  "reusing-logic-with-custom-hooks": "Reusing Logic with Custom Hooks (요약)"
+}
