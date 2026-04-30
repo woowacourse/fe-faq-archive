@@ -12,11 +12,11 @@ import { Reveal } from '../../../components/Reveal'
 
 ## AS-IS 코드
 
-> 🔍 **읽기 전에 — 한 번 멈춰서**
+> 🔍 **읽기 전에**
 >
-> 페어와 한 가지를 입으로 먼저 꺼내봅니다. 답이 아니라, 지금 우리 *추측*이 어디에 서 있는지 들어봅니다.
+> 두 코드는 무엇을 다르게 강제하나요?
 >
-> 두 코드가 *다르게 강제*하는 것은 무엇인가요? `type='number'`는 무엇을 *플랫폼이 잡아주고*, 무엇을 *놓치는가*요?
+> `type='number'`가 잡아주는 것과 놓치는 것은 무엇일까요?
 
 ```jsx
 // 두 패턴이 공존하는 상황 — 어느 쪽이 더 견딜까?
@@ -26,7 +26,6 @@ import { Reveal } from '../../../components/Reveal'
   type="number"
   value={cardNumber}
   onChange={handleChange}
-  // type=number는 maxLength가 무시된다
 />
 
 // (b) type="text" + maxLength + 별도 숫자 검증
