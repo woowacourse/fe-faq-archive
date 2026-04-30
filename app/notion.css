@@ -1,7 +1,7 @@
 :root {
   /* Notion light palette — warm grays, never pure black */
-  --notion-bg: #fbfbfa;
-  --notion-sidebar: #f7f6f3;
+  --notion-bg: #ffffff;
+  --notion-sidebar: #ffffff;
   --notion-surface: #ffffff;
   --notion-text: rgb(55, 53, 47);
   --notion-text-soft: rgba(55, 53, 47, 0.81);
@@ -218,7 +218,7 @@ input,
 .nextra-sidebar,
 .nextra-mobile-nav {
   background: var(--notion-sidebar) !important;
-  color: var(--notion-text-soft);
+  color: var(--notion-text);
 }
 
 .nextra-sidebar {
@@ -230,8 +230,10 @@ input,
 .nextra-mobile-nav a,
 .nextra-mobile-nav button {
   border-radius: 4px !important;
+  color: var(--notion-text) !important;
   font-size: 14px;
-  line-height: 1.4;
+  font-weight: 450;
+  line-height: 1.45;
 }
 
 .nextra-sidebar a:hover,
@@ -248,7 +250,17 @@ input,
 .nextra-mobile-nav li.active > button {
   background: var(--notion-active) !important;
   color: var(--notion-text) !important;
-  font-weight: 600;
+  font-weight: 650;
+}
+
+/* Collapsed-section parent buttons (e.g., Lotto, Movie Review) — slightly lighter to make active items stand out */
+.nextra-sidebar li:not(.active) > button[aria-expanded] {
+  color: var(--notion-text-soft) !important;
+  font-weight: 500;
+}
+
+.nextra-sidebar li:not(.active) > button[aria-expanded]:hover {
+  color: var(--notion-text) !important;
 }
 
 .nextra-sidebar-footer {

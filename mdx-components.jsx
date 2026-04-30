@@ -34,7 +34,7 @@ const headingIllustrationRules = [
   },
   {
     src: ILLUSTRATION.check,
-    terms: ['데이터 개요', '테스트', '검증', '체크', '타입', 'narrowing', '요약', 'choosing the state structure', 'state 구조의 다섯 가지 원칙'],
+    terms: ['데이터 개요', '테스트', '검증', '체크', '타입', 'narrowing', '각 state에는', 'choosing the state structure', 'state 구조의 다섯 가지 원칙'],
   },
   {
     src: ILLUSTRATION.guide,
@@ -46,7 +46,7 @@ const headingIllustrationRules = [
   },
   {
     src: ILLUSTRATION.question,
-    terms: ['크루의 질문', '크루의 고민', '스스로 진단', '연습 문제', 'reacting to input with state', '그러나', '언제'],
+    terms: ['크루의 질문', '크루의 고민', '12쌍 페어의 고민', '스스로 진단', '연습 문제', 'reacting to input with state', '그러나', '언제'],
   },
   {
     src: ILLUSTRATION.code,
@@ -66,7 +66,7 @@ const headingIllustrationRules = [
   },
   {
     src: ILLUSTRATION.idea,
-    terms: ['한 문장으로 요약하면', '해설', 'you might not need an effect', 'effect'],
+    terms: ['한 문장으로 요약하면', '해설', '요약', 'you might not need an effect', 'effect'],
   },
   {
     src: ILLUSTRATION.learning,
