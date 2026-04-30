@@ -45,6 +45,10 @@ function AddCard() {
   };
 ```
 
+> 💭 **잠깐 — 공식문서를 보기 전에**
+>
+> 페어 또는 자기 자신과 5분만 — 위 AS-IS 코드의 *결정·비용·개선 포인트*를 *입으로 먼저* 꺼내보세요. 권위 텍스트(공식문서)는 자기 추측을 *수정하는 자리*에 두지, *형성하는 자리*에 두지 않습니다.
+
 ## 공식문서 단서 — *State 구조 선택*
 
 React 공식문서 [Choosing the State Structure](https://react.dev/learn/choosing-the-state-structure) ([한글 번역](/react-payments/step1/q09-official-docs-ko/choosing-state-structure))는 다섯 원칙을 제시한다:
@@ -56,16 +60,6 @@ React 공식문서 [Choosing the State Structure](https://react.dev/learn/choosi
 > 5. **Avoid deeply nested state.** Deeply hierarchical state is not very convenient to update. When possible, prefer to keep state flat.
 
 핵심: *"카드 번호와 유효기간이 항상 함께 바뀌나?"* — 답이 **No**라면 *그룹화하지 마라*. 이 원칙은 라바·도넛·아지의 고민에 직접적인 결정 기준을 준다.
-
-## 추가 읽을거리 — Kent C. Dodds
-
-### Stop using isLoading booleans
-- 원문: [kentcdodds.com/blog/stop-using-isloading-booleans](https://kentcdodds.com/blog/stop-using-isloading-booleans)
-- 한 줄 요약: `isLoading` / `isError` / `isSuccess` 같은 boolean 여러 개를 두면 *불가능한 상태*가 생긴다. 대신 `'idle' | 'pending' | 'resolved' | 'rejected'` 같은 *단일 status 상태*로 묶어라. 공식문서 5원칙의 *2번 — 모순 회피*와 같은 기준이다.
-
-### Don't Sync State. Derive It!
-- 원문: [kentcdodds.com/blog/dont-sync-state-derive-it](https://kentcdodds.com/blog/dont-sync-state-derive-it)
-- 한 줄 요약: 두 상태를 *동기화*하려고 useEffect를 쓰는 대신, *파생값으로* 계산해라. 공식문서 5원칙의 *3번 — 불필요한 state 회피*와 짝.
 
 ---
 
@@ -89,6 +83,22 @@ React 공식문서 [Choosing the State Structure](https://react.dev/learn/choosi
 **읽는 관점:** "배열/index로 카드번호나 비밀번호를 다루는 코드에서 index가 도메인 의미를 대신하는 지점을 보세요. 순서 기반 접근이 읽기 쉬운지, 실수하기 쉬운지가 읽는 포인트입니다."
 
 </Reveal>
+
+## 추가 읽을거리 — Kent C. Dodds
+
+<details>
+<summary><b>외부 글 모음 — 펼쳐보기</b></summary>
+
+### Stop using isLoading booleans
+- 원문: [kentcdodds.com/blog/stop-using-isloading-booleans](https://kentcdodds.com/blog/stop-using-isloading-booleans)
+- 한 줄 요약: `isLoading` / `isError` / `isSuccess` 같은 boolean 여러 개를 두면 *불가능한 상태*가 생긴다. 대신 `'idle' | 'pending' | 'resolved' | 'rejected'` 같은 *단일 status 상태*로 묶어라. 공식문서 5원칙의 *2번 — 모순 회피*와 같은 기준이다.
+
+### Don't Sync State. Derive It!
+- 원문: [kentcdodds.com/blog/dont-sync-state-derive-it](https://kentcdodds.com/blog/dont-sync-state-derive-it)
+- 한 줄 요약: 두 상태를 *동기화*하려고 useEffect를 쓰는 대신, *파생값으로* 계산해라. 공식문서 5원칙의 *3번 — 불필요한 state 회피*와 짝.
+
+</details>
+
 
 ## 연관 PR 더 보기
 

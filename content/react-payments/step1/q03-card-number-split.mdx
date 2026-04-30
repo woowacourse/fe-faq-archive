@@ -42,6 +42,10 @@ const CardAdditionForm = (props) => {
     onCardNumbersChange,
 ```
 
+> 💭 **잠깐 — 공식문서를 보기 전에**
+>
+> 페어 또는 자기 자신과 5분만 — 위 AS-IS 코드의 *결정·비용·개선 포인트*를 *입으로 먼저* 꺼내보세요. 권위 텍스트(공식문서)는 자기 추측을 *수정하는 자리*에 두지, *형성하는 자리*에 두지 않습니다.
+
 ## 공식문서 단서 — *Reacting to Input with State*
 
 React 공식문서 [Reacting to Input with State](https://react.dev/learn/reacting-to-input-with-state) ([한글 번역](/react-payments/step1/q09-official-docs-ko/reacting-to-input-with-state))는 *명령형 사고*에서 *선언형 사고*로 옮겨가는 다섯 단계를 안내한다:
@@ -55,16 +59,6 @@ React 공식문서 [Reacting to Input with State](https://react.dev/learn/reacti
 특히 4단계 — *"Avoid duplication in content. If you can calculate something from the component's props or its existing state during rendering, you don't need state for it."* — 가 클라우디·해니 페어의 고민과 직접 만난다. *4분할은 UI 표현일 뿐 데이터의 본질은 1개의 문자열*이라면, 4분할은 *파생*이고 *상태로 둘 필요가 없다*.
 
 > 이 카드는 Q2와 함께 읽으면 좋다. Q2가 *"여러 종류의 상태를 묶을까"* 를 묻는다면, Q3은 *"같은 종류의 상태를 UI 단위에 맞춰 나눌까"* 를 묻는다.
-
-## 추가 읽을거리 — Kent C. Dodds
-
-### Don't Sync State. Derive It!
-- 원문: [kentcdodds.com/blog/dont-sync-state-derive-it](https://kentcdodds.com/blog/dont-sync-state-derive-it)
-- 한 줄 요약: *4분할이 UI 표현일 뿐*이라면, 4개의 state를 *동기화*할 게 아니라 *1개 state에서 파생*시켜야 한다. 클라우디·해니의 직관과 같은 방향이다.
-
-### useState lazy initialization and function updates
-- 원문: [kentcdodds.com/blog/use-state-lazy-initialization-and-function-updates](https://kentcdodds.com/blog/use-state-lazy-initialization-and-function-updates)
-- 한 줄 요약: *4분할 input의 setter*가 이전 값을 참조해야 할 때, `setX(prev => ...)` 함수형 업데이트가 왜 필요한지. 자동 포커스 이동 같은 *연속된 업데이트*에서 자주 만나는 상황.
 
 ---
 
@@ -83,6 +77,22 @@ React 공식문서 [Reacting to Input with State](https://react.dev/learn/reacti
 **읽는 관점:** "네 개 input의 `maxLength`, ref, focus 이동 코드가 검증 로직과 어떻게 묶이는지 보세요. 분리 state가 편해지는 지점과 프리뷰 조합이 복잡해지는 지점을 같이 비교하세요."
 
 </Reveal>
+
+## 추가 읽을거리 — Kent C. Dodds
+
+<details>
+<summary><b>외부 글 모음 — 펼쳐보기</b></summary>
+
+### Don't Sync State. Derive It!
+- 원문: [kentcdodds.com/blog/dont-sync-state-derive-it](https://kentcdodds.com/blog/dont-sync-state-derive-it)
+- 한 줄 요약: *4분할이 UI 표현일 뿐*이라면, 4개의 state를 *동기화*할 게 아니라 *1개 state에서 파생*시켜야 한다. 클라우디·해니의 직관과 같은 방향이다.
+
+### useState lazy initialization and function updates
+- 원문: [kentcdodds.com/blog/use-state-lazy-initialization-and-function-updates](https://kentcdodds.com/blog/use-state-lazy-initialization-and-function-updates)
+- 한 줄 요약: *4분할 input의 setter*가 이전 값을 참조해야 할 때, `setX(prev => ...)` 함수형 업데이트가 왜 필요한지. 자동 포커스 이동 같은 *연속된 업데이트*에서 자주 만나는 상황.
+
+</details>
+
 
 ## 연관 PR 더 보기
 
