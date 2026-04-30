@@ -3,47 +3,78 @@ import { useMDXComponents as getDocsMDXComponents } from 'nextra-theme-docs'
 import { Callout } from './components/Callout'
 import { Reveal } from './components/Reveal'
 
-const headingIllustrations = [
+const ILLUSTRATION = {
+  check: '/heading-illustrations/check.png',
+  code: '/heading-illustrations/code.png',
+  docs: '/heading-illustrations/docs.png',
+  error: '/heading-illustrations/error.png',
+  files: '/heading-illustrations/files.png',
+  guide: '/heading-illustrations/guide.png',
+  idea: '/heading-illustrations/idea.png',
+  improve: '/heading-illustrations/improve.png',
+  learning: '/heading-illustrations/learning.png',
+  question: '/heading-illustrations/question.png',
+  reading: '/heading-illustrations/reading.png',
+  review: '/heading-illustrations/review.png',
+  search: '/heading-illustrations/search.png',
+}
+
+const headingIllustrationRules = [
   {
-    src: '/heading-illustrations/error.png',
-    keywords: ['에러', '오류', '경고', '실패', '주의', '404', 'error'],
+    src: ILLUSTRATION.search,
+    terms: ['미션 선택', '단계 선택', '그룹 선택', '주제 고르기', '탐색 미션', '학습 흐름'],
   },
   {
-    src: '/heading-illustrations/review.png',
-    keywords: ['리뷰', '피드백', '코멘트', '토론', '대화', '상담', '선배', 'pr', 'feedback', 'review'],
+    src: ILLUSTRATION.reading,
+    terms: ['추가 읽을거리', '원문에서 더 읽을거리', '더 알아볼 개념'],
   },
   {
-    src: '/heading-illustrations/docs.png',
-    keywords: ['공식문서', '문서', '읽을거리', '자료', '부록', '단서', 'docs', 'reference'],
+    src: ILLUSTRATION.files,
+    terms: ['연관 pr', '매핑 표', '카테고리별 목차', '분류 표', '카드와 어떻게 연결', '페이먼츠 카드와 어떻게 연결'],
   },
   {
-    src: '/heading-illustrations/check.png',
-    keywords: ['테스트', '검증', '체크', '확인', '타입', '품질', 'typescript', 'narrowing'],
+    src: ILLUSTRATION.check,
+    terms: ['데이터 개요', '테스트', '검증', '체크', '타입', 'narrowing', '요약', 'choosing the state structure', 'state 구조의 다섯 가지 원칙'],
   },
   {
-    src: '/heading-illustrations/code.png',
-    keywords: [
-      'as-is',
-      '코드',
-      '구현',
-      '리팩터링',
-      '컴포넌트',
-      '상태',
-      '렌더링',
-      'hook',
-      'effect',
-      'jsx',
-      'props',
-      'state',
-    ],
+    src: ILLUSTRATION.guide,
+    terms: ['선배 pr 읽기 가이드', '리뷰어의 피드백', '댄 아브라모브', 'kent c. dodds', 'sharing state between components'],
   },
   {
-    src: '/heading-illustrations/question.png',
-    keywords: ['질문', '고민', '문제', '생각', '진단', '왜', 'pain'],
+    src: ILLUSTRATION.docs,
+    terms: ['공식문서 단서', '이 문서에서 배우게 될 것'],
   },
   {
-    src: '/heading-illustrations/learning.png',
-    keywords: ['미션', '단계', '학습', '방법', '목차', '카테고리', '개요', '선택', '시작', '데이터'],
+    src: ILLUSTRATION.question,
+    terms: ['크루의 질문', '크루의 고민', '스스로 진단', '연습 문제', 'reacting to input with state', '그러나', '언제'],
+  },
+  {
+    src: ILLUSTRATION.code,
+    terms: ['as-is 코드', '문제 코드', '선언적 ui', 'passing jsx', '페이먼츠 1단계와 연결', '예제로 보는', '5. 너무 깊게', '훅의'],
+  },
+  {
+    src: ILLUSTRATION.error,
+    terms: ['에러', '오류', '경고', '실패', '주의', '404', '모순', '2. state가 서로 모순', 'error'],
+  },
+  {
+    src: ILLUSTRATION.improve,
+    terms: ['학습 로드맵', '개선 방향', '선언형 사고', '권고', '어떻게 8장', '3. 불필요한 state', 'reusing logic'],
+  },
+  {
+    src: ILLUSTRATION.review,
+    terms: ['리뷰', '피드백', '코멘트', '토론', '대화', '상담', '4. 중복된 state', 'feedback', 'review'],
+  },
+  {
+    src: ILLUSTRATION.idea,
+    terms: ['한 문장으로 요약하면', '해설', 'you might not need an effect', 'effect'],
+  },
+  {
+    src: ILLUSTRATION.learning,
+    terms: ['들어가며', '학습 방법', '시작', '개요'],
+  },
+  {
+    src: ILLUSTRATION.files,
+    terms: ['1. 관련 있는 상태'],
   },
 ]
 
@@ -63,19 +94,23 @@ function getNodeText(node) {
   return ''
 }
 
-function getHeadingIllustration(children) {
-  const text = Children.toArray(children).map(getNodeText).join(' ').toLowerCase()
+function normalizeText(value) {
+  return value.toLowerCase().replace(/\s+/g, ' ').trim()
+}
+
+function getHeadingIllustration(children, props) {
+  const text = normalizeText(`${props.id ?? ''} ${Children.toArray(children).map(getNodeText).join(' ')}`)
 
   return (
-    headingIllustrations.find(({ keywords }) =>
-      keywords.some((keyword) => text.includes(keyword.toLowerCase())),
-    )?.src ?? '/heading-illustrations/learning.png'
+    headingIllustrationRules.find(({ terms }) =>
+      terms.some((term) => text.includes(normalizeText(term))),
+    )?.src ?? ILLUSTRATION.learning
   )
 }
 
 function createIllustratedHeading(Component) {
   return function IllustratedHeading({ children, ...props }) {
-    const illustration = getHeadingIllustration(children)
+    const illustration = getHeadingIllustration(children, props)
 
     return (
       <Component {...props}>
