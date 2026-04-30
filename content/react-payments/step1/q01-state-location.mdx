@@ -124,7 +124,7 @@ App이 카드번호·만료일·CVC 세 종류 상태를 *모두* 알고 있다.
 
 ### Kent C. Dodds — Application State Management with React
 - 원문: [kentcdodds.com/blog/application-state-management-with-react](https://kentcdodds.com/blog/application-state-management-with-react)
-- 한 줄 요약: *Local state → Context → 상태관리 라이브러리* 흐름에서, prop drilling은 먼저 *컴포넌트 합성(children)* 과 *lifting* 으로 풀고 그래도 부족할 때만 Context를 쓰라고 권한다. 지오·코브 페어의 *"3단계 이상 props는 전역?"* 질문에 *"먼저 합성·lifting을 시도하라"* 로 답이 된다.
+- 한 줄 요약: Kent는 *"React 자체가 상태 관리 라이브러리"* 라는 입장에서 위계를 제시한다 — **Local → Lifting → Composition(children prop) → Context → 외부 라이브러리**. *"Lifting State Up이 정통한 답"* 이고, prop drilling이 거슬릴 때 다음 카드는 *Context가 아니라 컴포넌트 합성*. 지오·코브 페어의 *"3단계 이상 props는 전역?"* 질문에 *"먼저 lifting과 합성을 시도하라"* 로 직접 답이 된다.
 
 ### Dan Abramov — Writing Resilient Components
 - 원문: [overreacted.io/writing-resilient-components](https://overreacted.io/writing-resilient-components/)
