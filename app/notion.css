@@ -230,10 +230,17 @@ input,
 .nextra-mobile-nav a,
 .nextra-mobile-nav button {
   border-radius: 4px !important;
-  color: var(--notion-text) !important;
+  color: #1f1f1c !important;
   font-size: 14px;
-  font-weight: 450;
+  font-weight: 500;
   line-height: 1.45;
+}
+
+.dark .nextra-sidebar a,
+.dark .nextra-sidebar button,
+.dark .nextra-mobile-nav a,
+.dark .nextra-mobile-nav button {
+  color: rgba(255, 255, 255, 0.94) !important;
 }
 
 .nextra-sidebar a:hover,
@@ -253,14 +260,22 @@ input,
   font-weight: 650;
 }
 
-/* Collapsed-section parent buttons (e.g., Lotto, Movie Review) — slightly lighter to make active items stand out */
+/* Collapsed-section parent buttons (e.g., Lotto, Movie Review) — keep readable, just one notch lighter */
 .nextra-sidebar li:not(.active) > button[aria-expanded] {
-  color: var(--notion-text-soft) !important;
+  color: #3a3a36 !important;
   font-weight: 500;
 }
 
 .nextra-sidebar li:not(.active) > button[aria-expanded]:hover {
-  color: var(--notion-text) !important;
+  color: #1f1f1c !important;
+}
+
+.dark .nextra-sidebar li:not(.active) > button[aria-expanded] {
+  color: rgba(255, 255, 255, 0.78) !important;
+}
+
+.dark .nextra-sidebar li:not(.active) > button[aria-expanded]:hover {
+  color: rgba(255, 255, 255, 0.94) !important;
 }
 
 .nextra-sidebar-footer {
