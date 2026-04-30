@@ -58,7 +58,7 @@ App이 카드번호·만료일·CVC 세 종류 상태를 *모두* 알고 있다.
 
 > *Sometimes, you want the state of two components to always change together. To do it, remove state from both of them, move it to their closest common parent, and then pass it down to them via props. This is known as **lifting state up**, and it's one of the most common things you will do writing React code.*
 
-핵심 한 줄: *상태를 자식이 공유해야 할 때, 가장 가까운 공통 부모로 옮긴다.* 페이먼츠에서는 *프리뷰 카드*가 카드번호·만료일·CVC·브랜드를 모두 *동시에* 보여주므로, 입력 컴포넌트들과 프리뷰의 *공통 부모*가 어디인지가 결정의 기준이 된다.
+핵심 한 줄: *상태를 자식이 공유해야 할 때, 가장 가까운 공통 부모로 옮긴다.* 페이먼츠에서는 *프리뷰 카드*가 카드번호·만료일·소유자명·브랜드를 *동시에* 보여주므로(CVC는 실제 카드처럼 프리뷰에 노출되지 않습니다), 입력 컴포넌트들과 프리뷰의 *공통 부모*가 어디인지가 결정의 기준이 된다. *반대로 CVC는 프리뷰가 모르는 값* — 이런 입력은 굳이 App까지 끌어올리지 않아도 되는 후보가 된다.
 
 또한 [Choosing the State Structure](https://react.dev/learn/choosing-the-state-structure)의 다섯 원칙 중 첫 번째 — *"Group related state. If you always update two or more state variables at the same time, consider merging them into a single state variable."* — 가 Q2와 직결된다.
 
