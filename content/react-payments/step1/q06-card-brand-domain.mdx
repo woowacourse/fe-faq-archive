@@ -14,6 +14,12 @@ import { Reveal } from '../../../components/Reveal'
 
 ## AS-IS 코드
 
+> 🔍 **읽기 전에 — 한 번 멈춰서**
+>
+> 페어와 한 가지를 입으로 먼저 꺼내봅니다. 답이 아니라, 지금 우리 *추측*이 어디에 서 있는지 들어봅니다.
+>
+> `cardBrand`를 *지금 바로 알고 싶다면* 어떤 정보가 필요한가요? 그 정보가 다른 state에 이미 있다면, `cardBrand`는 *상태일까요, 파생값일까요*?
+
 ```tsx
 // src/components/AddCardPage/AddCardForm/index.tsx
   const [cardBrand, setCardBrand] = useState<CardBrand>({ name: '', color: '' });
@@ -41,10 +47,6 @@ import { Reveal } from '../../../components/Reveal'
 
     if (!cardBrand) {
 ```
-
-> 💭 **잠깐 — 공식문서를 보기 전에**
->
-> 페어 또는 자기 자신과 5분만 — 위 AS-IS 코드의 *결정·비용·개선 포인트*를 *입으로 먼저* 꺼내보세요. 권위 텍스트(공식문서)는 자기 추측을 *수정하는 자리*에 두지, *형성하는 자리*에 두지 않습니다.
 
 ## 공식문서 단서 + *도메인 노트*
 

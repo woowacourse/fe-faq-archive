@@ -14,6 +14,12 @@ import { Reveal } from '../../../components/Reveal'
 
 ## AS-IS 코드
 
+> 🔍 **읽기 전에 — 한 번 멈춰서**
+>
+> 페어와 한 가지를 입으로 먼저 꺼내봅니다. 답이 아니라, 지금 우리 *추측*이 어디에 서 있는지 들어봅니다.
+>
+> `onChange` 안에서 *두 가지 일*이 일어납니다 — 값 저장과 검증. 둘이 *같이 일어나야* 하나요, *따로 일어날 수* 있나요?
+
 ```tsx
 // src/entities/cardCVCNumberInputs/CardCVCNumberInputs.tsx
   const errorMessage = getErrorMessage();
@@ -41,10 +47,6 @@ import { Reveal } from '../../../components/Reveal'
       {errorMessage ? (
         <StyledErrorMessage>{errorMessage}</StyledErrorMessage>
 ```
-
-> 💭 **잠깐 — 공식문서를 보기 전에**
->
-> 페어 또는 자기 자신과 5분만 — 위 AS-IS 코드의 *결정·비용·개선 포인트*를 *입으로 먼저* 꺼내보세요. 권위 텍스트(공식문서)는 자기 추측을 *수정하는 자리*에 두지, *형성하는 자리*에 두지 않습니다.
 
 ## 공식문서 단서 — *상태로 표현하는 사고*
 

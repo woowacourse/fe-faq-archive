@@ -14,6 +14,12 @@ import { Reveal } from '../../../components/Reveal'
 
 ## AS-IS 코드
 
+> 🔍 **읽기 전에 — 한 번 멈춰서**
+>
+> 페어와 한 가지를 입으로 먼저 꺼내봅니다. 답이 아니라, 지금 우리 *추측*이 어디에 서 있는지 들어봅니다.
+>
+> 사용자 입력은 *4개 input*에서 오는데, 이 코드는 *하나의 문자열*로 본다. 두 단위 사이의 *번역*은 어디에서 일어나고 있나요?
+
 ```tsx
 // src/components/CardAdditionForm.js
 const formatCardNumbers = (numbers) => {
@@ -41,10 +47,6 @@ const CardAdditionForm = (props) => {
     cardNumbersInputRef,
     onCardNumbersChange,
 ```
-
-> 💭 **잠깐 — 공식문서를 보기 전에**
->
-> 페어 또는 자기 자신과 5분만 — 위 AS-IS 코드의 *결정·비용·개선 포인트*를 *입으로 먼저* 꺼내보세요. 권위 텍스트(공식문서)는 자기 추측을 *수정하는 자리*에 두지, *형성하는 자리*에 두지 않습니다.
 
 ## 공식문서 단서 — *Reacting to Input with State*
 
