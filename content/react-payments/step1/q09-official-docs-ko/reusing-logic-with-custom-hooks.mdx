@@ -2,13 +2,13 @@
 title: 'Reusing Logic with Custom Hooks (요약)'
 ---
 
-# Reusing Logic with Custom Hooks — 페이먼츠 코치 요약
+# Reusing Logic with Custom Hooks — 페이먼츠 요약 가이드
 
 > 원문: [react.dev/learn/reusing-logic-with-custom-hooks](https://react.dev/learn/reusing-logic-with-custom-hooks)
 >
 > 카드: 페이먼츠 2단계 시작 직전 *AHA(Avoid Hasty Abstractions) 보조 자료*. [Q1. state 위치](/react-payments/step1/q01-state-location)의 PR #361 사례와 직접 만남.
 >
-> 이 페이지는 *전체 번역이 아닌 코치의 요약 가이드*입니다. 페이먼츠 2단계 진입 직전 학생이 *훅을 짜고 싶은 충동*을 한 박자 늦추는 데 필요한 부분만 추렸습니다. 정확한 표현이 필요하면 항상 [원문](https://react.dev/learn/reusing-logic-with-custom-hooks)을 함께 보세요.
+> 이 페이지는 *전체 번역이 아닌 요약 가이드*입니다. 페이먼츠 2단계 진입 직전 크루가 *훅으로 추출하고 싶은 마음*을 한 박자 늦추는 데 필요한 부분만 추렸습니다. 정확한 표현이 필요하면 항상 [원문](https://react.dev/learn/reusing-logic-with-custom-hooks)을 함께 보세요.
 
 ---
 
@@ -32,7 +32,7 @@ title: 'Reusing Logic with Custom Hooks (요약)'
 
 > 처음부터 훅 구조를 설계하지 않는다. 먼저 1단계 스타일로 완성한 뒤 중복을 확인하고 추출한다.
 
-이 한 줄이 React 공식 권고와 정확히 같은 자리입니다.
+이 한 줄은 React 공식 권고와 같은 방향입니다.
 
 원문 인용:
 
@@ -40,7 +40,7 @@ title: 'Reusing Logic with Custom Hooks (요약)'
 
 번역: *같은 코드를 여러 곳에서 반복하고 있는 것을 발견하면, 그것을 커스텀 훅으로 추출할 수 있습니다.*
 
-핵심 순서: **반복을 *본 뒤* 추출.** 그 *반대 순서*(훅을 먼저 짜고 그것을 어디 쓸지 고민)는 [Q1 카드의 PR #361](/react-payments/step1/q01-state-location) 자리에서 어떻게 무너지는지 직접 확인할 수 있습니다.
+핵심 순서: **반복을 *본 뒤* 추출.** 그 *반대 순서*(훅을 먼저 짜고 그것을 어디 쓸지 고민)는 [Q1 카드의 PR #361](/react-payments/step1/q01-state-location)에서 어떻게 어려워지는지 직접 확인할 수 있습니다.
 
 ---
 
@@ -58,7 +58,7 @@ title: 'Reusing Logic with Custom Hooks (요약)'
 
 | 카드 | 연결 |
 |---|---|
-| [Q1. state 위치](/react-payments/step1/q01-state-location) | PR #361 제이드의 `useInput` → `useInputs` 추상화가 *너무 일찍* 만들어진 자리. 리뷰어 zigsong이 *"처음부터 구조를 다시 생각해보라"*고 권유한 자리 |
+| [Q1. state 위치](/react-payments/step1/q01-state-location) | PR #361 제이드의 `useInput` → `useInputs` 추상화가 *너무 일찍* 만들어진 사례. 리뷰어 zigsong이 *"처음부터 구조를 다시 생각해보라"*고 권유한 지점 |
 | [Q4. 공통 Input 합성](/react-payments/step1/q04-fieldset-composition) | *컴포넌트로 추출*할지 *훅으로 추출*할지의 결정. 시각적 감싸기는 컴포넌트, *상태 있는 로직*은 훅 |
 | [Q5. 검증과 에러 책임](/react-payments/step1/q05-validation-error) | 검증 로직을 hook(useCardValidation)으로 추출하면 *상태와 핸들러*를 한 자리에 모을 수 있음. 단 *반복을 본 뒤*에 |
 
@@ -76,7 +76,7 @@ title: 'Reusing Logic with Custom Hooks (요약)'
 
 이 세 질문을 다 통과한 뒤에 추출하라.
 
-> *Avoid Hasty Abstractions* — Kent C. Dodds의 [AHA Programming](https://kentcdodds.com/blog/aha-programming)과 짝지어 읽으면 한 자리에서 닫힌다.
+> *Avoid Hasty Abstractions* — Kent C. Dodds의 [AHA Programming](https://kentcdodds.com/blog/aha-programming)과 함께 읽으면 기준이 더 분명해진다.
 
 ---
 

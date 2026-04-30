@@ -2,13 +2,13 @@
 title: 'You Might Not Need an Effect (요약)'
 ---
 
-# You Might Not Need an Effect — 페이먼츠 코치 요약
+# You Might Not Need an Effect — 페이먼츠 요약 가이드
 
 > 원문: [react.dev/learn/you-might-not-need-an-effect](https://react.dev/learn/you-might-not-need-an-effect)
 >
 > 카드: [Q5. 검증과 에러 책임](/react-payments/step1/q05-validation-error), [Q6. 카드 브랜드](/react-payments/step1/q06-card-brand-domain)
 >
-> 이 페이지는 *전체 번역이 아닌 코치의 요약 가이드*입니다. 원문은 매우 길고 다양한 사례를 다루므로, 페이먼츠 1단계 학습 자리와 직접 만나는 부분만 추렸습니다. 정확한 표현이나 다른 사례가 필요하면 항상 [원문](https://react.dev/learn/you-might-not-need-an-effect)을 함께 보세요.
+> 이 페이지는 *전체 번역이 아닌 요약 가이드*입니다. 원문은 매우 길고 다양한 사례를 다루므로, 페이먼츠 1단계 학습 포인트와 직접 연결되는 부분만 추렸습니다. 정확한 표현이나 다른 사례가 필요하면 항상 [원문](https://react.dev/learn/you-might-not-need-an-effect)을 함께 보세요.
 
 ---
 
@@ -26,7 +26,7 @@ title: 'You Might Not Need an Effect (요약)'
 
 ---
 
-## 페이먼츠 1단계와 만나는 두 자리
+## 페이먼츠 1단계와 연결되는 두 부분
 
 ### 1. 파생값은 Effect가 아니다 (Q5·Q6)
 
@@ -67,18 +67,18 @@ const fullName = firstName + ' ' + lastName;
 | [Q5. 검증과 에러 책임](/react-payments/step1/q05-validation-error) | 에러 메시지를 *별도 state*로 두고 Effect로 동기화하지 말고, *입력값으로부터 파생*시킴 |
 | [Q6. 카드 브랜드](/react-payments/step1/q06-card-brand-domain) | `cardBrand`를 *별도 state*로 두고 Effect로 동기화하지 말고, *cardNumber로부터 식별 함수*로 매번 계산 |
 
-[Choosing the State Structure 전체 번역](/react-payments/step1/q09-official-docs-ko/choosing-state-structure)의 *3번 원칙(Avoid redundant state)*과 짝지어 읽으면 한 자리에서 닫힌다.
+[Choosing the State Structure 전체 번역](/react-payments/step1/q09-official-docs-ko/choosing-state-structure)의 *3번 원칙(Avoid redundant state)*과 함께 읽으면 기준이 더 분명해진다.
 
 ---
 
 ## 원문에서 더 읽을거리
 
-원문은 다양한 *Effect 안티패턴*을 사례별로 다룹니다. 자주 만나는 자리:
+원문은 다양한 *Effect 안티패턴*을 사례별로 다룹니다. 자주 만나는 상황:
 
-- 부모로부터 받은 props로 state를 *초기화*하는 자리
-- prop이 바뀌면 state를 *리셋*해야 하는 자리
-- 사용자 이벤트가 일어났을 때 *외부 함수를 호출*하는 자리 (이건 Effect가 아니라 *이벤트 핸들러*에서)
-- 부모에 데이터를 알려주는 자리 (Effect가 아니라 *상태 끌어올리기*로)
+- 부모로부터 받은 props로 state를 *초기화*하는 상황
+- prop이 바뀌면 state를 *리셋*해야 하는 상황
+- 사용자 이벤트가 일어났을 때 *외부 함수를 호출*하는 상황 (이건 Effect가 아니라 *이벤트 핸들러*에서)
+- 부모에 데이터를 알려주는 상황 (Effect가 아니라 *상태 끌어올리기*로)
 
 각 사례의 *코드 비교 + 안티패턴 vs 좋은 패턴*은 [원문](https://react.dev/learn/you-might-not-need-an-effect)에서 직접 확인하세요.
 

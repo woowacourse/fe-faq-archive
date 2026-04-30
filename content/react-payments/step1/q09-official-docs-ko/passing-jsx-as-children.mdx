@@ -2,13 +2,13 @@
 title: 'Passing JSX as children (요약)'
 ---
 
-# Passing JSX as children — 페이먼츠 코치 요약
+# Passing JSX as children — 페이먼츠 요약 가이드
 
 > 원문: [react.dev/learn/passing-props-to-a-component#passing-jsx-as-children](https://react.dev/learn/passing-props-to-a-component#passing-jsx-as-children)
 >
 > 카드: [Q4. 공통 Input 컴포넌트 — 합성](/react-payments/step1/q04-fieldset-composition)
 >
-> 이 페이지는 *전체 번역이 아닌 코치의 요약 가이드*입니다. 페이먼츠 1단계의 *공통 컴포넌트 합성* 학습 자리에 직접 만나는 부분만 추렸습니다. 정확한 표현이 필요하면 항상 [원문](https://react.dev/learn/passing-props-to-a-component)을 함께 보세요.
+> 이 페이지는 *전체 번역이 아닌 요약 가이드*입니다. 페이먼츠 1단계의 *공통 컴포넌트 합성* 학습 포인트와 직접 연결되는 부분만 추렸습니다. 정확한 표현이 필요하면 항상 [원문](https://react.dev/learn/passing-props-to-a-component)을 함께 보세요.
 
 ---
 
@@ -26,7 +26,7 @@ title: 'Passing JSX as children (요약)'
 
 ---
 
-## 페이먼츠 1단계와 만나는 자리 — Q4
+## 페이먼츠 1단계와 연결되는 부분 — Q4
 
 콘티·먼지 페어가 만든 *공통 fieldset 컴포넌트*는 정확히 이 패턴이다.
 
@@ -63,14 +63,14 @@ function Fieldset({ label, children }) {
 
 ## 그러나 *합성의 단위*가 fieldset이 맞는가?
 
-콘티·먼지 페어의 진짜 질문은 *"`Fieldset` 컴포넌트가 필요한가"* 였다. 이 카드의 학습 자리는 *children 패턴 자체가 아니라*, **언제 children 패턴을 쓰는 게 맞는지**다.
+콘티·먼지 페어의 진짜 질문은 *"`Fieldset` 컴포넌트가 필요한가"* 였다. 이 카드의 학습 포인트는 *children 패턴 자체가 아니라*, **언제 children 패턴을 쓰는 게 맞는지**다.
 
 | 결정 기준 | 신호 |
 |---|---|
 | `children`으로 가는 게 맞다 | 부모는 *자식이 어떤 종류인지 알 필요가 없다*. 시각적·구조적 감싸기만 한다 |
-| 도메인 영역별 컴포넌트가 더 맞다 | 카드번호·만료일·CVC는 *각각 검증·자동 이동·포맷이 다르다*. 한 자리에서 *다 다른 행동*을 한다면 *공통화의 가치가 적다* |
+| 도메인 영역별 컴포넌트가 더 맞다 | 카드번호·만료일·CVC는 *각각 검증·자동 이동·포맷이 다르다*. 같은 컴포넌트 안에서 *서로 다른 행동*을 처리해야 한다면 *공통화의 가치가 적다* |
 
-> 페이먼츠 1단계에서 fieldset을 만들었는데 그 안의 input들이 *모두 다른 행동*을 한다면, 차라리 `<CardNumberInput />`, `<ExpiryInput />`, `<CvcInput />` 같이 *도메인 영역별*로 자르는 게 학습 자리에 더 가깝다.
+> 페이먼츠 1단계에서 fieldset을 만들었는데 그 안의 input들이 *모두 다른 행동*을 한다면, 차라리 `<CardNumberInput />`, `<ExpiryInput />`, `<CvcInput />` 같이 *도메인 영역별*로 나누는 편이 이 카드의 학습 포인트에 더 가깝다.
 
 ---
 
