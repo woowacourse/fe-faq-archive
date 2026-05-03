@@ -2534,3 +2534,11 @@ index 0000000000..773c1ab2c4
 +    },
 +    "node_modules/@storybook/test/node_modules/@vitest/utils": {
 +      "ve
+hook: SessionStart
+hook: SessionStart
+hook: SessionStart Completed
+hook: SessionStart Completed
+hook: UserPromptSubmit
+hook: UserPromptSubmit
+hook: UserPromptSubmit Completed
+hook: UserPromptSubmit Completed

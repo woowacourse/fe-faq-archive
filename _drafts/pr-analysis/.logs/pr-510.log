@@ -2410,3 +2410,48 @@ codex
 hook: Stop
 hook: Stop
 hook: Stop
+hook: Stop Completed
+hook: Stop Completed
+hook: Stop Completed
+2026-05-03T09:34:41.380092Z ERROR codex_core::session: failed to record rollout items: thread 019ded30-2a5b-78c1-8dcd-3422fd3bb8e6 not found
+tokens used
+74,569
+# PR #510 찰리(김상윤) (OPEN)
+
+- author: yuncic
+- url: https://github.com/woowacourse/react-payments/pull/510
+- changedFiles: 34 (+6730 -4)
+
+## 페어 고민 (PR body 핵심 발췌)
+
+- `maxLength` props를 받아 입력 길이를 제한하려 했는데, input의`type="number"`에서는 `maxLength`가 동작하지 않는 문제가 있었습니다.
+- 두 제약 중 `maxLength`를 선택하고 `type="text"`로 변경한 뒤, 숫자만 입력되도록 제한 로직을 걸었습니다.
+- 동일한 상태는 동시에 변하는 값들만 공유해야한다고 생각했기 때문에 카드 번호처럼 비슷한 역할을 하는 input이 여러 개일 때 처음엔 `cardNumber1` `cardNumber2`... 처럼 state를 따로 만들었습니다.
+- 하지만 배열 하나로 묶어서 관리하면 훨씬 깔끔하다는 걸 배웠습니다.
+- 컴포넌트는 재사용성과 의존도가 낮은게 핵심이라고 생각을 합니다.
+
+## 핵심 코드 결정/패턴 (실제 diff 발췌)
+
+### 결정 1 — 정보 없음
+**파일**: `정보 없음`
+```text
+정보 없음
+```
+
+## 리뷰어 피드백 (실제 인용)
+
+- @coderabbitai[bot] `src/components/Input/CardInfoInput.tsx:32`: "숫자 검증 조건이 느슨해서 비숫자 문자열이 통과할 수 있습니다." → 정보 없음
+- @coderabbitai[bot] `src/utils/getCVCNumberErrorMessage.ts:4`: "CVC가 숫자가 아니어도 길이 3이면 검증을 통과합니다." → 정보 없음
+- @coderabbitai[bot] `src/utils/isMonthMatch.ts:3`: "비숫자 문자열이 2자리면 월값으로 통과됩니다." → 정보 없음
+- @eastroots92 `src/components/Input/CardInfoInput.tsx:null`: "Input 컴포넌트에선 Input 제 역할에 집중하는 방향으로" → 전부 수정했습니다
+- @eastroots92 `src/App.tsx:22`: "카드 정보를 하나의 데이터로 볼 수도 있을 것 같은데" → 연관있는 값들을 묶는 방식 채택 후 판단 기준 고민
+- @eastroots92 `src/utils/isMasterCardNumber.ts:null`: "visa와 master인지 판단하는 함수를 각각 만든 이유가 있을까요?" → `getCardBrand`로 합치고 `'visa' | 'master' | null` 반환
+
+## 잠재 안티패턴 태그
+
+- [validation] : 숫자/월/CVC 검증 누락 신호
+- [input-handling] : type=number와 maxLength 충돌
+- [component-split] : Input 도메인 feature 혼재
+- [state-shape] : 카드 값 분리 vs 객체/배열 고민
+- [naming] : Style/Block/Position 이름 피드백
+- [card-brand] : 브랜드 판별 함수 분리 피드백
