@@ -2565,3 +2565,89 @@ permissions:
 hook: Stop
 hook: Stop
 hook: Stop
+hook: Stop Completed
+hook: Stop Completed
+hook: Stop Completed
+2026-05-03T09:33:34.625821Z ERROR codex_core::session: failed to record rollout items: thread 019ded2f-0a93-74a0-a643-fb4a9138ff0b not found
+tokens used
+62,544
+# PR #512 이스타(김동성) (OPEN)
+
+- author: Eastar-DS
+- url: https://github.com/woowacourse/react-payments/pull/512
+- changedFiles: 42 (+7099 -1)
+
+## 페어 고민 (PR body 핵심 발췌)
+
+- 받은 디자인 시안을 바탕으로 컴포넌트 설계부터 들어갔고, 구현을 시작하면서 조금씩 달라졌지만 결과적으로는 다시 처음 설계했던 것과 거의 똑같이 구현하게되면서 컴포넌트 설계의 중요성과 설계를 어떻게해야하는지 감을 조금 잡았습니다.
+- 에러상태는 각각의 FormField에서, 에러메세지는 InputFieldForm에서 관리하는게 좋다고 생각했습니다.
+- cvc의 상태에따라 카드 프리뷰가 변경되지 않으므로, 불필요한 리랜더링을 막기위해 cvc 상태는 paymentForm이아니라 따로 가지고 있는게 좋다고 생각했습니다.
+- 애초에 상태를 모두 배열로 관리하는 것이 좋았나?
+- InputFieldForm을 추상화 하는 과정에서 각각 다른 상태들의 타입에 따라 input의 개수를 조절하는 과정에서 제네릭을 사용했고 타입좁히기를 했어야했는데, 어떻게 타입을 좁혀야하는지 어려웠습니다.
+
+## 핵심 코드 결정/패턴 (실제 diff 발췌)
+
+### 결정 1 — 배포 워크플로우 추가
+**파일**: `.github/workflows/deploy.yml`
+```yml
+# .github/workflows/deploy.yml
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+```
+
+### 결정 2 — 기능 명세를 카드 입력 흐름 기준으로 정리
+**파일**: `README.md`
+```md
+# README.md
+## 기능 명세
+
+### 카드 프리뷰
+
+- [x] 입력한 카드 유효기간에 따라 카드 프리뷰를 실시간으로 업데이트한다.
+
+### 카드 번호 입력 및 식별
+
+- [x] 카드 번호를 입력 받는다.
+- [x] 카드 브랜드를 식별한다.
+- [x] [예외] 숫자 외의 값이 입력되는 경우
+```
+
+### 결정 3 — React 결제 앱 엔트리 구성
+**파일**: `index.html`
+```html
+# index.html
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>React Payments</title>
+  </head>
+```
+
+## 리뷰어 피드백 (실제 인용)
+
+- @coderabbitai[bot] `src/components/CardPreview/CardPreview.tsx:6`: "`storybook/theming`은 devDependency로만 존재하므로 런타임에서 실패합니다." → `@emotion/styled`로 변경 제안
+- @coderabbitai[bot] `src/components/Common/Form/FormField.tsx:60`: "블러 시 오류 문구를 유지해 주세요." → 에러 해소 시에만 메시지 삭제 제안
+- @coderabbitai[bot] `src/components/Common/InputField/InputField.tsx:25`: "포커스 시 에러 테두리가 사라집니다." → `isError`일 때 에러 border 유지 제안
+- @coderabbitai[bot] `src/components/Form/PaymentForm.tsx:84`: "폼 제출 동작을 명시해 주세요." → `preventDefault()` 또는 `div` 변경 제안
+- @coderabbitai[bot] `src/utils/validate.ts:70`: "숫자 판별이 너무 느슨합니다." → digit-only 정규식 검증 제안
+
+## 잠재 안티패턴 태그
+
+- [state-shape] : cvc만 paymentForm 밖 상태
+- [validation] : blur 시 에러 문구 삭제 신호
+- [input-handling] : Number 기반 숫자 판별
+- [styling] : invalid padding 선언
+- [card-brand] : visa/mastercard 식별 로직 존재
+- [testing] : 테스트 코드 신호 없음
