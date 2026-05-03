@@ -1,8 +1,6 @@
 #!/bin/bash
-# 25개 PR 원본 데이터를 codex로 1페이지 노트 요약 (shard 병렬 지원)
+# 25개 PR 원본 데이터를 codex로 1페이지 노트 요약 (shard 병렬 + per-PR timeout)
 # 사용: bash _drafts/run-codex-summarize.sh <shard_id> <total_shards>
-#   예: bash _drafts/run-codex-summarize.sh 0 4   # 0번째 shard (총 4개 중)
-# shard 미지정 시 전체 순차 처리
 set -u
 SHARD_ID="${1:-0}"
 TOTAL_SHARDS="${2:-1}"
@@ -11,6 +9,7 @@ RAW_DIR="_drafts/pr-raw"
 OUT_DIR="_drafts/pr-analysis"
 LOG_DIR="_drafts/pr-analysis/.logs"
 mkdir -p "$OUT_DIR" "$LOG_DIR"
+PER_PR_TIMEOUT="${PER_PR_TIMEOUT:-240}"   # 4 min hard cap
 
 if [ ! -f "$PROMPT_FILE" ]; then
   echo "no prompt file: $PROMPT_FILE" >&2
@@ -40,7 +39,7 @@ for raw in "$RAW_DIR"/pr-*.txt; do
   fi
 
   count=$((count + 1))
-  echo "[shard $SHARD_ID] [$count] codex on $base ..."
+  echo "[shard $SHARD_ID] [$count] codex on $base (timeout=${PER_PR_TIMEOUT}s) ..."
 
   COMBINED=$(cat <<EOF
 $PROMPT_BODY
@@ -52,19 +51,34 @@ $(cat "$raw")
 EOF
 )
 
-  codex exec \
-    --sandbox read-only \
-    --skip-git-repo-check \
-    --output-last-message "$out" \
-    --color never \
-    "$COMBINED" \
-    > "$log" 2>&1
+  # gtimeout(coreutils) or timeout(linux). On macOS, gtimeout via brew install coreutils
+  TIMEOUT_BIN=$(command -v gtimeout || command -v timeout || true)
+
+  if [ -n "$TIMEOUT_BIN" ]; then
+    "$TIMEOUT_BIN" "$PER_PR_TIMEOUT" codex exec \
+      --sandbox read-only \
+      --skip-git-repo-check \
+      --output-last-message "$out" \
+      --color never \
+      "$COMBINED" \
+      > "$log" 2>&1
+    rc=$?
+  else
+    codex exec \
+      --sandbox read-only \
+      --skip-git-repo-check \
+      --output-last-message "$out" \
+      --color never \
+      "$COMBINED" \
+      > "$log" 2>&1
+    rc=$?
+  fi
 
   if [ ! -s "$out" ]; then
-    echo "[shard $SHARD_ID]   [FAIL] empty output for $base, see $log"
+    echo "[shard $SHARD_ID]   [FAIL rc=$rc] empty output for $base, see $log"
   else
     size=$(wc -c < "$out")
-    echo "[shard $SHARD_ID]   -> $out ($size bytes)"
+    echo "[shard $SHARD_ID]   -> $out ($size bytes, rc=$rc)"
   fi
 done
 

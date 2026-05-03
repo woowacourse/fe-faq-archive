@@ -1,5 +1,5 @@
 Reading additional input from stdin...
-2026-05-03T09:26:48.962018Z ERROR codex_core::session: failed to load skill /Users/makerjun/.codex/skills/youtube-suggest-replies/SKILL.md: invalid YAML: found character that cannot start any token at line 2 column 14, while scanning for the next token
+2026-05-03T09:31:27.958911Z ERROR codex_core::session: failed to load skill /Users/makerjun/.codex/skills/youtube-suggest-replies/SKILL.md: invalid YAML: found character that cannot start any token at line 2 column 14, while scanning for the next token
 OpenAI Codex v0.125.0 (research preview)
 --------
 workdir: /Users/makerjun/git/woowacourse/fe-faq-archive
@@ -9,14 +9,24 @@ approval: never
 sandbox: read-only
 reasoning effort: xhigh
 reasoning summaries: none
-session id: 019ded29-6f83-78c1-904e-081441303b0c
+session id: 019ded2d-b294-77a0-a72f-7586814242b6
 --------
 user
 # Codex 프롬프트 — 8기 페이먼츠 1단계 PR 1페이지 분석 노트 생성
 
-너는 우아한테크코스 프론트엔드 코칭 자료를 만드는 분석가다. 아래 `<stdin>`에는 단일 PR의 메타데이터·리뷰 코멘트·diff 일부가 들어있다. 이를 읽고 **정확히 아래 마크다운 템플릿대로** 1페이지 노트를 작성해 stdout에 출력해라. 추가 문장이나 머리말·꼬리말 없이 템플릿만 출력한다.
+## 절대 규칙 (위반 금지)
 
-## 출력 템플릿
+1. **어떤 도구도 호출하지 마라.** web search, fetch, exec, file read 등을 절대 쓰지 마라.
+2. **추가 데이터를 찾지 마라.** 아래 `<stdin>` 입력만 가지고 답하라. 입력에 없는 정보는 "정보 없음"으로 처리.
+3. **사고 과정을 출력하지 마라.** 머리말·꼬리말·해설·"분석을 시작합니다" 같은 메타 텍스트 금지.
+4. **즉시 출력하라.** 입력을 받자마자 아래 마크다운 템플릿만 채워서 반환. 출력 시간 60초 이내가 목표.
+5. **출력은 마크다운 한 덩어리.** 코드 블록 그대로 붙여넣기 가능한 형식.
+
+## 너의 정체성
+
+너는 우아한테크코스 프론트엔드 코칭 자료를 만드는 분석가다. 입력으로 단일 PR의 메타데이터·리뷰 코멘트·diff 일부가 들어온다. 1페이지 노트로 압축한다.
+
+## 출력 템플릿 (이 구조 그대로, 그 외 어떤 텍스트도 출력 금지)
 
 ```
 # PR #{N} {닉네임(이름)} ({state})
@@ -34,10 +44,10 @@ user
 ### 결정 1 — {짧은 제목}
 **파일**: `{경로}`
 ```{lang}
-{실제 diff에서 발췌, 5~20줄. 너무 길면 ... 으로 생략. 파일 상단에 `// {경로}` 주석.}
+{실제 diff에서 발췌, 5~20줄. 너무 길면 ... 으로 생략. 파일 상단에 // {경로} 주석}
 ```
 
-(2~4개 결정만 핵심으로 선별. 보일러플레이트 제외.)
+(2~4개 결정만 핵심으로 선별. 보일러플레이트, README, storybook config는 제외하고 src/ 하위의 실제 컴포넌트/검증/타입 코드 우선.)
 
 ## 리뷰어 피드백 (실제 인용)
 
@@ -65,18 +75,17 @@ user
 - [docs] : PR body/주석 부재 또는 과다
 - [기타] : 위에 없는 경우 (구체 명기)
 
-태그를 임의로 만들지 말 것. 해당 PR에 실제 신호가 있는 항목만. 0~6개 권장.
+태그 사전 외 새 카테고리 만들지 말 것. PR에 실제 신호가 있는 항목만. 0~6개.
 ```
 
 ## 작성 규칙
 
-1. PR body에 한국어로 적힌 페어의 고민/회고 부분에서 인용을 우선한다. 기술 외 인사말·체크리스트 양식은 제외.
-2. 코드 발췌는 반드시 diff에 실제로 등장하는 라인만. 만들어내지 마라. 발췌 시 추가/삭제 prefix(+, -)는 제거하고 결과 코드만 표기.
-3. 리뷰 코멘트는 path:line 형식 그대로 인용. line 정보가 없으면 path만.
-4. 태그는 사전에 없는 새 카테고리 만들지 말 것.
-5. 분석은 사실 위주. "X가 좋다/나쁘다" 평가어 금지. 신호 자체만 기록.
+1. PR body 인용은 한국어 원문 그대로. 인사말·체크리스트 양식은 제외.
+2. 코드 발췌는 diff에 실제로 등장하는 라인만. 만들어내지 마라. +/- prefix는 제거.
+3. 코드 발췌 우선순위: src/components, src/validators, src/hooks, src/types > README/config/스토리북.
+4. 리뷰 코멘트는 path:line 형식 그대로 인용. 리뷰어 봇(coderabbitai)도 포함하되 표시.
+5. 평가어("좋다/나쁘다") 금지. 신호만 기록.
 6. 출력은 한국어. 코드 식별자는 원문 그대로.
-
 ---
 ## 입력 데이터 (PR #499)
 
@@ -2623,1013 +2632,82 @@ hook: UserPromptSubmit
 hook: UserPromptSubmit
 hook: UserPromptSubmit Completed
 hook: UserPromptSubmit Completed
-hook: PreToolUse
-hook: PreToolUse Completed
-exec
-/bin/zsh -lc "rg --files | sed -n '1,120p'" in /Users/makerjun/git/woowacourse/fe-faq-archive
- succeeded in 0ms:
-CLAUDE.md
-mdx-components.jsx
-package.json
-package-lock.json
-README.md
-theme.config.jsx
-next.config.mjs
-public/heading-illustrations/reading.png
-public/heading-illustrations/idea.png
-public/heading-illustrations/docs.png
-public/heading-illustrations/senior-pr-guide.png
-public/heading-illustrations/error.png
-public/heading-illustrations/pr.png
-public/heading-illustrations/search.png
-public/heading-illustrations/improve.png
-public/heading-illustrations/files.png
-public/heading-illustrations/review.png
-public/heading-illustrations/guide.png
-public/heading-illustrations/question.png
-public/heading-illustrations/learning.png
-public/heading-illustrations/code.png
-public/heading-illustrations/check.png
-app/notion.css
-app/not-found.jsx
-app/layout.jsx
-components/Callout.jsx
-components/Reveal.jsx
-app/[[...mdxPath]]/page.jsx
-content/_meta.json
-content/index.mdx
-content/movie-review/07-duplicated-source-of-truth.mdx
-content/movie-review/03-listener-break.mdx
-content/movie-review/06-mode-flag-state.mdx
-content/movie-review/02-error-reflattened.mdx
-content/movie-review/08-duplicated-fetch.mdx
-content/movie-review/10-fetch-without-ok.mdx
-content/movie-review/09-render-fetch-mixed.mdx
-content/movie-review/index.mdx
-content/movie-review/11-magic-numbers.mdx
-content/movie-review/05-god-handler.mdx
-content/movie-review/01-error-swallowed.mdx
-content/movie-review/04-html-injection.mdx
-content/movie-review/_meta.json
-content/react-payments/_meta.json
-content/react-payments/index.mdx
-_drafts/pr-raw/pr-510.txt
-_drafts/pr-raw/pr-505.txt
-_drafts/pr-raw/pr-511.txt
-_drafts/pr-raw/pr-498.txt
-_drafts/pr-raw/pr-507.txt
-_drafts/pr-raw/pr-513.txt
-_drafts/pr-raw/pr-512.txt
-_drafts/pr-raw/pr-506.txt
-_drafts/pr-raw/pr-499.txt
-_drafts/pr-raw/pr-502.txt
-_drafts/pr-raw/pr-516.txt
-_drafts/pr-raw/pr-517.txt
-_drafts/pr-raw/pr-515.txt
-_drafts/pr-raw/pr-501.txt
-_drafts/pr-raw/pr-500.txt
-_drafts/pr-raw/pr-514.txt
-_drafts/pr-raw/pr-519.txt
-_drafts/pr-raw/pr-524.txt
-_drafts/pr-raw/pr-518.txt
-_drafts/pr-raw/pr-523.txt
-_drafts/pr-raw/pr-522.txt
-_drafts/pr-raw/pr-497.txt
-_drafts/pr-raw/pr-520.txt
-_drafts/pr-raw/pr-509.txt
-_drafts/pr-raw/pr-521.txt
-_drafts/antipatterns-template.md
-_drafts/codex-prompt.md
-_drafts/treasure.mdx
-docs/superpowers/specs/2026-04-01-content-addition-skill-design.md
-_drafts/fetch-pr-raw.sh
-_drafts/run-codex-summarize.sh
-content/lotto/_meta.json
-content/lotto/step1/_meta.json
-content/lotto/step1/q01-capsule.mdx
-content/lotto/index.mdx
-content/lotto/step1/q07-error-handling.mdx
-content/lotto/step1/q02-class-split.mdx
-content/lotto/step1/q10-design-pattern.mdx
-content/lotto/step1/q08-magic-number.mdx
-content/lotto/step1/q06-readability.mdx
-content/lotto/step1/q09-mvc.mdx
-content/lotto/step1/q11-module-structure.mdx
-content/lotto/step1/q05-unit-test.mdx
-content/lotto/step1/index.mdx
-content/lotto/step1/q04-tdd.mdx
-content/lotto/step1/q03-srp.mdx
-content/react-payments/step1/q02-state-shape.mdx
-content/react-payments/step1/q06-card-brand-domain.mdx
-content/react-payments/step1/q10-appendix-all-prs.mdx
-content/react-payments/step1/q05-validation-error.mdx
-content/react-payments/step1/q01-state-location.mdx
-content/react-payments/step1/q08-typescript-narrowing.mdx
-content/react-payments/step1/q03-card-number-split.mdx
-content/react-payments/step1/index.mdx
-content/react-payments/step1/q04-fieldset-composition.mdx
-_drafts/pr-analysis/pr-514.md
-_drafts/pr-analysis/pr-497.md
-_drafts/pr-analysis/pr-498.md
-content/react-payments/step1/crew-pain-points.mdx
-content/react-payments/step1/_meta.json
-content/react-payments/step1/q07-input-constraints.mdx
-content/react-payments/step1/q09-official-docs-ko/reacting-to-input-with-state.mdx
-content/react-payments/step1/q09-official-docs-ko/reusing-logic-with-custom-hooks.mdx
-content/react-payments/step1/q09-official-docs-ko/passing-jsx-as-children.mdx
-content/react-payments/step1/q09-official-docs-ko/you-might-not-need-an-effect.mdx
-content/react-payments/step1/q09-official-docs-ko/sharing-state-between-components.mdx
-content/react-payments/step1/q09-official-docs-ko/index.mdx
-content/react-payments/step1/q09-official-docs-ko/_meta.json
-content/react-payments/step1/q09-official-docs-ko/choosing-state-structure.mdx
-content/lotto/step2/b3-test-strategy.mdx
-content/lotto/step2/b1-ui-test.mdx
-content/lotto/step2/a1-model-view.mdx
-content/lotto/step2/a3-domain-logic.mdx
-content/lotto/step2/index.mdx
-content/lotto/step2/b2-test-separation.mdx
+codex
+# PR #499 비비빙(이병관) (OPEN)
 
-hook: PostToolUse
-hook: PostToolUse
-hook: PostToolUse Completed
-hook: PostToolUse Completed
-hook: PreToolUse
-hook: PreToolUse
-hook: PreToolUse Completed
-hook: PreToolUse Completed
-exec
-/bin/zsh -lc 'rg -n "diff --git a/my-app/src/App.tsx|diff --git a/my-app/src/components/cardNumberSection/CardNumberSection.tsx|diff --git a/my-app/src/components/cardPreview/CardPreview.tsx|diff --git a/my-app/src/components/common/commonSection/CommonSection.tsx|diff --git a/my-app/src/utils/Validation.ts|diff --git a/my-app/src/components/expirationDateSection/ExpirationDateSection.tsx" _drafts/pr-raw/pr-499.txt' in /Users/makerjun/git/woowacourse/fe-faq-archive
- exited 1 in 0ms:
-hook: PostToolUse
-hook: PostToolUse
-exec
-/bin/zsh -lc "wc -l _drafts/pr-raw/pr-499.txt && sed -n '1,80p' _drafts/pr-raw/pr-499.txt" in /Users/makerjun/git/woowacourse/fe-faq-archive
- succeeded in 0ms:
-    2534 _drafts/pr-raw/pr-499.txt
-===== PR #499 META =====
-{
-  "additions": 8438,
-  "author": {
-    "id": "U_kgDOC-S1Xw",
-    "is_bot": false,
-    "login": "binggwa",
-    "name": ""
-  },
-  "body": "## 🎯 페이먼츠\r\n\r\n이번 미션을 통해 다음과 같은 학습 경험들을 쌓는 것을 목표로 합니다.\r\n\r\n### 1단계\r\n- 재사용 가능한 Input Component를 개발한다.\r\n- Storybook을 사용하여 컴포넌트의 다양한 상태를 시각적으로 테스트한다.\r\n- 카드 정보를 효과적으로 렌더링 하기 위한 상태 관리를 경험한다.\r\n\r\n### 2단계\r\n- 다양한 Form 구성 요소들간의 상태를 효율적으로 관리한다.\r\n- hooks API를 이용하여 상태 관리 로직을 구현한다.\r\n- custom hooks를 생성하여 Form 관리 로직을 컴포넌트에서 분리하고 재사용한다.\r\n- Controlled & Uncontrolled Components에 입각하여 Form을 핸들링한다.\r\n\r\n### 3단계\r\n- MSW로 네트워크 경계를 모킹하고, 프론트엔드가 보는 서버의 모습을 설계한다.\r\n- 비동기 상태를 `idle | loading | success | error` 네 가지로 명시적으로 관리한다.\r\n- 실제 서버에 보낼 요청·받을 응답 형식을 설계하여 서버-클라이언트 계약을 경험한다.\r\n- React Testing Library와 MSW로 사용자 관점의 통합 테스트를 작성한다.\r\n\r\n---\r\n\r\n## 🕵️ 셀프 리뷰(Self-Review)\r\n\r\n### 제출 전 체크 리스트\r\n\r\n- [x] 기능 요구 사항을 모두 구현했고, 정상적으로 동작하는지 확인했나요?\r\n- [x] 기본적인 프로그래밍 요구 사항(코드 컨벤션, 에러 핸들링 등)을 준수했나요?\r\n- [x] 배포한 데모 페이지에 정상적으로 접근할 수 있나요?\r\n  - 기본 배포 링크 기입: https://binggwa.github.io/react-payments/\r\n\r\n### 리뷰 요청 & 논의하고 싶은 내용\r\n#### 1) 이번 단계에서 가장 많이 고민했던 문제와 해결 과정에서 배운 점\r\n 안녕하세요 동키콩! 이번에 리뷰받게 된 비비빙입니다. 리액트가 처음이라 어색한 부분이 많을수도 있어 걱정되네요 ㅎㅎ 리뷰 잘 부탁드립니다! 🙏🙏\r\n\r\n#### [구조 사진]\r\n<img width=\"1307\" height=\"1330\" alt=\"react-payments step1구조\" src=\"https://github.com/user-attachments/assets/9c75da54-d90c-4349-b1e6-79b42ceea602\" />\r\n\r\n#### 🚨 많이 고민했던 문제들\r\n 페어와 함께 오랫동안 고민했던 문제는 주로 상태 관리에 관한 내용이었습니다. \r\n\r\n🌱 **상태 관리**\r\n 현재 구조는 카드번호, 유효기간, CVC의 3가지 상태를 최상위 구조인 App에서 한번에 관리하고 있으며, 에러 상태는 각 섹션별로 각자 가지고 있는 상태입니다.\r\n\r\n  - 에러 상태 관리\r\n 페어와 처음 이야기를 나누었을 때에는 App 에서 모든 상태를 관리하는게 어떤가 하는 생각이었습니다. 에러 상태 또한 App에서 한번에 관리하는게 맞을지 아니면 각 섹션마다 에러판별로직이 다를테니 섹션에서 관리해야하는지 고민했습니다. 결국 각 섹션 컴포넌트 내부에서 onBlur를 통해 에러 상태를 관라하기 위해 섹션별로 나누어서 작성했는데요, 어제 수업을 통해 파생상태는 상태로 관리하지 않는 것이 좋다는 말도 있고, 추후 단계를 위한 폼 제출 시 오류가 없는지 체크해야할 것 같은데 이 경우 부모 컴포넌트가 자식의 에러 상태를 알아야 하는 상황이 발생할 것 같아 여전히 고민인 부분입니다.\r\n\r\n  - 상태 통합 관리\r\n 현재 저희는 App에서 3개의 상태를 따로 관리하고 있는데요, 자식 컴포넌트에게 넘겨줄 상태를 각각 관리하고 있는 것인데 이것을 하나로 합치는 것에 대한 이야기가 나왔었습니다. 만약 하나로 관리하게 된다면 App에서 모인 폼 하나가 카드 정보 하나를 관리한다와 같이 직관적으로 보고, 폼 제출 시에도 묶어둔 상태 하나만 넘기면 되기 때문에 편리한 장점이 있지만, 그에 따른 트레이드오프로 카드번호, 유효기간, CVC중 하나만 바뀌어도 모든 정보가 바뀌어야 해서 렌더링이 과하게 되는 것이 아닌가 하는 얘기가 나왔습니다. 저희는 수업을 통한 공식문서 읽기를 통해 상태는 같이 업데이트되는 것들끼리 묶어야 한다고 생각했기에 따로 관리하는 쪽으로 진행했는데, 동키콩이 보기엔 어느 방향이 괜찮았을지 궁금합니다.\r\n\r\n  - Cvc 상태 관리 문제\r\n 위의 상태 통합 관리의 리렌더링 문제와 연관된 부분인데요, 현재 미션 수준에서는 화면에 Cvc 코드를 렌더링할 필요가 없습니다. 그렇다면 과연 app이 Cvc 상태를 알고있어야 하는가 라는 의문이 들었습니다. 페어와는 그냥 자연스럽게 카드번호, 유효기간을 상태로 관리하니 cvc도 특별한 논의 없이 app에 넣어 상태를 한번에 관리하는 것으로 생각했는데, cvc를 입력할 때마다 App의 상태가 바뀌므로 하위의 모든 컴포넌트가 영향을 받게 되는 것이 아닐까 하는 생각도 들어 추후 미션을 위한 확장성을 고려하는 것이 좋은지, 상태를 렌더링하는 컴포넌트와 가까운 곳에 두어야 한다는 리액트의 생각을 지켜 현재 상태에서 리액트스럽게 짜는 것이 좋은지 고민이 되었습니다.\r\n\r\n#### 2) 이번 리뷰를 통해 논의하고 싶은 부분\r\n\r\n#### 🌪️[논의하고 싶은 부분]\r\n\r\n 위 고민했던 부분을 통해 해결되지 않았던 부분을 여쭙고 싶습니다.\r\n\r\n1) 상태 관리\r\n> 결국 카드 번호, 유효기간, CVC를 하나의 객체로 묶을지에 대한 고민에서 값 업데이트의 독립성과 리렌더링 문제로 분리하는 것을 택했는데요, 추후 폼 제출을 위한 데이터가 응집되지 않는다는 단점이 있을 것으로 보이는데, 동키콩은 이런 상태를 다룰 때에는 어떤 방식을 선호하시는지 궁금합니다.\r\n\r\n2) 에러 처리\r\n> 에러 상태와 에러 메시지를 각 섹션 컴포넌트 내부에 두었는데, 추후 모든 제출 폼이 에러가 없을 때에만 다음으로 넘어가기 위해서는 부모가 자식의 에러 상태를 알아야하는 상황에 처할 것 같습니다. onBlur를 통한 즉각적인 에러를 유지하면서도 추후 폼의 유효성 검사로 확장하기 용이하려면 과연 어떤 방식이 괜찮을까요?\r\n\r\n> 또, 현재 유효기간 에러 판별 로직에서 에러 상태는 월/연을 나누었지만 에러메시지는 commonsection을 통해 한칸에 표시하다보니 문제가 있었습니다. 예를 들어, 월 칸에 오류가 뜬 뒤, 해결하지 않고 연 칸으로 넘어가고 또 오류가 뜨면, 월의 오류메시지가 연의 오류메시지로 상태가 덮혀버립니다. 이 때 연의 오류를 해결해도 월 칸은 오류가 해결되지 않았는데 월의 오류메시지가 남지 않는 문제가 있었는데요, 이를 해결하기 위해 판별 로직에 임시 변수를 할당해서 기억하도록 만들었는데 코드가 너무 비대해져버렸습니다.. \r\n조금 더 스마트한 해결방식이나 리팩토링을 어떻게 해야했을지 동키콩의 시야가 궁금합니다.\r\n\r\n3) 컴포넌트\r\n> 카드번호, 유효기간, CVC의 형태가 반복되어 UI 재사용성을 위해 CommonSection으로 공통 레이아웃을 분리했습니다. 그 후, NumberInput 부분은 개수가 모두 다르기에 children으로 주입받도록 설게했습니다. 그런데, 현재는 형태가 완전히 똑같아 이렇게 뺄 수 있었지만 요구사항이 변경되어 섹션별로 특별한 기능이 추가된다면, 이런 공통 컴포넌트가 유연한 확장이 가능한지 하는 의문이 들었습니다. 공통 컴포넌트를 설계함에 있어서 이러한 확장성과 폼 일관성을 함께 챙기도록 만드려면 어떻게 만드는 것이 좋을지 동키콩의 의견이 궁금합니다!\r\n\r\n---\r\n\r\n## ✅ 리뷰어 체크 포인트\r\n\r\n<!-- 리뷰어가 이 PR을 검토할 때 중점적으로 확인할 사항입니다.\r\n코드의 완성도만이 아니라, 리뷰이가 구현 과정에서 어떤 고민과 결정을 하며 학습했는지도 함께 고려해 주세요. -->\r\n\r\n### 1. Form 상태 관리 & Custom Hook 분리\r\n\r\n- 반복되는 로직을 custom hook으로 분리했는가?\r\n- hook 내부와 UI 컴포넌트의 **역할이 명확하게 분리**되어 있는가?\r\n- 상태 흐름이 직관적이며, Form 전체를 일관되게 관리할 수 있는 구조인가?\r\n\r\n### 2. 입력 UI 흐름과 UX\r\n\r\n- 카드 번호 입력 시 필드 간 **자동 포커싱 이동**이 자연스럽게 동작하는가?\r\n- 숫자만 입력 가능한 필드에서 제한, 에러 메시지, 유효성 피드백 등 **사용자 경험이 충분히 고려**되었는가?\r\n\r\n### 3. 컴포넌트 구조 및 재사용성\r\n\r\n- 컴포넌트가 명확한 **역할과 책임**을 가지며 과도하게 분리되거나 중첩되어 있지 않은가?\r\n- Input, Button 등 재사용 가능한 컴포넌트가 잘 정의되어 있는가?\r\n\r\n### 4. 상태 기반 유효성 검사 및 확인 버튼 활성화\r\n\r\n- 모든 필드가 유효할 때만 확인 버튼이 **정확히 활성화/비활성화**되는가?\r\n- 유효성 검사의 기준이 명확하고, **상태 변경에 따른 UI 반응**이 잘 연결되어 있는가?\r\n\r\n### 5. 비동기 상태 · 네트워크 경계 · 통합 테스트\r\n\r\n- 비동기 상태를 `idle | loading | success | error` 네 가지로 **명시적으로** 관리하고, `isLoading`/`error`를 별도 boolean으로 쪼개지 않았는가?\r\n- MSW handler가 `POST/GET/DELETE /cards`와 400 시나리오까지 포함하여 **네트워크 경계**에서 동작하는가?\r\n- 통합 테스트가 `fetch`·`axios`를 모킹하지 않고, **MSW + RTL**로 사용자 관점에서 작성되었는가?\r\n- RTL 요소 탐색이 `getByRole → getByText → getByLabelText → getByTestId` 우선순위를 따르고, 비동기 요소에 `findBy*`를 사용했는가?\r\n",
-  "changedFiles": 47,
-  "comments": [
-    {
-      "id": "IC_kwDOFV34T88AAAABA8Noww",
-      "author": {
-        "login": "coderabbitai"
-      },
-      "authorAssociation": "NONE",
-      "body": "<!-- This is an auto-generated comment: summarize by coderabbit.ai -->\n<!-- walkthrough_start -->\n\n<!-- This is an auto-generated comment: release notes by coderabbit.ai -->\n\n## Summary by CodeRabbit\n\n## 새 기능 (New Features)\n\n* 결제 양식 UI 및 카드 미리보기 추가 - 카드 번호, 유효 기간, CVC 입력 필드 포함\n* 카드 브랜드 자동 감지 (Visa, Mastercard)\n* 실시간 입력 유효성 검사 및 오류 메시지 표시\n* 카드 번호 마스킹 및 포맷팅 지원\n\n<!-- end of auto-generated comment: release notes by coderabbit.ai -->\n## Walkthrough\n\n이 풀 요청은 React + TypeScript + Vite 기반의 새로운 결제 UI 프로젝트를 초기화합니다. 프로젝트 설정 파일(TypeScript, ESLint, Prettier, Storybook, Vite), 카드 정보 입력 컴포넌트(카드번호, 만료일, CVC), 카드 미리보기 컴포넌트(브랜드 감지 및 마스킹 포함), 공통 UI 컴포넌트, 검증 유틸리티, 그리고 스토리북 이야기를 포함하는 약 42개의 새 파일을 추가합니다. 각 입력 섹션에는 필드별 유효성 검사, 에러 메시지, 그리고 시각적 에러 표시가 구현되어 있습니다.\n\n## Estimated code review effort\n\n🎯 3 (Moderate) | ⏱️ ~30 minutes\n\n<!-- walkthrough_end -->\n\n<!-- pre_merge_checks_walkthrough_start -->\n\n<details>\n<summary>🚥 Pre-merge checks | ✅ 4 | ❌ 1</summary>\n\n### ❌ Failed checks (1 warning)\n\n|     Check name     | Status     | Explanation                                                                          | Resolution                                                                         |\n| :----------------: | :--------- | :----------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------- |\n| Docstring Coverage | ⚠️ Warning | Docstring coverage is 0.00% which is insufficient. The required threshold is 80.00%. | Write docstrings for the functions missing them to satisfy the coverage threshold. |\n\n<details>\n<summary>✅ Passed checks (4 passed)</summary>\n\n|         Check name         | Status   | Explanation                                                                                                          |\n| :------------------------: | :------- | :------------------------------------------------------------------------------------------------------------------- |\n|         Title check        | ✅ Passed | PR 제목은 '[1단계 - 페이먼츠] 비비빙(이병관) 미션 제출합니다'로, 단계와 미션 명을 명확히 포함하고 있으며 주요 변경사항(페이먼츠 결제 폼 1단계 구현)을 직관적으로 전달합니다.             |\n|      Description check     | ✅ Passed | PR 설명은 제공된 템플릿과 비교하여 목표, 자체 리뷰 체크리스트(모두 완료), 상세한 고민 과정(상태 관리, 에러 처리, 컴포넌트 설계), 그리고 리뷰어 체크포인트를 포함하고 있어 구조와 내용이 완전합니다. |\n|     Linked Issues check    | ✅ Passed | Check skipped because no linked issues were found for this pull request.                                             |\n| Out of Scope Changes check | ✅ Passed | Check skipped because no linked issues were found for this pull request.                                             |\n\n</details>\n\n<sub>✏️ Tip: You can configure your own custom pre-merge checks in the settings.</sub>\n\n</details>\n\n<!-- pre_merge_checks_walkthrough_end -->\n\n<!-- finishing_touch_checkbox_start -->\n\n<details>\n<summary>✨ Finishing Touches</summary>\n\n<details>\n<summary>🧪 Generate unit tests (beta)</summary>\n\n- [ ] <!-- {\"checkboxId\": \"f47ac10b-58cc-4372-a567-0e02b2c3d479\", \"radioGroupId\": \"utg-output-choice-group-unknown_comment_id\"} -->   Create PR with unit tests\n\n</details>\n\n</details>\n\n<!-- finishing_touch_checkbox_end -->\n\n<!-- tips_start -->\n\n---\n\nThanks for using [CodeRabbit](https://coderabbit.ai?utm_source=oss&utm_medium=github&utm_campaign=woowacourse/react-payments&utm_content=499)! It's free for OSS, and your support helps us grow. If you like it, consider giving us a shout-out.\n\n<details>\n<summary>❤️ Share</summary>\n\n- [X](https://twitter.com/intent/tweet?text=I%20just%20used%20%40coderabbitai%20for%20my%20code%20review%2C%20and%20it%27s%20fantastic%21%20It%27s%20free%20for%20OSS%20and%20offers%20a%20free%20trial%20for%20the%20proprietary%20code.%20Check%20it%20out%3A&url=https%3A//coderabbit.ai)\n- [Mastodon](https://mastodon.social/share?text=I%20just%20used%20%40coderabbitai%20for%20my%20code%20review%2C%20and%20it%27s%20fantastic%21%20It%27s%20free%20for%20OSS%20and%20offers%20a%20free%20trial%20for%20the%20proprietary%20code.%20Check%20it%20out%3A%20https%3A%2F%2Fcoderabbit.ai)\n- [Reddit](https://www.reddit.com/submit?title=Great%20tool%20for%20code%20review%20-%20CodeRabbit&text=I%20just%20used%20CodeRabbit%20for%20my%20code%20review%2C%20and%20it%27s%20fantastic%21%20It%27s%20free%20for%20OSS%20and%20offers%20a%20free%20trial%20for%20proprietary%20code.%20Check%20it%20out%3A%20https%3A//coderabbit.ai)\n- [LinkedIn](https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fcoderabbit.ai&mini=true&title=Great%20tool%20for%20code%20review%20-%20CodeRabbit&summary=I%20just%20used%20CodeRabbit%20for%20my%20code%20review%2C%20and%20it%27s%20fantastic%21%20It%27s%20free%20for%20OSS%20and%20offers%20a%20free%20trial%20for%20proprietary%20code)\n\n</details>\n<!-- review_rate_limit_status_start -->\n<sub>Review rate limit: 0/1 reviews remaining, refill in 60 minutes.</sub>\n<!-- review_rate_limit_status_end -->\n\n<sub>Comment `@coderabbitai help` to get the list of available commands and usage tips.</sub>\n\n<!-- tips_end -->\n\n<!-- internal state start -->\n\n\n<!-- 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= -->\n\n<!-- internal state end -->",
-      "createdAt": "2026-05-01T06:12:06Z",
-      "includesCreatedEdit": true,
-      "isMinimized": false,
-      "minimizedReason": "",
-      "reactionGroups": [],
-      "url": "https://github.com/woowacourse/react-payments/pull/499#issuecomment-4358105283",
-      "viewerDidAuthor": false
-    }
-  ],
-  "deletions": 0,
-  "number": 499,
-  "reviews": [
-    {
-      "id": "PRR_kwDOFV34T8768ysL",
-      "author": {
-        "login": "coderabbitai"
-      },
-      "authorAssociation": "NONE",
-      "body": "**Actionable comments posted: 7**\n\n<details>\n<summary>🧹 Nitpick comments (2)</summary><blockquote>\n\n<details>\n<summary>my-app/src/App.styles.ts (1)</summary><blockquote>\n\n`4-4`: _⚡ Quick win_\n\n**모바일 대응을 위해 viewport 단위 재검토를 권장합니다.**\n\nLine 4의 `height: 100vh`는 모바일 브라우저 주소창 변화 시 레이아웃 흔들림이 생길 수 있습니다. `min-height: 100dvh`(필요 시 fallback 병행)로 확인해보면 어떨까요?\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@my-app/src/App.styles.ts` at line 4, 파일 my-app/src/App.styles.ts에서 현재 사용 중인\n\"height: 100vh\" 규칙으로 인해 모바일 주소창 변화 시 레이아웃이 흔들릴 수 있으니, 해당 규칙을 \"min-height:\n100dvh\"로 대체하고 호환성을 위해 폴백으로 \"min-height: 100vh\" (또는 필요 시 기존 \"height: 100vh\")를\n순차적으로 선언하여 적용하세요; 즉, 찾을 식별자 \"height: 100vh\"를 교체하고 새로운 min-height 규칙을 해당 스타일\n블록(또는 관련 클래스/컴포넌트 스타일)에 추가하세요.\n```\n\n</details>\n\n</blockquote></details>\n<details>\n<summary>my-app/src/components/cardPreview/CardPreview.tsx (1)</summary><blockquote>\n\n`24-24`: **`EachCardNumber` 함수를 JSX 문법으로 호출하세요.**\n\n현재 `EachCardNumber(number, index)`는 React 컴포넌트처럼 보이지만 일반 함수로 호출되고 있습니다. 이 패턴은 두 가지 문제를 야기합니다:\n\n- `key` prop을 전달할 수 없어 React의 리스트 렌더링 규약을 위반합니다\n- 컴포넌트와 헬퍼 함수의 의도가 모호해집니다\n\n함수 시그니처를 `key`, `number`, `index`를 받도록 수정하고 JSX 문법으로 호출하세요: `<EachCardNumber key={index} number={number} index={index} />`\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@my-app/src/components/cardPreview/CardPreview.tsx` at line 24, The map\ncurrently calls EachCardNumber as a plain function (cardNumber.map((number,\nindex) => EachCardNumber(number, index))) which prevents passing a React key and\nblurs component intent; change the map to JSX syntax: cardNumber.map((number,\nindex) => <EachCardNumber key={index} number={number} index={index} />) and\nupdate the EachCardNumber component/signature to accept props (e.g., function\nEachCardNumber({ number, index }) or a React.FC with props number and index) so\nit renders correctly as a component and receives number and index via props.\n```\n\n</details>\n\n</blockquote></details>\n\n</blockquote></details>\n\n<details>\n<summary>🤖 Prompt for all review comments with AI agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nInline comments:\nIn `@my-app/.eslintrc.cjs`:\n- Around line 1-10: Remove the unused legacy ESLint config file by deleting the\n.eslintrc.cjs that exports the module.exports object (the parser/plugins/extends\nblock shown) because it’s ignored when a flat eslint.config.js exists; remove\nthe file from the repo and commit the deletion, then verify no other .eslintrc.*\nfiles remain to avoid confusion.\n\nIn `@my-app/.gitignore`:\n- Around line 10-14: .gitignore에 .env 계열 파일이 누락되어 있어 민감 정보가 추적될 수 있습니다;\n.gitignore 파일을 열고 기본 패턴(.env)과 모든 확장자 버전(.env.*, 예: .env.local,\n.env.production)을 무시하도록 추가하고, 필요하다면 템플릿용 .env.example 같은 예외 패턴(!.env.example)을\n남겨 두어 환경변수 파일이 커밋되지 않도록 수정하세요.\n\nIn `@my-app/index.html`:\n- Line 2: 현재 문서의 <html> 요소가 lang=\"en\"으로 설정되어 있어 한국어 UI와 불일치합니다; index.html의\n<html> 태그에서 lang=\"en\"을 lang=\"ko\"로 변경해 문서 언어를 한국어로 맞추고 스크린리더 등 접근성 도구가 올바른 언어를\n사용하도록 수정하세요.\n\nIn `@my-app/package.json`:\n- Around line 24-31: The dependency `@storybook/test` is pinned to 8.6.15 while\nall other `@storybook/`* packages are 10.3.5; update package.json by either\nchanging the `@storybook/test` entry to \"^10.3.5\" to align major versions or\nremove the `@storybook/test` dependency entirely if it's unused (search for\nimports/usages of \"@storybook/test\" in the codebase first); after changing\npackage.json run your package manager install and run tests/build to verify\nnothing breaks.\n\nIn `@my-app/src/components/cardPreview/cardBrandImage/CardBrandImage.tsx`:\n- Around line 10-13: The checkMasterCard function only checks 51–55 and misses\nthe newer Mastercard BIN range 2221–2720; update checkMasterCard to parse both\nthe first two digits (Number(cardNumber.slice(0,2))) and the first four digits\n(Number(cardNumber.slice(0,4))) and return true if the two-digit value is\nbetween 51 and 55 OR the four-digit value is between 2221 and 2720, making sure\nto guard against empty/short cardNumber before slicing; reference\ncheckMasterCard and cardNumber when applying the change so EmptyImg no longer\nappears for valid Mastercard ranges.\n\nIn `@my-app/src/styles/reset.css`:\n- Around line 18-19: The CSS has conflicting declarations—keep only one of the\ntwo conflicting properties to satisfy stylelint: remove the redundant\n\"font-size: 100%\" declaration so \"font: inherit\" remains (it covers font-size\nvia the shorthand), i.e., delete the \"font-size: 100%\" line where the stylesheet\ncurrently sets both \"font-size\" and \"font: inherit\".\n\nIn `@my-app/src/utils/Validation.ts`:\n- Around line 10-13: isValidRange currently treats lengths greater than\nmaxLength as valid; update the function isValidRange to return true only when\nvalue.length is within 0 and maxLength inclusive (i.e. value.length >= 0 &&\nvalue.length <= maxLength) and return false otherwise; if the intended behaviour\nis to require an exact length instead, change the check to value.length ===\nmaxLength in the isValidRange implementation.\n\n---\n\nNitpick comments:\nIn `@my-app/src/App.styles.ts`:\n- Line 4: 파일 my-app/src/App.styles.ts에서 현재 사용 중인 \"height: 100vh\" 규칙으로 인해 모바일 주소창\n변화 시 레이아웃이 흔들릴 수 있으니, 해당 규칙을 \"min-height: 100dvh\"로 대체하고 호환성을 위해 폴백으로\n\"min-height: 100vh\" (또는 필요 시 기존 \"height: 100vh\")를 순차적으로 선언하여 적용하세요; 즉, 찾을 식별자\n\"height: 100vh\"를 교체하고 새로운 min-height 규칙을 해당 스타일 블록(또는 관련 클래스/컴포넌트 스타일)에 추가하세요.\n\nIn `@my-app/src/components/cardPreview/CardPreview.tsx`:\n- Line 24: The map currently calls EachCardNumber as a plain function\n(cardNumber.map((number, index) => EachCardNumber(number, index))) which\nprevents passing a React key and blurs component intent; change the map to JSX\nsyntax: cardNumber.map((number, index) => <EachCardNumber key={index}\nnumber={number} index={index} />) and update the EachCardNumber\ncomponent/signature to accept props (e.g., function EachCardNumber({ number,\nindex }) or a React.FC with props number and index) so it renders correctly as a\ncomponent and receives number and index via props.\n```\n\n</details>\n\n<details>\n<summary>🪄 Autofix (Beta)</summary>\n\nFix all unresolved CodeRabbit comments on this PR:\n\n- [ ] <!-- {\"checkboxId\": \"4b0d0e0a-96d7-4f10-b296-3a18ea78f0b9\"} --> Push a commit to this branch (recommended)\n- [ ] <!-- {\"checkboxId\": \"ff5b1114-7d8c-49e6-8ac1-43f82af23a33\"} --> Create a new PR with the fixes\n\n</details>\n\n---\n\n<details>\n<summary>ℹ️ Review info</summary>\n\n<details>\n<summary>⚙️ Run configuration</summary>\n\n**Configuration used**: Organization UI\n\n**Review profile**: CHILL\n\n**Plan**: Pro\n\n**Run ID**: `a7a44c57-5675-4171-a2b1-c92bbb46c5fc`\n\n</details>\n\n<details>\n<summary>📥 Commits</summary>\n\nReviewing files that changed from the base of the PR and between 8d4c2c73f7cce87ffaae55245ae1cfd10228981d and fc02d45d960f053f4d0a95beae78087fab32abef.\n\n</details>\n\n<details>\n<summary>⛔ Files ignored due to path filters (7)</summary>\n\n* `my-app/package-lock.json` is excluded by `!**/package-lock.json`\n* `my-app/public/favicon.svg` is excluded by `!**/*.svg`\n* `my-app/public/icons.svg` is excluded by `!**/*.svg`\n* `my-app/src/assets/MaskingImg.png` is excluded by `!**/*.png`\n* `my-app/src/assets/Mastercard.png` is excluded by `!**/*.png`\n* `my-app/src/assets/Visa.png` is excluded by `!**/*.png`\n* `package-lock.json` is excluded by `!**/package-lock.json`\n\n</details>\n\n<details>\n<summary>📒 Files selected for processing (40)</summary>\n\n* `README.md`\n* `my-app/.eslintrc.cjs`\n* `my-app/.gitignore`\n* `my-app/.prettierrc`\n* `my-app/.storybook/main.ts`\n* `my-app/.storybook/preview.ts`\n* `my-app/README.md`\n* `my-app/eslint.config.js`\n* `my-app/index.html`\n* `my-app/package.json`\n* `my-app/src/App.stories.tsx`\n* `my-app/src/App.styles.ts`\n* `my-app/src/App.tsx`\n* `my-app/src/components/cardNumberSection/CardNumberSection.stories.tsx`\n* `my-app/src/components/cardNumberSection/CardNumberSection.tsx`\n* `my-app/src/components/cardPreview/CardPreview.stories.tsx`\n* `my-app/src/components/cardPreview/CardPreview.styles.ts`\n* `my-app/src/components/cardPreview/CardPreview.tsx`\n* `my-app/src/components/cardPreview/cardBrandImage/CardBrandImage.styles.ts`\n* `my-app/src/components/cardPreview/cardBrandImage/CardBrandImage.tsx`\n* `my-app/src/components/cardPreview/eachCardNumber/EachCardNumber.styles.ts`\n* `my-app/src/components/cardPreview/eachCardNumber/EachCardNumber.tsx`\n* `my-app/src/components/common/commonSection/CommonSection.styles.ts`\n* `my-app/src/components/common/commonSection/CommonSection.tsx`\n* `my-app/src/components/common/numberInput/NumberInput.stories.tsx`\n* `my-app/src/components/common/numberInput/NumberInput.styles.ts`\n* `my-app/src/components/common/numberInput/NumberInput.tsx`\n* `my-app/src/components/cvcSection/CvcSection.tsx`\n* `my-app/src/components/cvcSection/CvsSection.stories.tsx`\n* `my-app/src/components/expirationDateSection/ExpirationDateSection.stories.tsx`\n* `my-app/src/components/expirationDateSection/ExpirationDateSection.tsx`\n* `my-app/src/main.tsx`\n* `my-app/src/styles/reset.css`\n* `my-app/src/utils/Validation.ts`\n* `my-app/tsconfig.app.json`\n* `my-app/tsconfig.json`\n* `my-app/tsconfig.node.json`\n* `my-app/vite.config.ts`\n* `my-app/vitest.shims.d.ts`\n* `package.json`\n\n</details>\n\n</details>\n\n<!-- This is an auto-generated comment by CodeRabbit for review status -->",
-      "submittedAt": "2026-05-01T06:17:09Z",
-      "includesCreatedEdit": false,
-      "reactionGroups": [],
-      "state": "COMMENTED",
-      "commit": {
-        "oid": "fc02d45d960f053f4d0a95beae78087fab32abef"
-      }
-    },
-    {
-      "id": "PRR_kwDOFV34T876-YFY",
-      "author": {
-        "login": "JUDONGHYEOK"
-      },
-      "authorAssociation": "NONE",
-      "body": "안녕하세요 비비빙~!! 이번 페이먼츠 리뷰를 맡게된 동키콩입니다! 레벨2도 한번 잘 헤쳐나가보시죠!!\n\n리액트를 처음이라 바로 페이먼츠 미션을 들어가는 것이 쉽지 않으셨을텐데 아주 잘 구현해주셨네요! CommonSection, NumberInput로 반복 UI를 줄이려고 해주셨고 각 필드들의 규칙들도 명확하게 코드에 잘 드러나서 좋았습니다! 또 storybook으로 테스트해주신 것도 좋았구요!\n\n지금 수준에서는 괜찮은 것 같지만 컴포넌트 내부에 UI 렌더링, 도메인 검증 로직이 함께 있어 함수가 커지고 있어요. 리액트에서는 어떻게 이런 문제를 해결할 수 있을지 학습해보는 것도 좋은 경험이 될 것 같습니다!! 또 많이 시간이 부족하셨을 것 같지만 story파일을 정의하실 때 기본 케이스 뿐만아니라 경계값 에러 상태를 더 명시하면 스토리 파일이 컴포넌트 문서 가치가 더 올라갈 것 같아요!!\n\n# Q&A\n\n> 상태 관리\n결국 카드 번호, 유효기간, CVC를 하나의 객체로 묶을지에 대한 고민에서 값 업데이트의 독립성과 리렌더링 문제로 분리하는 것을 택했는데요, 추후 폼 제출을 위한 데이터가 응집되지 않는다는 단점이 있을 것으로 보이는데, 동키콩은 이런 상태를 다룰 때에는 어떤 방식을 선호하시는지 궁금합니다.\n\n고민을 많이 해주신 것 같은데요 제생각에 기준은 함께 검증, 제출, 전이되는가로 판단할 것 같습니다! 보다더 중요한 것은 상태의 응집성이라고 생각이 되어서요!\n\n리렌더링을 먼저 걱정하기보다 구조 명확성을 우선하고 리액트에서 많은 최적화 기법을 제공하기 떄문에 필요할 때 최적화하는 것이 더 좋은 선택이라 생각합니다!\n\n> 에러 처리\n에러 상태와 에러 메시지를 각 섹션 컴포넌트 내부에 두었는데, 추후 모든 제출 폼이 에러가 없을 때에만 다음으로 넘어가기 위해서는 부모가 자식의 에러 상태를 알아야하는 상황에 처할 것 같습니다. onBlur를 통한 즉각적인 에러를 유지하면서도 추후 폼의 유효성 검사로 확장하기 용이하려면 과연 어떤 방식이 괜찮을까요?\n\n제가 질문을 잘 이해한 것인지는 모르겠지만 에러 상태를 즉각적으로 보여주면서도, 폼 전체 유효성 검사를 위해 에러 상태를 부모 컴포넌트까지 끌어올리는 방법을 여쭤보신 것으로 이해를 했는데요. 말씀해주신대로 부모 컴포넌트가 해당 상태를 알아야한다면 부모 컴포넌트로 해당 상태를 올리고 prop으로 전달 하는 형식이 가장 기본이 될 것 같아요. 이에 따라 prop이 늘어나고 로직이 복잡해진다면 그때 또 다른 솔루션을 찾을 것 같습니ㅏㄷ!\n\n> 또, 현재 유효기간 에러 판별 로직에서 에러 상태는 월/연을 나누었지만 에러메시지는 commonsection을 통해 한칸에 표시하다보니 문제가 있었습니다. 예를 들어, 월 칸에 오류가 뜬 뒤, 해결하지 않고 연 칸으로 넘어가고 또 오류가 뜨면, 월의 오류메시지가 연의 오류메시지로 상태가 덮혀버립니다. 이 때 연의 오류를 해결해도 월 칸은 오류가 해결되지 않았는데 월의 오류메시지가 남지 않는 문제가 있었는데요, 이를 해결하기 위해 판별 로직에 임시 변수를 할당해서 기억하도록 만들었는데 코드가 너무 비대해져버렸습니다..\n조금 더 스마트한 해결방식이나 리팩토링을 어떻게 해야했을지 동키콩의 시야가 궁금합니다.\n\n저라면 errorMessage를 별도 상태로 저장하지 않고, month, year의 검증 결과에서 매 렌더마다 파생해 계산할 것 같아요. 이렇게 하면 월,연 메시지가 서로 덮이는 문제가 사라지고, 임시 변수로 기억하지 않아도 UI와 검증 상태가 항상 일치하게 될 것 같습니다.\n\n\n> 컴포넌트\n카드번호, 유효기간, CVC의 형태가 반복되어 UI 재사용성을 위해 CommonSection으로 공통 레이아웃을 분리했습니다. 그 후, NumberInput 부분은 개수가 모두 다르기에 children으로 주입받도록 설게했습니다. 그런데, 현재는 형태가 완전히 똑같아 이렇게 뺄 수 있었지만 요구사항이 변경되어 섹션별로 특별한 기능이 추가된다면, 이런 공통 컴포넌트가 유연한 확장이 가능한지 하는 의문이 들었습니다. 공통 컴포넌트를 설계함에 있어서 이러한 확장성과 폼 일관성을 함께 챙기도록 만드려면 어떻게 만드는 것이 좋을지 동키콩의 의견이 궁금합니다!\n\n저는 공통 컴포넌트는 레이아웃, 표현 책임 까지만, 섹션별 정책(검증 조건, 메시지 우선순위, 포커스 이동 등)은 바깥에서 주입받는 구조를 추천드립니다.\n그러면 요구사항이 바뀌어도 공통 컴포넌트는 안정적으로 재사용되고, 각 섹션만 독립적으로 바꿀 수 있어서 유지보수가 더 좋아질 것 같아요!.\n지금처럼 children 기반으로 열어두신 건 확장성 측면에서 이미 좋다고 생각합니다! 다음 단계에서는 무엇을 공통으로 고정할지 무엇을 주입으로 열어둘지 기준만 조금 더 명확히 잡아보시면 훨씬 더 좋아질 것 같아요.\n\n\n리액트가 처음이라 미션이 쉽지 않으셨을텐데 고생많으셨습니다! 코멘트 확인해주시고 다시 요청주시면 감사하겠습니다!",
-      "submittedAt": "2026-05-02T03:39:07Z",
-      "includesCreatedEdit": false,
-      "reactionGroups": [],
-      "state": "COMMENTED",
-      "commit": {
-        "oid": "fc02d45d960f053f4d0a95beae78087fab32abef"
-      }
-    },
-    {
-      "id": "PRR_kwDOFV34T877MXbT",
-      "author": {
-        "login": "JUDONGHYEOK"
-      },
-      "authorAssociation": "NONE",
-      "body": "리뷰를 Comment로 남겨 RequestChanges로 다시 전달드립니다!😅",
-      "submittedAt": "2026-05-02T03:40:23Z",
-      "includesCreatedEdit": false,
-      "reactionGroups": [],
-      "state": "CHANGES_REQUESTED",
-      "commit": {
-        "oid": "fc02d45d960f053f4d0a95beae78087fab32abef"
-      }
-    }
-  ],
-  "state": "OPEN",
-  "title": "[1단계 - 페이먼츠] 비비빙(이병관) 미션 제출합니다."
-}
+- author: binggwa
+- url: https://github.com/woowacourse/react-payments/pull/499
+- changedFiles: 47 (+8438 -0)
 
-hook: PostToolUse
-hook: PostToolUse
-hook: PostToolUse Completed
-hook: PostToolUse Completed
-hook: PostToolUse Completed
-hook: PostToolUse Completed
-hook: PreToolUse
-hook: PreToolUse Completed
-exec
-/bin/zsh -lc 'rg -n "===== PR #499 DIFF|src/App.tsx|CardNumberSection|ExpirationDateSection|CommonSection|Validation.ts|CardPreview.tsx" _drafts/pr-raw/pr-499.txt' in /Users/makerjun/git/woowacourse/fe-faq-archive
- succeeded in 0ms:
-10:  "body": "## 🎯 페이먼츠\r\n\r\n이번 미션을 통해 다음과 같은 학습 경험들을 쌓는 것을 목표로 합니다.\r\n\r\n### 1단계\r\n- 재사용 가능한 Input Component를 개발한다.\r\n- Storybook을 사용하여 컴포넌트의 다양한 상태를 시각적으로 테스트한다.\r\n- 카드 정보를 효과적으로 렌더링 하기 위한 상태 관리를 경험한다.\r\n\r\n### 2단계\r\n- 다양한 Form 구성 요소들간의 상태를 효율적으로 관리한다.\r\n- hooks API를 이용하여 상태 관리 로직을 구현한다.\r\n- custom hooks를 생성하여 Form 관리 로직을 컴포넌트에서 분리하고 재사용한다.\r\n- Controlled & Uncontrolled Components에 입각하여 Form을 핸들링한다.\r\n\r\n### 3단계\r\n- MSW로 네트워크 경계를 모킹하고, 프론트엔드가 보는 서버의 모습을 설계한다.\r\n- 비동기 상태를 `idle | loading | success | error` 네 가지로 명시적으로 관리한다.\r\n- 실제 서버에 보낼 요청·받을 응답 형식을 설계하여 서버-클라이언트 계약을 경험한다.\r\n- React Testing Library와 MSW로 사용자 관점의 통합 테스트를 작성한다.\r\n\r\n---\r\n\r\n## 🕵️ 셀프 리뷰(Self-Review)\r\n\r\n### 제출 전 체크 리스트\r\n\r\n- [x] 기능 요구 사항을 모두 구현했고, 정상적으로 동작하는지 확인했나요?\r\n- [x] 기본적인 프로그래밍 요구 사항(코드 컨벤션, 에러 핸들링 등)을 준수했나요?\r\n- [x] 배포한 데모 페이지에 정상적으로 접근할 수 있나요?\r\n  - 기본 배포 링크 기입: https://binggwa.github.io/react-payments/\r\n\r\n### 리뷰 요청 & 논의하고 싶은 내용\r\n#### 1) 이번 단계에서 가장 많이 고민했던 문제와 해결 과정에서 배운 점\r\n 안녕하세요 동키콩! 이번에 리뷰받게 된 비비빙입니다. 리액트가 처음이라 어색한 부분이 많을수도 있어 걱정되네요 ㅎㅎ 리뷰 잘 부탁드립니다! 🙏🙏\r\n\r\n#### [구조 사진]\r\n<img width=\"1307\" height=\"1330\" alt=\"react-payments step1구조\" src=\"https://github.com/user-attachments/assets/9c75da54-d90c-4349-b1e6-79b42ceea602\" />\r\n\r\n#### 🚨 많이 고민했던 문제들\r\n 페어와 함께 오랫동안 고민했던 문제는 주로 상태 관리에 관한 내용이었습니다. \r\n\r\n🌱 **상태 관리**\r\n 현재 구조는 카드번호, 유효기간, CVC의 3가지 상태를 최상위 구조인 App에서 한번에 관리하고 있으며, 에러 상태는 각 섹션별로 각자 가지고 있는 상태입니다.\r\n\r\n  - 에러 상태 관리\r\n 페어와 처음 이야기를 나누었을 때에는 App 에서 모든 상태를 관리하는게 어떤가 하는 생각이었습니다. 에러 상태 또한 App에서 한번에 관리하는게 맞을지 아니면 각 섹션마다 에러판별로직이 다를테니 섹션에서 관리해야하는지 고민했습니다. 결국 각 섹션 컴포넌트 내부에서 onBlur를 통해 에러 상태를 관라하기 위해 섹션별로 나누어서 작성했는데요, 어제 수업을 통해 파생상태는 상태로 관리하지 않는 것이 좋다는 말도 있고, 추후 단계를 위한 폼 제출 시 오류가 없는지 체크해야할 것 같은데 이 경우 부모 컴포넌트가 자식의 에러 상태를 알아야 하는 상황이 발생할 것 같아 여전히 고민인 부분입니다.\r\n\r\n  - 상태 통합 관리\r\n 현재 저희는 App에서 3개의 상태를 따로 관리하고 있는데요, 자식 컴포넌트에게 넘겨줄 상태를 각각 관리하고 있는 것인데 이것을 하나로 합치는 것에 대한 이야기가 나왔었습니다. 만약 하나로 관리하게 된다면 App에서 모인 폼 하나가 카드 정보 하나를 관리한다와 같이 직관적으로 보고, 폼 제출 시에도 묶어둔 상태 하나만 넘기면 되기 때문에 편리한 장점이 있지만, 그에 따른 트레이드오프로 카드번호, 유효기간, CVC중 하나만 바뀌어도 모든 정보가 바뀌어야 해서 렌더링이 과하게 되는 것이 아닌가 하는 얘기가 나왔습니다. 저희는 수업을 통한 공식문서 읽기를 통해 상태는 같이 업데이트되는 것들끼리 묶어야 한다고 생각했기에 따로 관리하는 쪽으로 진행했는데, 동키콩이 보기엔 어느 방향이 괜찮았을지 궁금합니다.\r\n\r\n  - Cvc 상태 관리 문제\r\n 위의 상태 통합 관리의 리렌더링 문제와 연관된 부분인데요, 현재 미션 수준에서는 화면에 Cvc 코드를 렌더링할 필요가 없습니다. 그렇다면 과연 app이 Cvc 상태를 알고있어야 하는가 라는 의문이 들었습니다. 페어와는 그냥 자연스럽게 카드번호, 유효기간을 상태로 관리하니 cvc도 특별한 논의 없이 app에 넣어 상태를 한번에 관리하는 것으로 생각했는데, cvc를 입력할 때마다 App의 상태가 바뀌므로 하위의 모든 컴포넌트가 영향을 받게 되는 것이 아닐까 하는 생각도 들어 추후 미션을 위한 확장성을 고려하는 것이 좋은지, 상태를 렌더링하는 컴포넌트와 가까운 곳에 두어야 한다는 리액트의 생각을 지켜 현재 상태에서 리액트스럽게 짜는 것이 좋은지 고민이 되었습니다.\r\n\r\n#### 2) 이번 리뷰를 통해 논의하고 싶은 부분\r\n\r\n#### 🌪️[논의하고 싶은 부분]\r\n\r\n 위 고민했던 부분을 통해 해결되지 않았던 부분을 여쭙고 싶습니다.\r\n\r\n1) 상태 관리\r\n> 결국 카드 번호, 유효기간, CVC를 하나의 객체로 묶을지에 대한 고민에서 값 업데이트의 독립성과 리렌더링 문제로 분리하는 것을 택했는데요, 추후 폼 제출을 위한 데이터가 응집되지 않는다는 단점이 있을 것으로 보이는데, 동키콩은 이런 상태를 다룰 때에는 어떤 방식을 선호하시는지 궁금합니다.\r\n\r\n2) 에러 처리\r\n> 에러 상태와 에러 메시지를 각 섹션 컴포넌트 내부에 두었는데, 추후 모든 제출 폼이 에러가 없을 때에만 다음으로 넘어가기 위해서는 부모가 자식의 에러 상태를 알아야하는 상황에 처할 것 같습니다. onBlur를 통한 즉각적인 에러를 유지하면서도 추후 폼의 유효성 검사로 확장하기 용이하려면 과연 어떤 방식이 괜찮을까요?\r\n\r\n> 또, 현재 유효기간 에러 판별 로직에서 에러 상태는 월/연을 나누었지만 에러메시지는 commonsection을 통해 한칸에 표시하다보니 문제가 있었습니다. 예를 들어, 월 칸에 오류가 뜬 뒤, 해결하지 않고 연 칸으로 넘어가고 또 오류가 뜨면, 월의 오류메시지가 연의 오류메시지로 상태가 덮혀버립니다. 이 때 연의 오류를 해결해도 월 칸은 오류가 해결되지 않았는데 월의 오류메시지가 남지 않는 문제가 있었는데요, 이를 해결하기 위해 판별 로직에 임시 변수를 할당해서 기억하도록 만들었는데 코드가 너무 비대해져버렸습니다.. \r\n조금 더 스마트한 해결방식이나 리팩토링을 어떻게 해야했을지 동키콩의 시야가 궁금합니다.\r\n\r\n3) 컴포넌트\r\n> 카드번호, 유효기간, CVC의 형태가 반복되어 UI 재사용성을 위해 CommonSection으로 공통 레이아웃을 분리했습니다. 그 후, NumberInput 부분은 개수가 모두 다르기에 children으로 주입받도록 설게했습니다. 그런데, 현재는 형태가 완전히 똑같아 이렇게 뺄 수 있었지만 요구사항이 변경되어 섹션별로 특별한 기능이 추가된다면, 이런 공통 컴포넌트가 유연한 확장이 가능한지 하는 의문이 들었습니다. 공통 컴포넌트를 설계함에 있어서 이러한 확장성과 폼 일관성을 함께 챙기도록 만드려면 어떻게 만드는 것이 좋을지 동키콩의 의견이 궁금합니다!\r\n\r\n---\r\n\r\n## ✅ 리뷰어 체크 포인트\r\n\r\n<!-- 리뷰어가 이 PR을 검토할 때 중점적으로 확인할 사항입니다.\r\n코드의 완성도만이 아니라, 리뷰이가 구현 과정에서 어떤 고민과 결정을 하며 학습했는지도 함께 고려해 주세요. -->\r\n\r\n### 1. Form 상태 관리 & Custom Hook 분리\r\n\r\n- 반복되는 로직을 custom hook으로 분리했는가?\r\n- hook 내부와 UI 컴포넌트의 **역할이 명확하게 분리**되어 있는가?\r\n- 상태 흐름이 직관적이며, Form 전체를 일관되게 관리할 수 있는 구조인가?\r\n\r\n### 2. 입력 UI 흐름과 UX\r\n\r\n- 카드 번호 입력 시 필드 간 **자동 포커싱 이동**이 자연스럽게 동작하는가?\r\n- 숫자만 입력 가능한 필드에서 제한, 에러 메시지, 유효성 피드백 등 **사용자 경험이 충분히 고려**되었는가?\r\n\r\n### 3. 컴포넌트 구조 및 재사용성\r\n\r\n- 컴포넌트가 명확한 **역할과 책임**을 가지며 과도하게 분리되거나 중첩되어 있지 않은가?\r\n- Input, Button 등 재사용 가능한 컴포넌트가 잘 정의되어 있는가?\r\n\r\n### 4. 상태 기반 유효성 검사 및 확인 버튼 활성화\r\n\r\n- 모든 필드가 유효할 때만 확인 버튼이 **정확히 활성화/비활성화**되는가?\r\n- 유효성 검사의 기준이 명확하고, **상태 변경에 따른 UI 반응**이 잘 연결되어 있는가?\r\n\r\n### 5. 비동기 상태 · 네트워크 경계 · 통합 테스트\r\n\r\n- 비동기 상태를 `idle | loading | success | error` 네 가지로 **명시적으로** 관리하고, `isLoading`/`error`를 별도 boolean으로 쪼개지 않았는가?\r\n- MSW handler가 `POST/GET/DELETE /cards`와 400 시나리오까지 포함하여 **네트워크 경계**에서 동작하는가?\r\n- 통합 테스트가 `fetch`·`axios`를 모킹하지 않고, **MSW + RTL**로 사용자 관점에서 작성되었는가?\r\n- RTL 요소 탐색이 `getByRole → getByText → getByLabelText → getByTestId` 우선순위를 따르고, 비동기 요소에 `findBy*`를 사용했는가?\r\n",
-38:      "body": "**Actionable comments posted: 7**\n\n<details>\n<summary>🧹 Nitpick comments (2)</summary><blockquote>\n\n<details>\n<summary>my-app/src/App.styles.ts (1)</summary><blockquote>\n\n`4-4`: _⚡ Quick win_\n\n**모바일 대응을 위해 viewport 단위 재검토를 권장합니다.**\n\nLine 4의 `height: 100vh`는 모바일 브라우저 주소창 변화 시 레이아웃 흔들림이 생길 수 있습니다. `min-height: 100dvh`(필요 시 fallback 병행)로 확인해보면 어떨까요?\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@my-app/src/App.styles.ts` at line 4, 파일 my-app/src/App.styles.ts에서 현재 사용 중인\n\"height: 100vh\" 규칙으로 인해 모바일 주소창 변화 시 레이아웃이 흔들릴 수 있으니, 해당 규칙을 \"min-height:\n100dvh\"로 대체하고 호환성을 위해 폴백으로 \"min-height: 100vh\" (또는 필요 시 기존 \"height: 100vh\")를\n순차적으로 선언하여 적용하세요; 즉, 찾을 식별자 \"height: 100vh\"를 교체하고 새로운 min-height 규칙을 해당 스타일\n블록(또는 관련 클래스/컴포넌트 스타일)에 추가하세요.\n```\n\n</details>\n\n</blockquote></details>\n<details>\n<summary>my-app/src/components/cardPreview/CardPreview.tsx (1)</summary><blockquote>\n\n`24-24`: **`EachCardNumber` 함수를 JSX 문법으로 호출하세요.**\n\n현재 `EachCardNumber(number, index)`는 React 컴포넌트처럼 보이지만 일반 함수로 호출되고 있습니다. 이 패턴은 두 가지 문제를 야기합니다:\n\n- `key` prop을 전달할 수 없어 React의 리스트 렌더링 규약을 위반합니다\n- 컴포넌트와 헬퍼 함수의 의도가 모호해집니다\n\n함수 시그니처를 `key`, `number`, `index`를 받도록 수정하고 JSX 문법으로 호출하세요: `<EachCardNumber key={index} number={number} index={index} />`\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@my-app/src/components/cardPreview/CardPreview.tsx` at line 24, The map\ncurrently calls EachCardNumber as a plain function (cardNumber.map((number,\nindex) => EachCardNumber(number, index))) which prevents passing a React key and\nblurs component intent; change the map to JSX syntax: cardNumber.map((number,\nindex) => <EachCardNumber key={index} number={number} index={index} />) and\nupdate the EachCardNumber component/signature to accept props (e.g., function\nEachCardNumber({ number, index }) or a React.FC with props number and index) so\nit renders correctly as a component and receives number and index via props.\n```\n\n</details>\n\n</blockquote></details>\n\n</blockquote></details>\n\n<details>\n<summary>🤖 Prompt for all review comments with AI agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nInline comments:\nIn `@my-app/.eslintrc.cjs`:\n- Around line 1-10: Remove the unused legacy ESLint config file by deleting the\n.eslintrc.cjs that exports the module.exports object (the parser/plugins/extends\nblock shown) because it’s ignored when a flat eslint.config.js exists; remove\nthe file from the repo and commit the deletion, then verify no other .eslintrc.*\nfiles remain to avoid confusion.\n\nIn `@my-app/.gitignore`:\n- Around line 10-14: .gitignore에 .env 계열 파일이 누락되어 있어 민감 정보가 추적될 수 있습니다;\n.gitignore 파일을 열고 기본 패턴(.env)과 모든 확장자 버전(.env.*, 예: .env.local,\n.env.production)을 무시하도록 추가하고, 필요하다면 템플릿용 .env.example 같은 예외 패턴(!.env.example)을\n남겨 두어 환경변수 파일이 커밋되지 않도록 수정하세요.\n\nIn `@my-app/index.html`:\n- Line 2: 현재 문서의 <html> 요소가 lang=\"en\"으로 설정되어 있어 한국어 UI와 불일치합니다; index.html의\n<html> 태그에서 lang=\"en\"을 lang=\"ko\"로 변경해 문서 언어를 한국어로 맞추고 스크린리더 등 접근성 도구가 올바른 언어를\n사용하도록 수정하세요.\n\nIn `@my-app/package.json`:\n- Around line 24-31: The dependency `@storybook/test` is pinned to 8.6.15 while\nall other `@storybook/`* packages are 10.3.5; update package.json by either\nchanging the `@storybook/test` entry to \"^10.3.5\" to align major versions or\nremove the `@storybook/test` dependency entirely if it's unused (search for\nimports/usages of \"@storybook/test\" in the codebase first); after changing\npackage.json run your package manager install and run tests/build to verify\nnothing breaks.\n\nIn `@my-app/src/components/cardPreview/cardBrandImage/CardBrandImage.tsx`:\n- Around line 10-13: The checkMasterCard function only checks 51–55 and misses\nthe newer Mastercard BIN range 2221–2720; update checkMasterCard to parse both\nthe first two digits (Number(cardNumber.slice(0,2))) and the first four digits\n(Number(cardNumber.slice(0,4))) and return true if the two-digit value is\nbetween 51 and 55 OR the four-digit value is between 2221 and 2720, making sure\nto guard against empty/short cardNumber before slicing; reference\ncheckMasterCard and cardNumber when applying the change so EmptyImg no longer\nappears for valid Mastercard ranges.\n\nIn `@my-app/src/styles/reset.css`:\n- Around line 18-19: The CSS has conflicting declarations—keep only one of the\ntwo conflicting properties to satisfy stylelint: remove the redundant\n\"font-size: 100%\" declaration so \"font: inherit\" remains (it covers font-size\nvia the shorthand), i.e., delete the \"font-size: 100%\" line where the stylesheet\ncurrently sets both \"font-size\" and \"font: inherit\".\n\nIn `@my-app/src/utils/Validation.ts`:\n- Around line 10-13: isValidRange currently treats lengths greater than\nmaxLength as valid; update the function isValidRange to return true only when\nvalue.length is within 0 and maxLength inclusive (i.e. value.length >= 0 &&\nvalue.length <= maxLength) and return false otherwise; if the intended behaviour\nis to require an exact length instead, change the check to value.length ===\nmaxLength in the isValidRange implementation.\n\n---\n\nNitpick comments:\nIn `@my-app/src/App.styles.ts`:\n- Line 4: 파일 my-app/src/App.styles.ts에서 현재 사용 중인 \"height: 100vh\" 규칙으로 인해 모바일 주소창\n변화 시 레이아웃이 흔들릴 수 있으니, 해당 규칙을 \"min-height: 100dvh\"로 대체하고 호환성을 위해 폴백으로\n\"min-height: 100vh\" (또는 필요 시 기존 \"height: 100vh\")를 순차적으로 선언하여 적용하세요; 즉, 찾을 식별자\n\"height: 100vh\"를 교체하고 새로운 min-height 규칙을 해당 스타일 블록(또는 관련 클래스/컴포넌트 스타일)에 추가하세요.\n\nIn `@my-app/src/components/cardPreview/CardPreview.tsx`:\n- Line 24: The map currently calls EachCardNumber as a plain function\n(cardNumber.map((number, index) => EachCardNumber(number, index))) which\nprevents passing a React key and blurs component intent; change the map to JSX\nsyntax: cardNumber.map((number, index) => <EachCardNumber key={index}\nnumber={number} index={index} />) and update the EachCardNumber\ncomponent/signature to accept props (e.g., function EachCardNumber({ number,\nindex }) or a React.FC with props number and index) so it renders correctly as a\ncomponent and receives number and index via props.\n```\n\n</details>\n\n<details>\n<summary>🪄 Autofix (Beta)</summary>\n\nFix all unresolved CodeRabbit comments on this PR:\n\n- [ ] <!-- {\"checkboxId\": \"4b0d0e0a-96d7-4f10-b296-3a18ea78f0b9\"} --> Push a commit to this branch (recommended)\n- [ ] <!-- {\"checkboxId\": \"ff5b1114-7d8c-49e6-8ac1-43f82af23a33\"} --> Create a new PR with the fixes\n\n</details>\n\n---\n\n<details>\n<summary>ℹ️ Review info</summary>\n\n<details>\n<summary>⚙️ Run configuration</summary>\n\n**Configuration used**: Organization UI\n\n**Review profile**: CHILL\n\n**Plan**: Pro\n\n**Run ID**: `a7a44c57-5675-4171-a2b1-c92bbb46c5fc`\n\n</details>\n\n<details>\n<summary>📥 Commits</summary>\n\nReviewing files that changed from the base of the PR and between 8d4c2c73f7cce87ffaae55245ae1cfd10228981d and fc02d45d960f053f4d0a95beae78087fab32abef.\n\n</details>\n\n<details>\n<summary>⛔ Files ignored due to path filters (7)</summary>\n\n* `my-app/package-lock.json` is excluded by `!**/package-lock.json`\n* `my-app/public/favicon.svg` is excluded by `!**/*.svg`\n* `my-app/public/icons.svg` is excluded by `!**/*.svg`\n* `my-app/src/assets/MaskingImg.png` is excluded by `!**/*.png`\n* `my-app/src/assets/Mastercard.png` is excluded by `!**/*.png`\n* `my-app/src/assets/Visa.png` is excluded by `!**/*.png`\n* `package-lock.json` is excluded by `!**/package-lock.json`\n\n</details>\n\n<details>\n<summary>📒 Files selected for processing (40)</summary>\n\n* `README.md`\n* `my-app/.eslintrc.cjs`\n* `my-app/.gitignore`\n* `my-app/.prettierrc`\n* `my-app/.storybook/main.ts`\n* `my-app/.storybook/preview.ts`\n* `my-app/README.md`\n* `my-app/eslint.config.js`\n* `my-app/index.html`\n* `my-app/package.json`\n* `my-app/src/App.stories.tsx`\n* `my-app/src/App.styles.ts`\n* `my-app/src/App.tsx`\n* `my-app/src/components/cardNumberSection/CardNumberSection.stories.tsx`\n* `my-app/src/components/cardNumberSection/CardNumberSection.tsx`\n* `my-app/src/components/cardPreview/CardPreview.stories.tsx`\n* `my-app/src/components/cardPreview/CardPreview.styles.ts`\n* `my-app/src/components/cardPreview/CardPreview.tsx`\n* `my-app/src/components/cardPreview/cardBrandImage/CardBrandImage.styles.ts`\n* `my-app/src/components/cardPreview/cardBrandImage/CardBrandImage.tsx`\n* `my-app/src/components/cardPreview/eachCardNumber/EachCardNumber.styles.ts`\n* `my-app/src/components/cardPreview/eachCardNumber/EachCardNumber.tsx`\n* `my-app/src/components/common/commonSection/CommonSection.styles.ts`\n* `my-app/src/components/common/commonSection/CommonSection.tsx`\n* `my-app/src/components/common/numberInput/NumberInput.stories.tsx`\n* `my-app/src/components/common/numberInput/NumberInput.styles.ts`\n* `my-app/src/components/common/numberInput/NumberInput.tsx`\n* `my-app/src/components/cvcSection/CvcSection.tsx`\n* `my-app/src/components/cvcSection/CvsSection.stories.tsx`\n* `my-app/src/components/expirationDateSection/ExpirationDateSection.stories.tsx`\n* `my-app/src/components/expirationDateSection/ExpirationDateSection.tsx`\n* `my-app/src/main.tsx`\n* `my-app/src/styles/reset.css`\n* `my-app/src/utils/Validation.ts`\n* `my-app/tsconfig.app.json`\n* `my-app/tsconfig.json`\n* `my-app/tsconfig.node.json`\n* `my-app/vite.config.ts`\n* `my-app/vitest.shims.d.ts`\n* `package.json`\n\n</details>\n\n</details>\n\n<!-- This is an auto-generated comment by CodeRabbit for review status -->",
-53:      "body": "안녕하세요 비비빙~!! 이번 페이먼츠 리뷰를 맡게된 동키콩입니다! 레벨2도 한번 잘 헤쳐나가보시죠!!\n\n리액트를 처음이라 바로 페이먼츠 미션을 들어가는 것이 쉽지 않으셨을텐데 아주 잘 구현해주셨네요! CommonSection, NumberInput로 반복 UI를 줄이려고 해주셨고 각 필드들의 규칙들도 명확하게 코드에 잘 드러나서 좋았습니다! 또 storybook으로 테스트해주신 것도 좋았구요!\n\n지금 수준에서는 괜찮은 것 같지만 컴포넌트 내부에 UI 렌더링, 도메인 검증 로직이 함께 있어 함수가 커지고 있어요. 리액트에서는 어떻게 이런 문제를 해결할 수 있을지 학습해보는 것도 좋은 경험이 될 것 같습니다!! 또 많이 시간이 부족하셨을 것 같지만 story파일을 정의하실 때 기본 케이스 뿐만아니라 경계값 에러 상태를 더 명시하면 스토리 파일이 컴포넌트 문서 가치가 더 올라갈 것 같아요!!\n\n# Q&A\n\n> 상태 관리\n결국 카드 번호, 유효기간, CVC를 하나의 객체로 묶을지에 대한 고민에서 값 업데이트의 독립성과 리렌더링 문제로 분리하는 것을 택했는데요, 추후 폼 제출을 위한 데이터가 응집되지 않는다는 단점이 있을 것으로 보이는데, 동키콩은 이런 상태를 다룰 때에는 어떤 방식을 선호하시는지 궁금합니다.\n\n고민을 많이 해주신 것 같은데요 제생각에 기준은 함께 검증, 제출, 전이되는가로 판단할 것 같습니다! 보다더 중요한 것은 상태의 응집성이라고 생각이 되어서요!\n\n리렌더링을 먼저 걱정하기보다 구조 명확성을 우선하고 리액트에서 많은 최적화 기법을 제공하기 떄문에 필요할 때 최적화하는 것이 더 좋은 선택이라 생각합니다!\n\n> 에러 처리\n에러 상태와 에러 메시지를 각 섹션 컴포넌트 내부에 두었는데, 추후 모든 제출 폼이 에러가 없을 때에만 다음으로 넘어가기 위해서는 부모가 자식의 에러 상태를 알아야하는 상황에 처할 것 같습니다. onBlur를 통한 즉각적인 에러를 유지하면서도 추후 폼의 유효성 검사로 확장하기 용이하려면 과연 어떤 방식이 괜찮을까요?\n\n제가 질문을 잘 이해한 것인지는 모르겠지만 에러 상태를 즉각적으로 보여주면서도, 폼 전체 유효성 검사를 위해 에러 상태를 부모 컴포넌트까지 끌어올리는 방법을 여쭤보신 것으로 이해를 했는데요. 말씀해주신대로 부모 컴포넌트가 해당 상태를 알아야한다면 부모 컴포넌트로 해당 상태를 올리고 prop으로 전달 하는 형식이 가장 기본이 될 것 같아요. 이에 따라 prop이 늘어나고 로직이 복잡해진다면 그때 또 다른 솔루션을 찾을 것 같습니ㅏㄷ!\n\n> 또, 현재 유효기간 에러 판별 로직에서 에러 상태는 월/연을 나누었지만 에러메시지는 commonsection을 통해 한칸에 표시하다보니 문제가 있었습니다. 예를 들어, 월 칸에 오류가 뜬 뒤, 해결하지 않고 연 칸으로 넘어가고 또 오류가 뜨면, 월의 오류메시지가 연의 오류메시지로 상태가 덮혀버립니다. 이 때 연의 오류를 해결해도 월 칸은 오류가 해결되지 않았는데 월의 오류메시지가 남지 않는 문제가 있었는데요, 이를 해결하기 위해 판별 로직에 임시 변수를 할당해서 기억하도록 만들었는데 코드가 너무 비대해져버렸습니다..\n조금 더 스마트한 해결방식이나 리팩토링을 어떻게 해야했을지 동키콩의 시야가 궁금합니다.\n\n저라면 errorMessage를 별도 상태로 저장하지 않고, month, year의 검증 결과에서 매 렌더마다 파생해 계산할 것 같아요. 이렇게 하면 월,연 메시지가 서로 덮이는 문제가 사라지고, 임시 변수로 기억하지 않아도 UI와 검증 상태가 항상 일치하게 될 것 같습니다.\n\n\n> 컴포넌트\n카드번호, 유효기간, CVC의 형태가 반복되어 UI 재사용성을 위해 CommonSection으로 공통 레이아웃을 분리했습니다. 그 후, NumberInput 부분은 개수가 모두 다르기에 children으로 주입받도록 설게했습니다. 그런데, 현재는 형태가 완전히 똑같아 이렇게 뺄 수 있었지만 요구사항이 변경되어 섹션별로 특별한 기능이 추가된다면, 이런 공통 컴포넌트가 유연한 확장이 가능한지 하는 의문이 들었습니다. 공통 컴포넌트를 설계함에 있어서 이러한 확장성과 폼 일관성을 함께 챙기도록 만드려면 어떻게 만드는 것이 좋을지 동키콩의 의견이 궁금합니다!\n\n저는 공통 컴포넌트는 레이아웃, 표현 책임 까지만, 섹션별 정책(검증 조건, 메시지 우선순위, 포커스 이동 등)은 바깥에서 주입받는 구조를 추천드립니다.\n그러면 요구사항이 바뀌어도 공통 컴포넌트는 안정적으로 재사용되고, 각 섹션만 독립적으로 바꿀 수 있어서 유지보수가 더 좋아질 것 같아요!.\n지금처럼 children 기반으로 열어두신 건 확장성 측면에서 이미 좋다고 생각합니다! 다음 단계에서는 무엇을 공통으로 고정할지 무엇을 주입으로 열어둘지 기준만 조금 더 명확히 잡아보시면 훨씬 더 좋아질 것 같아요.\n\n\n리액트가 처음이라 미션이 쉽지 않으셨을텐데 고생많으셨습니다! 코멘트 확인해주시고 다시 요청주시면 감사하겠습니다!",
-126:  "path": "my-app/src/utils/Validation.ts",
-128:  "body": "_⚠️ Potential issue_ | _🟡 Minor_ | _⚡ Quick win_\n\n**`isValidRange`가 초과 길이를 유효로 처리합니다.**\n\nLine 11 조건은 `value.length < maxLength`만 실패 처리해서, `maxLength`를 초과한 값은 `true`가 됩니다. 지금은 입력 단계에서 길이를 제한하고 있지만, blur 검증 유틸 자체 의도를 “정확히 필요한 자릿수”로 둘지 한 번 점검해보면 좋겠습니다.\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@my-app/src/utils/Validation.ts` around lines 10 - 13, isValidRange currently\ntreats lengths greater than maxLength as valid; update the function isValidRange\nto return true only when value.length is within 0 and maxLength inclusive (i.e.\nvalue.length >= 0 && value.length <= maxLength) and return false otherwise; if\nthe intended behaviour is to require an exact length instead, change the check\nto value.length === maxLength in the isValidRange implementation.\n```\n\n</details>\n\n<!-- fingerprinting:phantom:poseidon:hawk:889b43ae-8c63-4387-9d1d-7b3b7bb61147 -->\n\n<!-- 4e71b3a2 -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->",
-133:  "path": "my-app/src/App.tsx",
-140:  "path": "my-app/src/components/cardNumberSection/CardNumberSection.tsx",
-147:  "path": "my-app/src/utils/Validation.ts",
-154:  "path": "my-app/src/components/expirationDateSection/ExpirationDateSection.tsx",
-161:  "path": "my-app/src/components/expirationDateSection/ExpirationDateSection.tsx",
-175:  "path": "my-app/src/components/common/commonSection/CommonSection.tsx",
-182:  "path": "my-app/src/components/common/commonSection/CommonSection.tsx",
-189:  "path": "my-app/src/components/cardPreview/CardPreview.tsx",
-210:  "path": "my-app/src/components/expirationDateSection/ExpirationDateSection.tsx",
-231:===== PR #499 DIFF (capped 80KB) =====
+## 페어 고민 (PR body 핵심 발췌)
 
-hook: PostToolUse
-hook: PostToolUse
-hook: PostToolUse Completed
-hook: PostToolUse Completed
-hook: PreToolUse
-hook: PreToolUse Completed
-exec
-/bin/zsh -lc "sed -n '231,520p' _drafts/pr-raw/pr-499.txt" in /Users/makerjun/git/woowacourse/fe-faq-archive
- succeeded in 0ms:
-===== PR #499 DIFF (capped 80KB) =====
-diff --git a/README.md b/README.md
-index 888803b842..2f91f6bbcd 100644
---- a/README.md
-+++ b/README.md
-@@ -13,3 +13,45 @@ npm create vite@latest my-app -- --template react-ts
- npm install
- npm run dev
- ```
-+
-+# 구현할 기능 목록
-+## 환경설정
-+- 빌드 도구 (Vite)
-+- CSS 스타일링 라이브러리 (emotion)
-+- react 설정
-+- JS
-+
-+## 카드 UI
-+- 브랜드 검증
-+  - 카드번호 1번째 폼에 따라 visa or master 표시
-+- 카드번호 3번째 폼부터는 **** 로 표시
-+- 월 입력 시 MM/ 표시
-+- 연 입력 시 MM/YY 표시
-+
-+## 카드 번호 입력 컴포넌트
-+- 카드번호 검증
-+
-+## 유효기간 입력 컴포넌트
-+- 월 검증
-+- 연 검증
-+
-+## CVC 입력 컴포넌트
-+- CVC 검증
-+
-+## Input 폼
-+- Number 검증
-+- 에러 체크 기능
-+  - 에러 발생 시 테두리 빨간색으로 변경
-+  - 에러 발생 시 하단에 에러 메시지 표시 필요
-+
-+## 전체 앱
-+- 상태 관리
-+  - 카드번호
-+  - 유효기간
-+
-+## StoryBook 테스트
-+- 개발 중 UI 확인용으로 간단하게 사용
-+- 기능 개발 완료 후 목 데이터로 테스트 코드 작성
-+
-+## 구조 관련 하고 싶은 것
-+- 3개의 반복되는 Section 별로 공통 컴포넌트를 만들어 사용하고 싶다.
-\ No newline at end of file
-diff --git a/my-app/.eslintrc.cjs b/my-app/.eslintrc.cjs
-new file mode 100644
-index 0000000000..a5609db8fd
---- /dev/null
-+++ b/my-app/.eslintrc.cjs
-@@ -0,0 +1,10 @@
-+module.exports = {
-+  parser: "@typescript-eslint/parser",
-+  plugins: ["@typescript-eslint", "react-hooks"],
-+  extends: [
-+    "eslint:recommended",
-+    "plugin:@typescript-eslint/recommended",
-+    "plugin:react-hooks/recommended",
-+    "prettier",
-+  ],
-+};
-\ No newline at end of file
-diff --git a/my-app/.gitignore b/my-app/.gitignore
-new file mode 100644
-index 0000000000..f52343a92d
---- /dev/null
-+++ b/my-app/.gitignore
-@@ -0,0 +1,27 @@
-+# Logs
-+logs
-+*.log
-+npm-debug.log*
-+yarn-debug.log*
-+yarn-error.log*
-+pnpm-debug.log*
-+lerna-debug.log*
-+
-+node_modules
-+dist
-+dist-ssr
-+*.local
-+
-+# Editor directories and files
-+.vscode/*
-+!.vscode/extensions.json
-+.idea
-+.DS_Store
-+*.suo
-+*.ntvs*
-+*.njsproj
-+*.sln
-+*.sw?
-+
-+*storybook.log
-+storybook-static
-diff --git a/my-app/.prettierrc b/my-app/.prettierrc
-new file mode 100644
-index 0000000000..02ff4340e1
---- /dev/null
-+++ b/my-app/.prettierrc
-@@ -0,0 +1,5 @@
-+{
-+  "semi": true,
-+  "singleQuote": true,
-+  "tabWidth": 2
-+}
-\ No newline at end of file
-diff --git a/my-app/.storybook/main.ts b/my-app/.storybook/main.ts
-new file mode 100644
-index 0000000000..78cf7b3929
---- /dev/null
-+++ b/my-app/.storybook/main.ts
-@@ -0,0 +1,17 @@
-+import type { StorybookConfig } from '@storybook/react-vite';
-+
-+const config: StorybookConfig = {
-+  "stories": [
-+    "../src/**/*.mdx",
-+    "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"
-+  ],
-+  "addons": [
-+    "@chromatic-com/storybook",
-+    "@storybook/addon-vitest",
-+    "@storybook/addon-a11y",
-+    "@storybook/addon-docs",
-+    "@storybook/addon-onboarding"
-+  ],
-+  "framework": "@storybook/react-vite"
-+};
-+export default config;
-\ No newline at end of file
-diff --git a/my-app/.storybook/preview.ts b/my-app/.storybook/preview.ts
-new file mode 100644
-index 0000000000..073582ec03
---- /dev/null
-+++ b/my-app/.storybook/preview.ts
-@@ -0,0 +1,21 @@
-+import type { Preview } from '@storybook/react-vite'
-+
-+const preview: Preview = {
-+  parameters: {
-+    controls: {
-+      matchers: {
-+       color: /(background|color)$/i,
-+       date: /Date$/i,
-+      },
-+    },
-+
-+    a11y: {
-+      // 'todo' - show a11y violations in the test UI only
-+      // 'error' - fail CI on a11y violations
-+      // 'off' - skip a11y checks entirely
-+      test: 'todo'
-+    }
-+  },
-+};
-+
-+export default preview;
-\ No newline at end of file
-diff --git a/my-app/README.md b/my-app/README.md
-new file mode 100644
-index 0000000000..7dbf7ebf3b
---- /dev/null
-+++ b/my-app/README.md
-@@ -0,0 +1,73 @@
-+# React + TypeScript + Vite
-+
-+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-+
-+Currently, two official plugins are available:
-+
-+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-+
-+## React Compiler
-+
-+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-+
-+## Expanding the ESLint configuration
-+
-+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-+
-+```js
-+export default defineConfig([
-+  globalIgnores(['dist']),
-+  {
-+    files: ['**/*.{ts,tsx}'],
-+    extends: [
-+      // Other configs...
-+
-+      // Remove tseslint.configs.recommended and replace with this
-+      tseslint.configs.recommendedTypeChecked,
-+      // Alternatively, use this for stricter rules
-+      tseslint.configs.strictTypeChecked,
-+      // Optionally, add this for stylistic rules
-+      tseslint.configs.stylisticTypeChecked,
-+
-+      // Other configs...
-+    ],
-+    languageOptions: {
-+      parserOptions: {
-+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-+        tsconfigRootDir: import.meta.dirname,
-+      },
-+      // other options...
-+    },
-+  },
-+])
-+```
-+
-+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-+
-+```js
-+// eslint.config.js
-+import reactX from 'eslint-plugin-react-x'
-+import reactDom from 'eslint-plugin-react-dom'
-+
-+export default defineConfig([
-+  globalIgnores(['dist']),
-+  {
-+    files: ['**/*.{ts,tsx}'],
-+    extends: [
-+      // Other configs...
-+      // Enable lint rules for React
-+      reactX.configs['recommended-typescript'],
-+      // Enable lint rules for React DOM
-+      reactDom.configs.recommended,
-+    ],
-+    languageOptions: {
-+      parserOptions: {
-+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-+        tsconfigRootDir: import.meta.dirname,
-+      },
-+      // other options...
-+    },
-+  },
-+])
-+```
-diff --git a/my-app/eslint.config.js b/my-app/eslint.config.js
-new file mode 100644
-index 0000000000..57a1df00f1
---- /dev/null
-+++ b/my-app/eslint.config.js
-@@ -0,0 +1,22 @@
-+// For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
-+import storybook from "eslint-plugin-storybook";
-+
-+import js from '@eslint/js'
-+import globals from 'globals'
-+import reactHooks from 'eslint-plugin-react-hooks'
-+import reactRefresh from 'eslint-plugin-react-refresh'
-+import tseslint from 'typescript-eslint'
-+import { defineConfig, globalIgnores } from 'eslint/config'
-+
-+export default defineConfig([globalIgnores(['dist']), {
-+  files: ['**/*.{ts,tsx}'],
-+  extends: [
-+    js.configs.recommended,
-+    tseslint.configs.recommended,
-+    reactHooks.configs.flat.recommended,
-+    reactRefresh.configs.vite,
-+  ],
-+  languageOptions: {
-+    globals: globals.browser,
-+  },
-+}, ...storybook.configs["flat/recommended"]])
-diff --git a/my-app/index.html b/my-app/index.html
-new file mode 100644
-index 0000000000..b25dfbe40b
---- /dev/null
-+++ b/my-app/index.html
-@@ -0,0 +1,13 @@
-+<!doctype html>
-+<html lang="en">
-+  <head>
-+    <meta charset="UTF-8" />
-+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-+    <title>my-app</title>
-+  </head>
-+  <body>
-+    <div id="root"></div>
-+    <script type="module" src="/src/main.tsx"></script>
+- 페어와 함께 오랫동안 고민했던 문제는 주로 상태 관리에 관한 내용이었습니다.
+- 결국 각 섹션 컴포넌트 내부에서 onBlur를 통해 에러 상태를 관라하기 위해 섹션별로 나누어서 작성했는데요
+- 저희는 수업을 통한 공식문서 읽기를 통해 상태는 같이 업데이트되는 것들끼리 묶어야 한다고 생각했기에 따로 관리하는 쪽으로 진행했는데, 동키콩이 보기엔 어느 방향이 괜찮았을지 궁금합니다.
+- 그렇다면 과연 app이 Cvc 상태를 알고있어야 하는가 라는 의문이 들었습니다.
+- NumberInput 부분은 개수가 모두 다르기에 children으로 주입받도록 설게했습니다.
 
-hook: PostToolUse
-hook: PostToolUse
-hook: PostToolUse Completed
-hook: PostToolUse Completed
-hook: PreToolUse
-hook: PreToolUse Completed
-exec
-/bin/zsh -lc "sed -n '520,920p' _drafts/pr-raw/pr-499.txt" in /Users/makerjun/git/woowacourse/fe-faq-archive
- succeeded in 0ms:
-+    <script type="module" src="/src/main.tsx"></script>
-+  </body>
-+</html>
-diff --git a/my-app/package-lock.json b/my-app/package-lock.json
-new file mode 100644
-index 0000000000..fa3b6caabe
---- /dev/null
-+++ b/my-app/package-lock.json
-@@ -0,0 +1,6582 @@
-+{
-+  "name": "my-app",
-+  "version": "0.0.0",
-+  "lockfileVersion": 3,
-+  "requires": true,
-+  "packages": {
-+    "": {
-+      "name": "my-app",
-+      "version": "0.0.0",
-+      "dependencies": {
-+        "@emotion/react": "^11.14.0",
-+        "@emotion/styled": "^11.14.1",
-+        "react": "^19.2.5",
-+        "react-dom": "^19.2.5"
-+      },
-+      "devDependencies": {
-+        "@chromatic-com/storybook": "^5.1.2",
-+        "@eslint/js": "^10.0.1",
-+        "@storybook/addon-a11y": "^10.3.5",
-+        "@storybook/addon-docs": "^10.3.5",
-+        "@storybook/addon-onboarding": "^10.3.5",
-+        "@storybook/addon-vitest": "^10.3.5",
-+        "@storybook/react-vite": "^10.3.5",
-+        "@storybook/test": "^8.6.15",
-+        "@types/node": "^24.12.2",
-+        "@types/react": "^19.2.14",
-+        "@types/react-dom": "^19.2.3",
-+        "@typescript-eslint/eslint-plugin": "^8.59.1",
-+        "@typescript-eslint/parser": "^8.59.1",
-+        "@vitejs/plugin-react": "^6.0.1",
-+        "@vitest/browser-playwright": "^4.1.5",
-+        "@vitest/coverage-v8": "^4.1.5",
-+        "eslint": "^10.2.1",
-+        "eslint-config-prettier": "^10.1.8",
-+        "eslint-plugin-react-hooks": "^7.1.1",
-+        "eslint-plugin-react-refresh": "^0.5.2",
-+        "eslint-plugin-storybook": "^10.3.5",
-+        "gh-pages": "^6.3.0",
-+        "globals": "^17.5.0",
-+        "playwright": "^1.59.1",
-+        "prettier": "^3.8.3",
-+        "storybook": "^10.3.5",
-+        "typescript": "~6.0.2",
-+        "typescript-eslint": "^8.58.2",
-+        "vite": "^8.0.10",
-+        "vitest": "^4.1.5"
-+      }
-+    },
-+    "node_modules/@adobe/css-tools": {
-+      "version": "4.4.4",
-+      "resolved": "https://registry.npmjs.org/@adobe/css-tools/-/css-tools-4.4.4.tgz",
-+      "integrity": "sha512-Elp+iwUx5rN5+Y8xLt5/GRoG20WGoDCQ/1Fb+1LiGtvwbDavuSk0jhD/eZdckHAuzcDzccnkv+rEjyWfRx18gg==",
-+      "dev": true,
-+      "license": "MIT"
-+    },
-+    "node_modules/@babel/code-frame": {
-+      "version": "7.29.0",
-+      "resolved": "https://registry.npmjs.org/@babel/code-frame/-/code-frame-7.29.0.tgz",
-+      "integrity": "sha512-9NhCeYjq9+3uxgdtp20LSiJXJvN0FeCtNGpJxuMFZ1Kv3cWUNb6DOhJwUvcVCzKGR66cw4njwM6hrJLqgOwbcw==",
-+      "license": "MIT",
-+      "dependencies": {
-+        "@babel/helper-validator-identifier": "^7.28.5",
-+        "js-tokens": "^4.0.0",
-+        "picocolors": "^1.1.1"
-+      },
-+      "engines": {
-+        "node": ">=6.9.0"
-+      }
-+    },
-+    "node_modules/@babel/compat-data": {
-+      "version": "7.29.0",
-+      "resolved": "https://registry.npmjs.org/@babel/compat-data/-/compat-data-7.29.0.tgz",
-+      "integrity": "sha512-T1NCJqT/j9+cn8fvkt7jtwbLBfLC/1y1c7NtCeXFRgzGTsafi68MRv8yzkYSapBnFA6L3U2VSc02ciDzoAJhJg==",
-+      "dev": true,
-+      "license": "MIT",
-+      "engines": {
-+        "node": ">=6.9.0"
-+      }
-+    },
-+    "node_modules/@babel/core": {
-+      "version": "7.29.0",
-+      "resolved": "https://registry.npmjs.org/@babel/core/-/core-7.29.0.tgz",
-+      "integrity": "sha512-CGOfOJqWjg2qW/Mb6zNsDm+u5vFQ8DxXfbM09z69p5Z6+mE1ikP2jUXw+j42Pf1XTYED2Rni5f95npYeuwMDQA==",
-+      "dev": true,
-+      "license": "MIT",
-+      "dependencies": {
-+        "@babel/code-frame": "^7.29.0",
-+        "@babel/generator": "^7.29.0",
-+        "@babel/helper-compilation-targets": "^7.28.6",
-+        "@babel/helper-module-transforms": "^7.28.6",
-+        "@babel/helpers": "^7.28.6",
-+        "@babel/parser": "^7.29.0",
-+        "@babel/template": "^7.28.6",
-+        "@babel/traverse": "^7.29.0",
-+        "@babel/types": "^7.29.0",
-+        "@jridgewell/remapping": "^2.3.5",
-+        "convert-source-map": "^2.0.0",
-+        "debug": "^4.1.0",
-+        "gensync": "^1.0.0-beta.2",
-+        "json5": "^2.2.3",
-+        "semver": "^6.3.1"
-+      },
-+      "engines": {
-+        "node": ">=6.9.0"
-+      },
-+      "funding": {
-+        "type": "opencollective",
-+        "url": "https://opencollective.com/babel"
-+      }
-+    },
-+    "node_modules/@babel/generator": {
-+      "version": "7.29.1",
-+      "resolved": "https://registry.npmjs.org/@babel/generator/-/generator-7.29.1.tgz",
-+      "integrity": "sha512-qsaF+9Qcm2Qv8SRIMMscAvG4O3lJ0F1GuMo5HR/Bp02LopNgnZBC/EkbevHFeGs4ls/oPz9v+Bsmzbkbe+0dUw==",
-+      "license": "MIT",
-+      "dependencies": {
-+        "@babel/parser": "^7.29.0",
-+        "@babel/types": "^7.29.0",
-+        "@jridgewell/gen-mapping": "^0.3.12",
-+        "@jridgewell/trace-mapping": "^0.3.28",
-+        "jsesc": "^3.0.2"
-+      },
-+      "engines": {
-+        "node": ">=6.9.0"
-+      }
-+    },
-+    "node_modules/@babel/helper-compilation-targets": {
-+      "version": "7.28.6",
-+      "resolved": "https://registry.npmjs.org/@babel/helper-compilation-targets/-/helper-compilation-targets-7.28.6.tgz",
-+      "integrity": "sha512-JYtls3hqi15fcx5GaSNL7SCTJ2MNmjrkHXg4FSpOA/grxK8KwyZ5bubHsCq8FXCkua6xhuaaBit+3b7+VZRfcA==",
-+      "dev": true,
-+      "license": "MIT",
-+      "dependencies": {
-+        "@babel/compat-data": "^7.28.6",
-+        "@babel/helper-validator-option": "^7.27.1",
-+        "browserslist": "^4.24.0",
-+        "lru-cache": "^5.1.1",
-+        "semver": "^6.3.1"
-+      },
-+      "engines": {
-+        "node": ">=6.9.0"
-+      }
-+    },
-+    "node_modules/@babel/helper-globals": {
-+      "version": "7.28.0",
-+      "resolved": "https://registry.npmjs.org/@babel/helper-globals/-/helper-globals-7.28.0.tgz",
-+      "integrity": "sha512-+W6cISkXFa1jXsDEdYA8HeevQT/FULhxzR99pxphltZcVaugps53THCeiWA8SguxxpSp3gKPiuYfSWopkLQ4hw==",
-+      "license": "MIT",
-+      "engines": {
-+        "node": ">=6.9.0"
-+      }
-+    },
-+    "node_modules/@babel/helper-module-imports": {
-+      "version": "7.28.6",
-+      "resolved": "https://registry.npmjs.org/@babel/helper-module-imports/-/helper-module-imports-7.28.6.tgz",
-+      "integrity": "sha512-l5XkZK7r7wa9LucGw9LwZyyCUscb4x37JWTPz7swwFE/0FMQAGpiWUZn8u9DzkSBWEcK25jmvubfpw2dnAMdbw==",
-+      "license": "MIT",
-+      "dependencies": {
-+        "@babel/traverse": "^7.28.6",
-+        "@babel/types": "^7.28.6"
-+      },
-+      "engines": {
-+        "node": ">=6.9.0"
-+      }
-+    },
-+    "node_modules/@babel/helper-module-transforms": {
-+      "version": "7.28.6",
-+      "resolved": "https://registry.npmjs.org/@babel/helper-module-transforms/-/helper-module-transforms-7.28.6.tgz",
-+      "integrity": "sha512-67oXFAYr2cDLDVGLXTEABjdBJZ6drElUSI7WKp70NrpyISso3plG9SAGEF6y7zbha/wOzUByWWTJvEDVNIUGcA==",
-+      "dev": true,
-+      "license": "MIT",
-+      "dependencies": {
-+        "@babel/helper-module-imports": "^7.28.6",
-+        "@babel/helper-validator-identifier": "^7.28.5",
-+        "@babel/traverse": "^7.28.6"
-+      },
-+      "engines": {
-+        "node": ">=6.9.0"
-+      },
-+      "peerDependencies": {
-+        "@babel/core": "^7.0.0"
-+      }
-+    },
-+    "node_modules/@babel/helper-string-parser": {
-+      "version": "7.27.1",
-+      "resolved": "https://registry.npmjs.org/@babel/helper-string-parser/-/helper-string-parser-7.27.1.tgz",
-+      "integrity": "sha512-qMlSxKbpRlAridDExk92nSobyDdpPijUq2DW6oDnUqd0iOGxmQjyqhMIihI9+zv4LPyZdRje2cavWPbCbWm3eA==",
-+      "license": "MIT",
-+      "engines": {
-+        "node": ">=6.9.0"
-+      }
-+    },
-+    "node_modules/@babel/helper-validator-identifier": {
-+      "version": "7.28.5",
-+      "resolved": "https://registry.npmjs.org/@babel/helper-validator-identifier/-/helper-validator-identifier-7.28.5.tgz",
-+      "integrity": "sha512-qSs4ifwzKJSV39ucNjsvc6WVHs6b7S03sOh2OcHF9UHfVPqWWALUsNUVzhSBiItjRZoLHx7nIarVjqKVusUZ1Q==",
-+      "license": "MIT",
-+      "engines": {
-+        "node": ">=6.9.0"
-+      }
-+    },
-+    "node_modules/@babel/helper-validator-option": {
-+      "version": "7.27.1",
-+      "resolved": "https://registry.npmjs.org/@babel/helper-validator-option/-/helper-validator-option-7.27.1.tgz",
-+      "integrity": "sha512-YvjJow9FxbhFFKDSuFnVCe2WxXk1zWc22fFePVNEaWJEu8IrZVlda6N0uHwzZrUM1il7NC9Mlp4MaJYbYd9JSg==",
-+      "dev": true,
-+      "license": "MIT",
-+      "engines": {
-+        "node": ">=6.9.0"
-+      }
-+    },
-+    "node_modules/@babel/helpers": {
-+      "version": "7.29.2",
-+      "resolved": "https://registry.npmjs.org/@babel/helpers/-/helpers-7.29.2.tgz",
-+      "integrity": "sha512-HoGuUs4sCZNezVEKdVcwqmZN8GoHirLUcLaYVNBK2J0DadGtdcqgr3BCbvH8+XUo4NGjNl3VOtSjEKNzqfFgKw==",
-+      "dev": true,
-+      "license": "MIT",
-+      "dependencies": {
-+        "@babel/template": "^7.28.6",
-+        "@babel/types": "^7.29.0"
-+      },
-+      "engines": {
-+        "node": ">=6.9.0"
-+      }
-+    },
-+    "node_modules/@babel/parser": {
-+      "version": "7.29.2",
-+      "resolved": "https://registry.npmjs.org/@babel/parser/-/parser-7.29.2.tgz",
-+      "integrity": "sha512-4GgRzy/+fsBa72/RZVJmGKPmZu9Byn8o4MoLpmNe1m8ZfYnz5emHLQz3U4gLud6Zwl0RZIcgiLD7Uq7ySFuDLA==",
-+      "license": "MIT",
-+      "dependencies": {
-+        "@babel/types": "^7.29.0"
-+      },
-+      "bin": {
-+        "parser": "bin/babel-parser.js"
-+      },
-+      "engines": {
-+        "node": ">=6.0.0"
-+      }
-+    },
-+    "node_modules/@babel/runtime": {
-+      "version": "7.29.2",
-+      "resolved": "https://registry.npmjs.org/@babel/runtime/-/runtime-7.29.2.tgz",
-+      "integrity": "sha512-JiDShH45zKHWyGe4ZNVRrCjBz8Nh9TMmZG1kh4QTK8hCBTWBi8Da+i7s1fJw7/lYpM4ccepSNfqzZ/QvABBi5g==",
-+      "license": "MIT",
-+      "engines": {
-+        "node": ">=6.9.0"
-+      }
-+    },
-+    "node_modules/@babel/template": {
-+      "version": "7.28.6",
-+      "resolved": "https://registry.npmjs.org/@babel/template/-/template-7.28.6.tgz",
-+      "integrity": "sha512-YA6Ma2KsCdGb+WC6UpBVFJGXL58MDA6oyONbjyF/+5sBgxY/dwkhLogbMT2GXXyU84/IhRw/2D1Os1B/giz+BQ==",
-+      "license": "MIT",
-+      "dependencies": {
-+        "@babel/code-frame": "^7.28.6",
-+        "@babel/parser": "^7.28.6",
-+        "@babel/types": "^7.28.6"
-+      },
-+      "engines": {
-+        "node": ">=6.9.0"
-+      }
-+    },
-+    "node_modules/@babel/traverse": {
-+      "version": "7.29.0",
-+      "resolved": "https://registry.npmjs.org/@babel/traverse/-/traverse-7.29.0.tgz",
-+      "integrity": "sha512-4HPiQr0X7+waHfyXPZpWPfWL/J7dcN1mx9gL6WdQVMbPnF3+ZhSMs8tCxN7oHddJE9fhNE7+lxdnlyemKfJRuA==",
-+      "license": "MIT",
-+      "dependencies": {
-+        "@babel/code-frame": "^7.29.0",
-+        "@babel/generator": "^7.29.0",
-+        "@babel/helper-globals": "^7.28.0",
-+        "@babel/parser": "^7.29.0",
-+        "@babel/template": "^7.28.6",
-+        "@babel/types": "^7.29.0",
-+        "debug": "^4.3.1"
-+      },
-+      "engines": {
-+        "node": ">=6.9.0"
-+      }
-+    },
-+    "node_modules/@babel/types": {
-+      "version": "7.29.0",
-+      "resolved": "https://registry.npmjs.org/@babel/types/-/types-7.29.0.tgz",
-+      "integrity": "sha512-LwdZHpScM4Qz8Xw2iKSzS+cfglZzJGvofQICy7W7v4caru4EaAmyUuO6BGrbyQ2mYV11W0U8j5mBhd14dd3B0A==",
-+      "license": "MIT",
-+      "dependencies": {
-+        "@babel/helper-string-parser": "^7.27.1",
-+        "@babel/helper-validator-identifier": "^7.28.5"
-+      },
-+      "engines": {
-+        "node": ">=6.9.0"
-+      }
-+    },
-+    "node_modules/@bcoe/v8-coverage": {
-+      "version": "1.0.2",
-+      "resolved": "https://registry.npmjs.org/@bcoe/v8-coverage/-/v8-coverage-1.0.2.tgz",
-+      "integrity": "sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==",
-+      "dev": true,
-+      "license": "MIT",
-+      "engines": {
-+        "node": ">=18"
-+      }
-+    },
-+    "node_modules/@blazediff/core": {
-+      "version": "1.9.1",
-+      "resolved": "https://registry.npmjs.org/@blazediff/core/-/core-1.9.1.tgz",
-+      "integrity": "sha512-ehg3jIkYKulZh+8om/O25vkvSsXXwC+skXmyA87FFx6A/45eqOkZsBltMw/TVteb0mloiGT8oGRTcjRAz66zaA==",
-+      "dev": true,
-+      "license": "MIT"
-+    },
-+    "node_modules/@chromatic-com/storybook": {
-+      "version": "5.1.2",
-+      "resolved": "https://registry.npmjs.org/@chromatic-com/storybook/-/storybook-5.1.2.tgz",
-+      "integrity": "sha512-H/hgvwC3E+OtseP2OT2QYUJH2VfnzT6wM3pWOkaNV6g7QI+VUdWJbeJ3o2jFqvEPQNqzhQKWDOlvM4lu+7is6g==",
-+      "dev": true,
-+      "license": "MIT",
-+      "dependencies": {
-+        "@neoconfetti/react": "^1.0.0",
-+        "chromatic": "^13.3.4",
-+        "filesize": "^10.0.12",
-+        "jsonfile": "^6.1.0",
-+        "strip-ansi": "^7.1.0"
-+      },
-+      "engines": {
-+        "node": ">=20.0.0",
-+        "yarn": ">=1.22.18"
-+      },
-+      "peerDependencies": {
-+        "storybook": "^0.0.0-0 || ^10.1.0 || ^10.1.0-0 || ^10.2.0-0 || ^10.3.0-0 || ^10.4.0-0"
-+      }
-+    },
-+    "node_modules/@emnapi/core": {
-+      "version": "1.10.0",
-+      "resolved": "https://registry.npmjs.org/@emnapi/core/-/core-1.10.0.tgz",
-+      "integrity": "sha512-yq6OkJ4p82CAfPl0u9mQebQHKPJkY7WrIuk205cTYnYe+k2Z8YBh11FrbRG/H6ihirqcacOgl2BIO8oyMQLeXw==",
-+      "dev": true,
-+      "license": "MIT",
-+      "optional": true,
-+      "dependencies": {
-+        "@emnapi/wasi-threads": "1.2.1",
-+        "tslib": "^2.4.0"
-+      }
-+    },
-+    "node_modules/@emnapi/runtime": {
-+      "version": "1.10.0",
-+      "resolved": "https://registry.npmjs.org/@emnapi/runtime/-/runtime-1.10.0.tgz",
-+      "integrity": "sha512-ewvYlk86xUoGI0zQRNq/mC+16R1QeDlKQy21Ki3oSYXNgLb45GV1P6A0M+/s6nyCuNDqe5VpaY84BzXGwVbwFA==",
-+      "dev": true,
-+      "license": "MIT",
-+      "optional": true,
-+      "dependencies": {
-+        "tslib": "^2.4.0"
-+      }
-+    },
-+    "node_modules/@emnapi/wasi-threads": {
-+      "version": "1.2.1",
-+      "resolved": "https://registry.npmjs.org/@emnapi/wasi-threads/-/wasi-threads-1.2.1.tgz",
-+      "integrity": "sha512-uTII7OYF+/Mes/MrcIOYp5yOtSMLBWSIoLPpcgwipoiKbli6k322tcoFsxoIIxPDqW01SQGAgko4EzZi2BNv2w==",
-+      "dev": true,
-+      "license": "MIT",
-+      "optional": true,
-+      "dependencies": {
-+        "tslib": "^2.4.0"
-+      }
-+    },
-+    "node_modules/@emotion/babel-plugin": {
-+      "version": "11.13.5",
-+      "resolved": "https://registry.npmjs.org/@emotion/babel-plugin/-/babel-plugin-11.13.5.tgz",
-+      "integrity": "sha512-pxHCpT2ex+0q+HH91/zsdHkw/lXd468DIN2zvfvLtPKLLMo6gQj7oLObq8PhkrxOZb/gGCq03S3Z7PDhS8pduQ==",
-+      "license": "MIT",
-+      "dependencies": {
-+        "@babel/helper-module-imports": "^7.16.7",
-+        "@babel/runtime": "^7.18.3",
-+        "@emotion/hash": "^0.9.2",
-+        "@emotion/memoize": "^0.9.0",
-+        "@emotion/serialize": "^1.3.3",
-+        "babel-plugin-macros": "^3.1.0",
-+        "convert-source-map": "^1.5.0",
-+        "escape-string-regexp": "^4.0.0",
-+        "find-root": "^1.1.0",
-+        "source-map": "^0.5.7",
-+        "stylis": "4.2.0"
-+      }
-+    },
-+    "node_modules/@emotion/babel-plugin/node_modules/convert-source-map": {
-+      "version": "1.9.0",
-+      "resolved": "https://registry.npmjs.org/convert-source-map/-/convert-source-map-1.9.0.tgz",
-+      "integrity": "sha512-ASFBup0Mz1uyiIjANan1jzLQami9z1PoYSZCiiYW2FczPbenXc45FZdBZLzOT+r6+iciuEModtmCti+hjaAk0A==",
-+      "license": "MIT"
-+    },
-+    "node_modules/@emotion/cache": {
+## 핵심 코드 결정/패턴 (실제 diff 발췌)
 
-hook: PostToolUse
-hook: PostToolUse
-hook: PostToolUse Completed
-hook: PostToolUse Completed
-web search: 
-web search: 
-web search: 
-web search: woowacourse react-payments pull 499 binggwa CardNumberSection.tsx
-web search: 
-web search: 
-web search: 
-web search: api.github.com repos woowacourse react-payments pulls 499
-web search: 
-web search: 
-web search: 
-web search: https://github.com/woowacourse/react-payments/pull/499
-hook: PreToolUse
-hook: PreToolUse Completed
-mcp: codex_apps/github_fetch_pr_file_patch started
-mcp: codex_apps/github_fetch_pr_file_patch (completed)
-hook: PostToolUse
-hook: PostToolUse
-hook: PostToolUse Completed
-hook: PostToolUse Completed
-hook: PreToolUse
-hook: PreToolUse Completed
-mcp: codex_apps/github_fetch_pr_file_patch started
-mcp: codex_apps/github_fetch_pr_file_patch (completed)
-hook: PostToolUse
-hook: PostToolUse
-hook: PostToolUse Completed
-hook: PostToolUse Completed
-hook: PreToolUse
-hook: PreToolUse Completed
-mcp: codex_apps/github_fetch_pr_file_patch started
-mcp: codex_apps/github_fetch_pr_file_patch (completed)
-hook: PostToolUse
-hook: PostToolUse
-hook: PostToolUse Completed
-hook: PostToolUse Completed
-hook: PreToolUse
-hook: PreToolUse Completed
-mcp: codex_apps/github_fetch_pr_file_patch started
-mcp: codex_apps/github_fetch_pr_file_patch (completed)
-hook: PostToolUse
-hook: PostToolUse
-hook: PostToolUse Completed
-hook: PostToolUse Completed
+### 결정 1 — 기능 목록 선정
+**파일**: `README.md`
+```md
+// README.md
+# 구현할 기능 목록
+## 카드 UI
+- 브랜드 검증
+  - 카드번호 1번째 폼에 따라 visa or master 표시
+- 카드번호 3번째 폼부터는 **** 로 표시
+- 월 입력 시 MM/ 표시
+- 연 입력 시 MM/YY 표시
+```
+
+### 결정 2 — 카드 입력 섹션 분리 계획
+**파일**: `README.md`
+```md
+// README.md
+## 카드 번호 입력 컴포넌트
+- 카드번호 검증
+
+## 유효기간 입력 컴포넌트
+- 월 검증
+- 연 검증
+
+## CVC 입력 컴포넌트
+- CVC 검증
+```
+
+### 결정 3 — 공통 섹션 컴포넌트 의도
+**파일**: `README.md`
+```md
+// README.md
+## Input 폼
+- Number 검증
+- 에러 체크 기능
+  - 에러 발생 시 테두리 빨간색으로 변경
+  - 에러 발생 시 하단에 에러 메시지 표시 필요
+
+## 구조 관련 하고 싶은 것
+- 3개의 반복되는 Section 별로 공통 컴포넌트를 만들어 사용하고 싶다.
+```
+
+## 리뷰어 피드백 (실제 인용)
+
+- @coderabbitai[bot] `my-app/src/utils/Validation.ts:13`: "`isValidRange`가 초과 길이를 유효로 처리합니다." → 답변 정보 없음
+- @JUDONGHYEOK `my-app/src/utils/Validation.ts:11`: "이함수의 이름과 로직이 매칭이 안되는 것 같은데요." → 답변 정보 없음
+- @JUDONGHYEOK `my-app/src/components/expirationDateSection/ExpirationDateSection.tsx:25`: "검증, 계산, 상태변경등으로 로직을 분리가능해보입니다!" → 답변 정보 없음
+- @JUDONGHYEOK `my-app/src/components/common/numberInput/NumberInput.tsx:14`: "maxLength를 DOM 속성으로도 두는 건 어떨까요?" → 답변 정보 없음
+- @JUDONGHYEOK `my-app/src/components/common/commonSection/CommonSection.tsx:7`: "요기 any타입을 사용해주신 이유가 있으실까요??" → 답변 정보 없음
+- @JUDONGHYEOK `my-app/src/components/cardPreview/CardPreview.tsx:24`: "함수 직접 호출보다 <EachCardNumber ... /> 컴포넌트 형태" → 답변 정보 없음
+
+## 잠재 안티패턴 태그
+
+- [state-shape] : App에서 상태 분리/통합 고민
+- [validation] : 에러 상태와 메시지 동기화 고민
+- [type-safety] : CommonSection any 사용
+- [component-split] : 검증/계산/렌더링 혼재
+- [input-handling] : maxLength DOM 속성 누락
+- [card-brand] : Mastercard BIN 범위 누락
+hook: Stop
+hook: Stop
+hook: Stop
