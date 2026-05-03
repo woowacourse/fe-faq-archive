@@ -2553,3 +2553,95 @@ hook: UserPromptSubmit
 hook: UserPromptSubmit
 hook: UserPromptSubmit Completed
 hook: UserPromptSubmit Completed
+codex
+# PR #502 두부(서보연) (OPEN)
+
+- author: boboyoii
+- url: https://github.com/woowacourse/react-payments/pull/502
+- changedFiles: 55 (+7427 -10)
+
+## 페어 고민 (PR body 핵심 발췌)
+
+- 컴포넌트에서 UI와 도메인을 분리하자.
+- 결론적으로 `Input`, `InputField`는 카드 도메인을 모르는 순수 UI 컴포넌트로 두고 `CardNumberInputField`, `CardValidityPeriodInputField`, `CardCVCInputField`에서 각 입력 도메인의 상태와 검증 로직을 결합했습니다.
+- 카드 번호 상태를 하나로 관리할지, input마다 따로 관리할지 고민했습니다.
+- 그래서 카드 번호를 하나의 상태로 관리하되 배열을 사용해서 각 input의 값을 나누어 관리하는 방식을 선택했습니다.
+- 에러 상태를 페이지까지 끌어올리기보다는 각 입력 필드 컴포넌트 내부에서 관리하도록 했습니다.
+
+## 핵심 코드 결정/패턴 (실제 diff 발췌)
+
+### 결정 1 — Vite React 앱 진입 HTML 추가
+**파일**: `index.html`
+```html
+// index.html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>react-payments</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+```
+
+### 결정 2 — Storybook 설정과 접근성 애드온 추가
+**파일**: `.storybook/main.ts`
+```ts
+// .storybook/main.ts
+import type { StorybookConfig } from '@storybook/react-vite';
+
+const config: StorybookConfig = {
+  "stories": [
+    "../src/**/*.mdx",
+    "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"
+  ],
+  "addons": [
+    "@chromatic-com/storybook",
+    "@storybook/addon-vitest",
+    "@storybook/addon-a11y",
+    "@storybook/addon-docs",
+    "@storybook/addon-onboarding"
+  ],
+  "framework": "@storybook/react-vite"
+};
+export default config;
+```
+
+### 결정 3 — 카드 입력 기능 요구사항 문서화
+**파일**: `README.md`
+```md
+// README.md
+### 카드 번호 입력 및 식별
+
+- 사용자는 카드 번호를 입력할 수 있다.
+- 입력한 카드 번호가 Visa 또는 MasterCard에 해당하는 경우, 해당 브랜드의 로고가 UI에 표시된다.
+- 카드 번호는 양의 정수만 입력할 수 있다.
+- 올바르지 않은 입력을 한 경우 피드백을 제공하고 입력을 제한한다.
+- 사용자의 카드 번호 입력에 따라 카드 프리뷰를 동시에 업데이트한다.
+```
+
+## 리뷰어 피드백 (실제 인용)
+
+- @coderabbitai[bot] `src/components/CardNumberInputField.tsx:46`: "한 칸의 오류가 다른 칸의 에러 표시를 지우고 있습니다." → 전체 status 초기화 대신 편집 인덱스만 갱신 또는 4칸 재검증
+- @ukkodeveloper `src/components/CardNumberInputField.tsx:42`: "다른 칸에서 발생한 에러 표시도 초기화될 것 같은데" → 의도된 동작인지 확인 요청
+- @coderabbitai[bot] `src/components/InputField.tsx:31`: "그룹 제목을 `label`로 두면 접근성이 어긋납니다." → fieldset/legend 또는 aria-labelledby 제안
+- @ukkodeveloper `src/components/InputField.tsx:29`: "input, label을 시멘틱하게 작성하면 좋은 점이 무엇일까요?" → 접근성 의미 연결 질문
+- @coderabbitai[bot] `src/utils/card.ts:17`: "MasterCard 감지 범위를 다시 확인해 주세요." → 2221~2720 BIN 범위 추가 제안
+- @ukkodeveloper `src/components/CardValidityPeriodInputField.tsx:60`: "`13`처럼 숫자이지만 월 범위를 벗어난 값도" → 범위 오류 문구 분리 제안
+
+## 잠재 안티패턴 태그
+
+- [state-update] : 전체 status 초기화 신호
+- [validation] : 범위/형식 오류 메시지 혼재
+- [input-handling] : CVC와 카드번호 검증 중복
+- [component-split] : InputField 전달 방식 논의
+- [card-brand] : MasterCard BIN 범위 누락
+- [docs] : 추후 구현사항 현재 상태와 불일치
+hook: Stop
+hook: Stop
+hook: Stop
