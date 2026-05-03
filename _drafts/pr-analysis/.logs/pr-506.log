@@ -2618,3 +2618,11 @@ index 0000000000..edceb85f5c
 +      }
 +    },
 +    "node_modules/@typescript-eslint/parser
+hook: SessionStart
+hook: SessionStart
+hook: SessionStart Completed
+hook: SessionStart Completed
+hook: UserPromptSubmit
+hook: UserPromptSubmit
+hook: UserPromptSubmit Completed
+hook: UserPromptSubmit Completed

@@ -2473,3 +2473,11 @@ index 0000000000..5630992265
 +    "node_modules/@types/mdx": {
 +      "version": "2.0.13",
 +      "resolved": "https://registry.npmjs.org/@types/mdx/-/mdx-2
+hook: SessionStart
+hook: SessionStart
+hook: SessionStart Completed
+hook: SessionStart Completed
+hook: UserPromptSubmit
+hook: UserPromptSubmit
+hook: UserPromptSubmit Completed
+hook: UserPromptSubmit Completed

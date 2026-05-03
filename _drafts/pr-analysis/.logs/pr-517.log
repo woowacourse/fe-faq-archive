@@ -2560,3 +2560,49 @@ hook: UserPromptSubmit
 hook: UserPromptSubmit
 hook: UserPromptSubmit Completed
 hook: UserPromptSubmit Completed
+codex
+# PR #517 도넛(박건규) (OPEN)
+
+- author: geongyu09
+- url: https://github.com/woowacourse/react-payments/pull/517
+- changedFiles: 55 (+7427 -10)
+
+## 페어 고민 (PR body 핵심 발췌)
+
+- 일단 오버엔지니어링을 절대로 하지 말자는 생각으로 미션을 수행했습니다.
+- 좋은 코드를 작성하는 것도 좋지만, 그리고 완벽한 설계를 하는 것도 좋지만, 일단 요구사항을 만족하는 돌아가는 코드를 만드는것이 무엇보다 중요하다고 생각하였습니다.
+- 실제로 Input 컴포넌트를 도메인과 무관한 원자 컴포넌트로 만들고 나니, CardNumberInputField, CardValidityPeriodInputField, CardCVCInputField 전부에서 별도 수정 없이 그대로 재사용할 수 있었습니다.
+- 카드 입력값(cardNumber, validityPeriod, CVC) 은 `Card` 프리뷰와 공유해야 하므로 페이지(`AddNewCardPage`)로 끌어올렸습니다.
+- 반면 에러 상태(`inputStatus`) 는 카드 프리뷰가 알 필요가 없으므로, 각 `CardXxxInputField` 내부에 로컬로 두었습니다.
+
+## 핵심 코드 결정/패턴 (실제 diff 발췌)
+
+### 결정 1 — 정보 없음
+**파일**: `정보 없음`
+```tsx
+// 정보 없음
+정보 없음
+```
+
+## 리뷰어 피드백 (실제 인용)
+
+- @coderabbitai[bot] `src/components/Card.tsx:37`: "카드 브랜드 이미지에 대체 텍스트가 없습니다." → alt 속성 추가 제안
+- @coderabbitai[bot] `src/components/CardValidityPeriodInputField.tsx:89`: "블러 시 유효성 실패 값이 부모 상태로 반영됩니다." → 검증 실패 시 onChange 차단 제안
+- @coderabbitai[bot] `src/components/InputField.tsx:29`: "레이블이 입력 요소와 프로그램적으로 연결되지 않습니다." → fieldset/legend 또는 id/htmlFor 연결 제안
+- @coderabbitai[bot] `src/pages/AddNewCardPage.tsx:71`: "기본 form submit 처리 부재로 입력값 유실 위험이 있습니다." → onSubmit preventDefault 제안
+- @coderabbitai[bot] `src/utils/card.ts:14`: "MasterCard 판별 범위가 과도하게 제한적입니다." → 51~55와 2221~2720 범위 분리 제안
+- @cys4585 `src/components/CardNumberInputField.tsx:31`: "각 칸에 숫자만 들어가면 길이가 1자리든 3자리든 피드백이 뜨지" → 의도 여부 또는 다음 단계 이월 여부 질문
+- @cys4585 `src/utils/validator.ts:19`: "YY 칸에 12 (2012년) 를 입력해봤는데 에러가 뜨지 않았는데요" → 현재 연도 기준 만료 체크 필요 의견
+- @cys4585 `src/components/InputField.tsx:30`: ".map 으로 Input 을 렌더링하는데 key 가 빠져 있네요." → key 이해 정리 요청
+
+## 잠재 안티패턴 태그
+
+- [validation] : 에러 원인별 메시지 분기 누락
+- [state-update] : 검증 실패 값 부모 상태 반영
+- [input-handling] : 카드번호 길이 피드백 누락
+- [card-brand] : MasterCard BIN 범위 제한
+- [component-split] : SwitchCase 추상화 근거 질문
+- [docs] : README 입력 조건 문구 불일치
+hook: Stop
+hook: Stop
+hook: Stop
