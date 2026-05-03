@@ -1,0 +1,2455 @@
+===== PR #502 META =====
+{
+  "additions": 7427,
+  "author": {
+    "id": "U_kgDOCErdsw",
+    "is_bot": false,
+    "login": "boboyoii",
+    "name": "Boyeon"
+  },
+  "body": "## 🎯 페이먼츠\r\n\r\n이번 미션을 통해 다음과 같은 학습 경험들을 쌓는 것을 목표로 합니다.\r\n\r\n### 1단계\r\n- 재사용 가능한 Input Component를 개발한다.\r\n- Storybook을 사용하여 컴포넌트의 다양한 상태를 시각적으로 테스트한다.\r\n- 카드 정보를 효과적으로 렌더링 하기 위한 상태 관리를 경험한다.\r\n\r\n### 2단계\r\n- 다양한 Form 구성 요소들간의 상태를 효율적으로 관리한다.\r\n- hooks API를 이용하여 상태 관리 로직을 구현한다.\r\n- custom hooks를 생성하여 Form 관리 로직을 컴포넌트에서 분리하고 재사용한다.\r\n- Controlled & Uncontrolled Components에 입각하여 Form을 핸들링한다.\r\n\r\n### 3단계\r\n- MSW로 네트워크 경계를 모킹하고, 프론트엔드가 보는 서버의 모습을 설계한다.\r\n- 비동기 상태를 `idle | loading | success | error` 네 가지로 명시적으로 관리한다.\r\n- 실제 서버에 보낼 요청·받을 응답 형식을 설계하여 서버-클라이언트 계약을 경험한다.\r\n- React Testing Library와 MSW로 사용자 관점의 통합 테스트를 작성한다.\r\n\r\n---\r\n\r\n## 🕵️ 셀프 리뷰(Self-Review)\r\n\r\n### 제출 전 체크 리스트\r\n\r\n- [x] 기능 요구 사항을 모두 구현했고, 정상적으로 동작하는지 확인했나요?\r\n- [x] 기본적인 프로그래밍 요구 사항(코드 컨벤션, 에러 핸들링 등)을 준수했나요?\r\n- [x] 배포한 데모 페이지에 정상적으로 접근할 수 있나요?\r\n  - 기본 배포 링크 기입: https://boboyoii.github.io/react-payments/\r\n\r\n### 리뷰 요청 & 논의하고 싶은 내용\r\n\r\n안녕하세요 우코!\r\n\r\n이번 미션에서는 공통 컴포넌트를 어디까지 분리하면 좋을지, props depth가 늘어나는 건 어느 정도까지 괜찮을지, 에러 상태는 어느 컴포넌트가 알고 있어야 할지에 대해 많이 고민했던 것 같습니다.\r\n\r\n아래에 제가 고민했던 부분과 리뷰를 받고 싶은 질문들을 정리해두었는데, 읽어보시고 편하게 의견 주시면 감사하겠습니다!\r\n\r\n#### 1) 이번 단계에서 가장 많이 고민했던 문제와 해결 과정에서 배운 점\r\n\r\n**재사용 가능한 컴포넌트 만들기**\r\n\r\n이번 미션은 페어와 간단한 설계를 한 뒤 개발을 하면서 필요한 컴포넌트를 만들자는 계획을 세웠습니다. 그래야 불필요한 컴포넌트를 줄이고 재사용 가능한 단위를 분리할 수 있다고 생각했습니다.\r\n\r\n그렇게 재사용 가능한 컴포넌트를 만들기 위해서 페어와 기준을 하나 정했습니다. \r\n\r\n> 컴포넌트에서 UI와 도메인을 분리하자.\r\n> \r\n\r\n위 기준을 가지고 순수하게 UI만 렌더링 할 수 있는 컴포넌트를 만들고 이 컴포넌트를 도메인과 결합해서 하나의 컴포넌트를 만들었습니다. \r\n\r\n결론적으로 `Input`, `InputField`는 카드 도메인을 모르는 순수 UI 컴포넌트로 두고\r\n`CardNumberInputField`, `CardValidityPeriodInputField`, `CardCVCInputField`에서\r\n각 입력 도메인의 상태와 검증 로직을 결합했습니다.\r\n\r\n이렇게 분리해두면 새로운 입력 필드가 추가되더라도 기존 UI 컴포넌트를 재사용하고 해당 입력에 필요한 도메인 로직만 추가하는 방식으로 확장할 수 있을 것 같습니다.\r\n\r\n추가로 카드 브랜드를 조건에 따라 렌더링하는 부분을 `SwitchCase` 컴포넌트로 분리했습니다. \r\n\r\n지금 단계에서  `SwitchCase`가 꼭 필요한 추상화인지 고민이 되긴 했지만 조건부 렌더링이 늘어났을 때 같은 패턴으로 처리할 수 있다는 점을 기대하고 추상화를 시도했습니다. \r\n\r\n또 카드 브랜드가 추가되더라도 조건문이 계속 늘어나는 것보다 `caseBy`에 새로운 case를 추가하는 방식이 어디를 수정해야 할지를 더 잘 드러내는 것 같습니다. \r\n\r\n**Props 타입 재사용하기**\r\n\r\n컴포넌트를 조합하면서 props 타입도 기존의 타입을 최대한 활용하려 했습니다.\r\n\r\n`InputField`에서는 `inputPropsList`의 타입을 직접 다시 정의하지 않고 `ComponentProps<typeof Input>[]`로 정의했습니다. 이렇게 `Input`에서 사용하는 props 타입을 그대로 가져와 쓰면 나중에 `Input`의 props가 바뀌어도 `InputField` 쪽 타입을 따로 맞춰줄 필요가 없어 변경에 대응하기 편하다고 생각했습니다.\r\n\r\n비슷한 관점으로 카드 브랜드 타입도 카드 번호에 따라 카드 브랜드를 탐색하는 함수의 반환 타입을 재사용 했습니다(`ReturnType<typeof detectCardBrand>`). `detectCardBrand`가 어떤 카드 브랜드를 반환하는지에 따라 `Card` 컴포넌트의 `brand` 타입도 함께 맞춰지기 때문에 카드 브랜드 관련 타입이 여러 곳에서 따로 관리되는 것을 줄일 수 있을 것 같습니다. \r\n\r\n**상태 관리** \r\n\r\n카드 번호 상태를 하나로 관리할지, input마다 따로 관리할지 고민했습니다.\r\n\r\n지금 카드 번호는 네 개의 input으로 나누어 입력받고 있습니다. 하지만 결국 의미상으로는 하나의 카드 번호라고 생각했습니다. 그래서 상태를 관리하는 방법을 몇 가지 떠올렸습니다.\r\n\r\n1. 하나의 문자열 상태로 관리하고, 필요한 곳에서 slice해서 보여준다.\r\n2. 하나의 배열 상태로 관리하고 각 input이 배열의 한 요소를 사용하게 한다.\r\n3. 네 개의 input 값을 각각 다른 상태로 관리한다.\r\n\r\n공식 문서에서 필요한 state 조각의 개수를 미리 알 수 없을 때는 데이터를 객체나 배열로 그룹화하라는 내용을 보고 다시 생각해봤습니다. 지금은 카드 번호를 네개의 input으로 받도록 고정되어 있지만 이 UI 구조가 바뀔 때 상태도 크게 바꿔야 하는 구조는 피하고 싶었습니다.\r\n\r\n그래서 카드 번호를 하나의 상태로 관리하되 배열을 사용해서 각 input의 값을 나누어 관리하는 방식을 선택했습니다.\r\n\r\n다음으로 에러 상태를 어디에서 관리할지 고민했습니다.\r\n\r\n에러 상태를 누가 알고 있어야하는지를 중심으로 생각했습니다. 프리뷰에는 카드 번호와 유효기간 같은 실제 카드 정보만 필요하고 특정 input이 에러 상태인지까지 알 필요는 없습니다. 그래서 에러 상태를 페이지까지 끌어올리기보다는 각 입력 필드 컴포넌트 내부에서 관리하도록 했습니다.\r\n\r\n에러 상태의 타입에 대해서도 공통으로 사용할지, 각 입력 필드가 따로 가질지 페어와 논의했습니다.\r\n\r\n현재는 `InputStatus`가 `\"default\"`와 `\"error\"`만 가지는 단순한 타입입니다. 그래서  `\"error\"`일 때만 정해진 헬퍼 메시지가 보여집니다. 하지만 나중에는 입력 필드마다 에러 이유를 더 자세히 구분해야 할 수도 있다고 생각했습니다. 예를 들어 유효기간은 “월 범위를 벗어남”, CVC는 “길이가 맞지 않음”처럼 서로 다른 에러 상태가 필요할 수 있습니다.\r\n\r\n그래서 에러 타입를 하나의 공통 타입으로 맞추기보다는 각 입력 필드가 자신의 구조와 검증 기준에 맞는 에러 상태를 가지도록 각 입력 필드 안에서 타입을 정의했습니다.\r\n\r\n#### 2) 이번 리뷰를 통해 논의하고 싶은 부분\r\n\r\n**1. `InputField`에서 input을 어떤 방식으로 전달받는 게 좋을까요?**\r\n\r\n현재 `InputField`는 여러 개의 input을 렌더링할 수 있도록 `inputPropsList`를 props로 받게 했습니다. `children`을 받는 방식도 있을 것 같은데 아직 두 방식의 차이를 명확하게 판단하기 어려운 것 같습니다,,,\r\n\r\n현재 구조에서 `inputPropsList` 방식과 `children` 방식 중 어떤 방식이 더 적절한지 그리고 두 방식은 어떤 기준으로 선택하면 좋을지 궁금합니다!\r\n\r\n**2. 컴포넌트 재사용성과 props depth 의 균형을 어떻게 맞추면 좋을까요?** \r\n\r\n공통 컴포넌트로 `InputField`를 분리하면서 `AddNewCardPage → CardNumberInputField → InputField → Input` 순서로 props가 전달되게 되었고 이전보다 props depth가 한 단계 늘어났습니다..!\r\n\r\n반복되는 입력 필드 UI를 재사용할 수 있다는 장점은 있었지만 그만큼 props 전달 단계가 깊어지는 점도 고민이 되었습니다. 재사용 가능한 컴포넌트를 만드는 것과 props depth를 줄이는 것 사이에서 어떤 기준으로 판단하면 좋을지 우코의 의견이 궁금합니다.\r\n\r\n**3. 현재 에러 상태 관리 방식이 적절한지 궁금합니다.**\r\n\r\n에러 상태는 각 입력 필드 컴포넌트 내부에서 관리하고 에러 상태 타입도 각 입력 필드가 자신의 에러 상태 타입을 정의하도록 했습니다. 이 방식이 적절한지 궁금합니다.\r\n\r\n또 에러 상태에 따라 각 입력 필드가 헬퍼 메시지를 보여주는 흐름이 괜찮은지도 궁금합니다. 현업에서는 입력값 검증 에러와 헬퍼 메시지를 어떤 흐름으로 처리하는지도 궁금합니다.\r\n\r\n**4. Storybook을 컴포넌트 확인 외에 어떻게 활용할 수 있을까요?**\r\n\r\n작은 단위의 컴포넌트를 하나씩 만들어가다 보니 전체 흐름 속에서 어떻게 동작하는지 확인하기가 어렵다고 느꼈습니다.\r\n그래서 현재는 스토리북을 활용해 각각의 컴포넌트를 독립적으로 바로 확인하는 방식으로 사용하고 있습니다.\r\n\r\n이처럼 “컴포넌트를 빠르게 확인하는 용도” 외에도 스토리북을 더 효과적으로 활용할 수 있는 방법이 있을지 궁금합니다!\r\n\r\n---\r\n\r\n## ✅ 리뷰어 체크 포인트\r\n\r\n<!-- 리뷰어가 이 PR을 검토할 때 중점적으로 확인할 사항입니다.\r\n코드의 완성도만이 아니라, 리뷰이가 구현 과정에서 어떤 고민과 결정을 하며 학습했는지도 함께 고려해 주세요. -->\r\n\r\n### 1. Form 상태 관리 & Custom Hook 분리\r\n\r\n- 반복되는 로직을 custom hook으로 분리했는가?\r\n- hook 내부와 UI 컴포넌트의 **역할이 명확하게 분리**되어 있는가?\r\n- 상태 흐름이 직관적이며, Form 전체를 일관되게 관리할 수 있는 구조인가?\r\n\r\n### 2. 입력 UI 흐름과 UX\r\n\r\n- 카드 번호 입력 시 필드 간 **자동 포커싱 이동**이 자연스럽게 동작하는가?\r\n- 숫자만 입력 가능한 필드에서 제한, 에러 메시지, 유효성 피드백 등 **사용자 경험이 충분히 고려**되었는가?\r\n\r\n### 3. 컴포넌트 구조 및 재사용성\r\n\r\n- 컴포넌트가 명확한 **역할과 책임**을 가지며 과도하게 분리되거나 중첩되어 있지 않은가?\r\n- Input, Button 등 재사용 가능한 컴포넌트가 잘 정의되어 있는가?\r\n\r\n### 4. 상태 기반 유효성 검사 및 확인 버튼 활성화\r\n\r\n- 모든 필드가 유효할 때만 확인 버튼이 **정확히 활성화/비활성화**되는가?\r\n- 유효성 검사의 기준이 명확하고, **상태 변경에 따른 UI 반응**이 잘 연결되어 있는가?\r\n\r\n### 5. 비동기 상태 · 네트워크 경계 · 통합 테스트\r\n\r\n- 비동기 상태를 `idle | loading | success | error` 네 가지로 **명시적으로** 관리하고, `isLoading`/`error`를 별도 boolean으로 쪼개지 않았는가?\r\n- MSW handler가 `POST/GET/DELETE /cards`와 400 시나리오까지 포함하여 **네트워크 경계**에서 동작하는가?\r\n- 통합 테스트가 `fetch`·`axios`를 모킹하지 않고, **MSW + RTL**로 사용자 관점에서 작성되었는가?\r\n- RTL 요소 탐색이 `getByRole → getByText → getByLabelText → getByTestId` 우선순위를 따르고, 비동기 요소에 `findBy*`를 사용했는가?\r\n",
+  "changedFiles": 55,
+  "comments": [
+    {
+      "id": "IC_kwDOFV34T88AAAABA8f9lQ",
+      "author": {
+        "login": "coderabbitai"
+      },
+      "authorAssociation": "NONE",
+      "body": "<!-- This is an auto-generated comment: summarize by coderabbit.ai -->\n<!-- walkthrough_start -->\n\n## Walkthrough\n\n이 풀 요청은 Vite 기반의 React 신용카드 결제 폼 애플리케이션의 완전한 프로젝트 초기 설정입니다. 패키지 매니페스트, TypeScript/ESLint/Prettier 구성, Storybook 설정, 카드 번호/유효기간/CVC 입력 필드 컴포넌트, 카드 미리보기 컴포넌트, 유틸리티 함수(카드 브랜드 감지, 범위 검증), Storybook 스토리 및 문서가 추가됩니다. README는 기능 요구사항 및 완료된 항목 체크리스트로 업데이트됩니다.\n\n## Estimated code review effort\n\n🎯 4 (Complex) | ⏱️ ~60 minutes\n\n<!-- walkthrough_end -->\n\n\n<!-- pre_merge_checks_walkthrough_start -->\n\n<details>\n<summary>🚥 Pre-merge checks | ✅ 4 | ❌ 1</summary>\n\n### ❌ Failed checks (1 inconclusive)\n\n|  Check name | Status         | Explanation                                                                                         | Resolution                                                                                                           |\n| :---------: | :------------- | :-------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------- |\n| Title check | ❓ Inconclusive | PR 제목이 미션 제출 및 단계(1단계)를 포함하지만, 변경 사항의 핵심인 Input 컴포넌트 개발, Storybook 설정, 카드 UI 구현 등을 구체적으로 설명하지 않습니다. | 제목을 더 구체적으로 개선하기를 권장합니다. 예: '[1단계] Input 컴포넌트 및 카드 폼 UI 구현 with Storybook' 또는 '[1단계] 재사용 가능한 Input 컴포넌트와 카드 입력 폼 구현' |\n\n<details>\n<summary>✅ Passed checks (4 passed)</summary>\n\n|         Check name         | Status   | Explanation                                                                                                |\n| :------------------------: | :------- | :--------------------------------------------------------------------------------------------------------- |\n|     Docstring Coverage     | ✅ Passed | No functions found in the changed files to evaluate docstring coverage. Skipping docstring coverage check. |\n|     Linked Issues check    | ✅ Passed | Check skipped because no linked issues were found for this pull request.                                   |\n| Out of Scope Changes check | ✅ Passed | Check skipped because no linked issues were found for this pull request.                                   |\n|      Description check     | ✅ Passed | PR 설명은 프로젝트 목표, 셀프 리뷰 체크리스트, 리뷰어 체크포인트를 포함하여 구조화되어 있고 1단계 요구사항을 충분히 다룸.                                    |\n\n</details>\n\n<sub>✏️ Tip: You can configure your own custom pre-merge checks in the settings.</sub>\n\n</details>\n\n<!-- pre_merge_checks_walkthrough_end -->\n\n<!-- finishing_touch_checkbox_start -->\n\n<details>\n<summary>✨ Finishing Touches</summary>\n\n<details>\n<summary>🧪 Generate unit tests (beta)</summary>\n\n- [ ] <!-- {\"checkboxId\": \"f47ac10b-58cc-4372-a567-0e02b2c3d479\", \"radioGroupId\": \"utg-output-choice-group-unknown_comment_id\"} -->   Create PR with unit tests\n\n</details>\n\n</details>\n\n<!-- finishing_touch_checkbox_end -->\n\n<!-- tips_start -->\n\n---\n\nThanks for using [CodeRabbit](https://coderabbit.ai?utm_source=oss&utm_medium=github&utm_campaign=woowacourse/react-payments&utm_content=502)! It's free for OSS, and your support helps us grow. If you like it, consider giving us a shout-out.\n\n<details>\n<summary>❤️ Share</summary>\n\n- [X](https://twitter.com/intent/tweet?text=I%20just%20used%20%40coderabbitai%20for%20my%20code%20review%2C%20and%20it%27s%20fantastic%21%20It%27s%20free%20for%20OSS%20and%20offers%20a%20free%20trial%20for%20the%20proprietary%20code.%20Check%20it%20out%3A&url=https%3A//coderabbit.ai)\n- [Mastodon](https://mastodon.social/share?text=I%20just%20used%20%40coderabbitai%20for%20my%20code%20review%2C%20and%20it%27s%20fantastic%21%20It%27s%20free%20for%20OSS%20and%20offers%20a%20free%20trial%20for%20the%20proprietary%20code.%20Check%20it%20out%3A%20https%3A%2F%2Fcoderabbit.ai)\n- [Reddit](https://www.reddit.com/submit?title=Great%20tool%20for%20code%20review%20-%20CodeRabbit&text=I%20just%20used%20CodeRabbit%20for%20my%20code%20review%2C%20and%20it%27s%20fantastic%21%20It%27s%20free%20for%20OSS%20and%20offers%20a%20free%20trial%20for%20proprietary%20code.%20Check%20it%20out%3A%20https%3A//coderabbit.ai)\n- [LinkedIn](https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fcoderabbit.ai&mini=true&title=Great%20tool%20for%20code%20review%20-%20CodeRabbit&summary=I%20just%20used%20CodeRabbit%20for%20my%20code%20review%2C%20and%20it%27s%20fantastic%21%20It%27s%20free%20for%20OSS%20and%20offers%20a%20free%20trial%20for%20proprietary%20code)\n\n</details>\n\n\n<sub>Comment `@coderabbitai help` to get the list of available commands and usage tips.</sub>\n\n<!-- tips_end -->\n\n<!-- internal state start -->\n\n\n<!-- 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= -->\n\n<!-- internal state end -->",
+      "createdAt": "2026-05-01T07:55:55Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/woowacourse/react-payments/pull/502#issuecomment-4358405525",
+      "viewerDidAuthor": false
+    }
+  ],
+  "deletions": 10,
+  "number": 502,
+  "reviews": [
+    {
+      "id": "PRR_kwDOFV34T8769z32",
+      "author": {
+        "login": "coderabbitai"
+      },
+      "authorAssociation": "NONE",
+      "body": "**Actionable comments posted: 13**\n\n<details>\n<summary>🤖 Prompt for all review comments with AI agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nInline comments:\nIn `@index.html`:\n- Line 2: 문서의 루트 html 태그에 설정된 lang=\"en\"이 현재 UI 문구(한국어)와 불일치하므로 루트 <html> 요소의\nlang 속성 값을 서비스 화면 언어에 맞게 변경(예: lang=\"ko\")하세요; 대상은 index.html의 <html lang=\"en\">\n문자열이며 스크린리더·브라우저 번역 동작을 위해 루트 lang 값을 한국어로 업데이트하면 됩니다.\n\nIn `@README.md`:\n- Around line 62-66: The \"추후 구현사항\" list in README.md is out of date because path\nalias, 색상 상수화, and 공통 타입 모듈화 were implemented in this change; update the README\nby removing these three items from the future work list and either delete the\nsection or add a new \"완료된 항목\" (or \"오늘 구현됨\") subsection that explicitly lists\n\"path alias 적용\", \"색상 상수화\", and \"공통 타입 모듈화\" (use the exact strings as in the\ndiff) so the document reflects the current code state.\n\nIn `@src/components/Card.tsx`:\n- Around line 27-40: The CardBrandImg instances inside the SwitchCase lack alt\ntext; update the MasterCard and Visa case components to pass an explicit alt\nprop (e.g., alt=\"MasterCard\" for the MasterCard case and alt=\"Visa\" for the Visa\ncase) so screen readers receive the brand name (or use alt=\"\" if the image is\npurely decorative); locate the SwitchCase handling 'brand' and modify the\nCardBrandImg props accordingly.\n\nIn `@src/components/CardCVCInputField.tsx`:\n- Around line 28-43: The label prop on the InputField in CardCVCInputField.tsx\nis incorrect — change label=\"카드 번호\" to match the CVC field (e.g., \"CVC\" or \"CVC\n번호\") so it aligns with title=\"CVC 번호를 입력해 주세요\"; update the label prop used in\nthe InputField component inside the CardCVCInputField render (refer to the\nInputField instantiation and its title/label props) to use the correct CVC label\nstring.\n\nIn `@src/components/CardNumberInputField.tsx`:\n- Around line 30-46: handleCardNumberChange currently calls\nsetStatus(INPUTS_STATUSES) which resets all fields and clears other inputs'\nerror states; instead compute and set a new status array that only updates the\nedited index (or revalidates all four units) using the existing InputsStatuses\ntype. Specifically, inside handleCardNumberChange, build newStatuses from the\nprevious status (setStatus(prev => { const s = [...prev]; /* set s[index] =\n\"error\" or \"valid\" based on validation of input and/or full revalidation of\ncardNumberUnits with input applied */ return s; })) so you preserve other\ninputs' \"error\" flags; reference functions/values: handleCardNumberChange,\nsetStatus, INPUTS_STATUSES, InputsStatuses, cardNumberUnits,\nvalidateCardNumberUnitRange and checkIsInt, and ensure onChange still gets the\ntruncated newCardNumberUnits.\n\nIn `@src/components/CardValidityPeriodInputField.tsx`:\n- Around line 117-121: The helper message currently conflates format errors and\nrange errors; update the helperMessage logic in CardValidityPeriodInputField to\ndistinguish status values (e.g., keep \"숫자만 입력 가능합니다.\" for status.month ===\n\"error\" || status.year === \"error\", and show a separate message like \"유효한 월/연도를\n입력하세요.\" when status.month === \"range\" || status.year === \"range\"). Locate the\nhelperMessage expression in the CardValidityPeriodInputField component and add\nthe branch for range status (or explicit numeric-range checks on month/year\nvalues) so users see a clear, different message for range vs format errors.\n- Around line 85-90: handleValidityPeriodBlur currently ignores the return value\nof validityPeriodChange which allows invalid values (e.g., padded \"00\") to be\nsent to the parent via onChange; capture and use the return from\nvalidityPeriodChange(key, padded) and only call onChange({ ...validityPeriod,\n[key]: padded }) if that return indicates the change was accepted/validated (or\nif it equals the padded value), otherwise do not propagate the padded value to\nthe parent; update handleValidityPeriodBlur to call padValidityPeriodUnit, pass\nthe padded value into validityPeriodChange, check its return and only call\nonChange when validation succeeded.\n\nIn `@src/components/InputField.tsx`:\n- Around line 22-31: The Label element in the InputField component is currently\na plain label that isn’t associated with any specific input, breaking\naccessibility for the grouped inputs; change the markup so the group title is\nprovided as a fieldset/legend or via aria-labelledby: wrap InputWrapper and the\ninput list with a <fieldset> and render the group text as a <legend> (replace\nthe Label node), or keep a non-label styled element and generate a stable id\n(e.g., groupLabelId) that you pass as aria-labelledby on each Input in\ninputPropsList; update InputField to set that id and ensure each Input receives\nthe aria-labelledby prop so screen readers correctly associate the group label\nwith all inputs (referencing InputField, Label, InputWrapper, inputPropsList,\nand Input).\n\nIn `@src/components/SwitchCase.tsx`:\n- Around line 12-17: The component currently wraps the resolved node in a div\nand loses falsy ReactNodes; update SwitchCase to return the matched node\ndirectly instead of rendering <div>. Locate the computed caseComponent (variable\ncaseComponent in SwitchCase) and replace the JSX return with a direct return\nthat preserves falsy values by selecting caseComponent when it is defined,\notherwise defaultCase (e.g., use an undefined check: return caseComponent !==\nundefined ? caseComponent : defaultCase). Ensure you remove the wrapper div so\nvalues like 0, '' or null passed as defaultCase are preserved as-is.\n\nIn `@src/pages/AddNewCardPage.tsx`:\n- Around line 67-71: CardInfoForm is declared as a styled.form but has no submit\nhandler, causing Enter to trigger page submission/refresh; either add an\nonSubmit handler where CardInfoForm is rendered (e.g., in the AddNewCardPage\ncomponent) that calls event.preventDefault() and then invokes your existing\nsave/submit logic, or change CardInfoForm to a non-form container (styled.div)\nif you don't intend any form submission UX. Locate the CardInfoForm symbol and\nupdate the parent component's JSX to supply onSubmit={e => e.preventDefault()}\n(and hooked submit logic if implemented) or refactor the styled.form to\nstyled.div.\n\nIn `@src/stories/Configure.mdx`:\n- Around line 50-218: Multiple anchor elements in Configure.mdx use\ntarget=\"_blank\" without rel attributes, exposing tab‑napping risk; update every\nJSX <a ... target=\"_blank\"> (e.g., the \"sb-action-link\" anchors like the Learn\nmore links, and the links for \"Star on GitHub\", \"Join Discord server\", \"Watch on\nYouTube\", \"Discover tutorials\", etc.) to include rel=\"noreferrer noopener\".\nSearch for all occurrences of target=\"_blank\" in this file and add\nrel=\"noreferrer noopener\" to each anchor element (keeping existing\nclassName/href/children intact) so every external link uses the security-safe\nattribute combination.\n\nIn `@src/utils/card.ts`:\n- Around line 5-17: detectCardBrand currently only checks VISA_PREFIX and\nMASTER_CARD_PREFIXES (51–55) so BIN range 2221–2720 is missed; update\ndetectCardBrand to also parse the first 4 digits (guarding for length) from\ncardNumber[0] and check if that integer is between 2221 and 2720, returning\n\"MasterCard\" when true while keeping the existing 51–55 slice check and Visa\ncheck (use the same function name detectCardBrand, constants VISA_PREFIX and\nMASTER_CARD_PREFIXES as anchors).\n\nIn `@vite.config.ts`:\n- Around line 56-68: The alias block uses the undefined ESM __dirname which\nbreaks config loading; update all occurrences of resolve(__dirname, ...) inside\nthe resolve.alias array to use the previously computed dirname variable (i.e.,\nresolve(dirname, ...)) so the alias entries ({ find: \"@\", \"{ find: \"@assets\",\netc.) reference resolve(dirname, ...) instead of resolve(__dirname, ...)).\n```\n\n</details>\n\n<details>\n<summary>🪄 Autofix (Beta)</summary>\n\nFix all unresolved CodeRabbit comments on this PR:\n\n- [ ] <!-- {\"checkboxId\": \"4b0d0e0a-96d7-4f10-b296-3a18ea78f0b9\"} --> Push a commit to this branch (recommended)\n- [ ] <!-- {\"checkboxId\": \"ff5b1114-7d8c-49e6-8ac1-43f82af23a33\"} --> Create a new PR with the fixes\n\n</details>\n\n---\n\n<details>\n<summary>ℹ️ Review info</summary>\n\n<details>\n<summary>⚙️ Run configuration</summary>\n\n**Configuration used**: Organization UI\n\n**Review profile**: CHILL\n\n**Plan**: Pro\n\n**Run ID**: `7020ec49-b9ad-4b19-8dbf-79966d0f4d93`\n\n</details>\n\n<details>\n<summary>📥 Commits</summary>\n\nReviewing files that changed from the base of the PR and between 8d4c2c73f7cce87ffaae55245ae1cfd10228981d and f4affe8ab720fb8416dca51d33dbabe2d2cc3423.\n\n</details>\n\n<details>\n<summary>⛔ Files ignored due to path filters (20)</summary>\n\n* `package-lock.json` is excluded by `!**/package-lock.json`\n* `public/favicon.svg` is excluded by `!**/*.svg`\n* `public/icons.svg` is excluded by `!**/*.svg`\n* `src/assets/Mastercard.png` is excluded by `!**/*.png`\n* `src/assets/Visa.png` is excluded by `!**/*.png`\n* `src/stories/assets/accessibility.png` is excluded by `!**/*.png`\n* `src/stories/assets/accessibility.svg` is excluded by `!**/*.svg`\n* `src/stories/assets/addon-library.png` is excluded by `!**/*.png`\n* `src/stories/assets/assets.png` is excluded by `!**/*.png`\n* `src/stories/assets/context.png` is excluded by `!**/*.png`\n* `src/stories/assets/discord.svg` is excluded by `!**/*.svg`\n* `src/stories/assets/docs.png` is excluded by `!**/*.png`\n* `src/stories/assets/figma-plugin.png` is excluded by `!**/*.png`\n* `src/stories/assets/github.svg` is excluded by `!**/*.svg`\n* `src/stories/assets/share.png` is excluded by `!**/*.png`\n* `src/stories/assets/styling.png` is excluded by `!**/*.png`\n* `src/stories/assets/testing.png` is excluded by `!**/*.png`\n* `src/stories/assets/theming.png` is excluded by `!**/*.png`\n* `src/stories/assets/tutorials.svg` is excluded by `!**/*.svg`\n* `src/stories/assets/youtube.svg` is excluded by `!**/*.svg`\n\n</details>\n\n<details>\n<summary>📒 Files selected for processing (35)</summary>\n\n* `.gitignore`\n* `.prettierrc`\n* `.storybook/main.ts`\n* `.storybook/preview.ts`\n* `README.md`\n* `eslint.config.js`\n* `index.html`\n* `package.json`\n* `src/App.tsx`\n* `src/components/Card.tsx`\n* `src/components/CardCVCInputField.tsx`\n* `src/components/CardNumberInputField.tsx`\n* `src/components/CardValidityPeriodInputField.tsx`\n* `src/components/Input.tsx`\n* `src/components/InputField.tsx`\n* `src/components/SwitchCase.tsx`\n* `src/index.css`\n* `src/main.tsx`\n* `src/pages/AddNewCardPage.tsx`\n* `src/stories/Card.stories.ts`\n* `src/stories/CardCVCInputField.stories.ts`\n* `src/stories/CardNumberInputField.stories.ts`\n* `src/stories/CardValidityPeriodInputField.stories.ts`\n* `src/stories/Configure.mdx`\n* `src/stories/Input.stories.ts`\n* `src/stories/InputField.stories.ts`\n* `src/stories/assets/avif-test-image.avif`\n* `src/styles/colorPalette.ts`\n* `src/utils/card.ts`\n* `src/utils/validator.ts`\n* `tsconfig.app.json`\n* `tsconfig.json`\n* `tsconfig.node.json`\n* `vite.config.ts`\n* `vitest.shims.d.ts`\n\n</details>\n\n</details>\n\n<!-- This is an auto-generated comment by CodeRabbit for review status -->",
+      "submittedAt": "2026-05-01T08:02:49Z",
+      "includesCreatedEdit": false,
+      "reactionGroups": [],
+      "state": "COMMENTED",
+      "commit": {
+        "oid": "f4affe8ab720fb8416dca51d33dbabe2d2cc3423"
+      }
+    },
+    {
+      "id": "PRR_kwDOFV34T877SI0t",
+      "author": {
+        "login": "ukkodeveloper"
+      },
+      "authorAssociation": "NONE",
+      "body": "두부 안녕하세요!! \n이번 리뷰어를 맡은 우코입니다. 반가워요 ㅎ\n\n이번 미션에서 UI 컴포넌트와 카드 도메인 컴포넌트를 나눠보려는 시도가 잘 들어난 코드인 것 같아요! 특히 `Input` / `InputField`는 카드 정보를 모르도록 두고, `CardNumberInputField` 같은 컴포넌트가 입력 도메인을 붙이는 방향이 좋았습니다. 실제 현업에서도 같은 패턴으로 사용하거든요. 그리고 카드 번호 네 개 상태를 어떻게 관리할지 고민한 흔적도 보기 좋았습니다!\n\n> 현재 `InputField`는 여러 개의 input을 렌더링할 수 있도록 `inputPropsList`를 props로 받게 했습니다. `children`을 받는 방식도 있을 것 같은데 아직 두 방식의 차이를 명확하게 판단하기 어려운 것 같습니다,,,\n\n`inputPropsList`를 받을지 `children`을 받을지에 대한 질문은.... 저는 \"InputField가 input의 의미까지 책임질 수 있는가\"를 기준으로 봐도 좋을 것 같아요. 지금처럼 `inputPropsList`를 받으면 반복 렌더링은 편하지만, 각 input의 `id`, `aria-label`, 에러 메시지 연결처럼 입력마다 달라지는 의미를 `InputField`가 대신 챙기기 어려워질거예요. 반대로 `children`을 받으면 호출부가 조금 더 길어지지만, 카드 번호 네 칸처럼 각각의 input이 어떤 이름과 제약을 갖는지 호출부에서 더 명확하게 표현할 수 있겠죠 ㅎㅎ\n\n> 공통 컴포넌트로 `InputField`를 분리하면서 `AddNewCardPage → CardNumberInputField → InputField → Input` 순서로 props가 전달되게 되었고 이전보다 props depth가 한 단계 늘어났습니다..!\n\nprops drilling은 는 그 자체로 나쁘다기보다... 컴포넌트가 그대로 값만 전달을 하는지, 아니면 별도의 책임을 수행하는 것인지 파악하는 게 먼저일 것 같은데요. 지금 `CardNumberInputField`는 카드 번호 입력 검증과 상태 표시를 맡고 있어서 `AddNewCardPage -> CardNumberInputField -> InputField -> Input` 로 이어지는 거라 충분히 납득은 될만한 분리인 것 같아요. \n여기서부터는 코드 스타일의 차이일 수도 있는데요. 저 같은 경우는 불필요한 선언으로 인해 복잡도가 높아지는 걸 별로 좋아하지 않는데요. 그래서 최대한 동적인 부분들을 밖으로 빼어내고 내부적으로 처리할 수 있는 것들은 처리하도록 설계를 많이 하는 것 같아요. 그리고 JSX쪽은 코드가 길어져도 최소한으로 분리하는 편이긴 합니다.\n\n\n> 현재 에러 상태 관리 방식이 적절한지 궁금합니다.\n\n에러 상태를 각 입력 필드 내부에 둔 방향도 지금 단계에서는 괜찮아 보이는데요. 대신 내부에 에러 상태를 처리한다면 필드가 여러 에러 이유까지 알고 있어야 메시지도 정확해질 수 있다고 생각이 들어요. 예를 들어 유효기간의 `13`은 숫자가 아닌 문제가 아니라 월 범위를 벗어난 문제라서, `default | error`보다 `nonNumeric | outOfRange`처럼 조금 더 구체적인 상태가 필요할 수도 있을 것 같네요!\n\n> Storybook을 컴포넌트 확인 외에 어떻게 활용할 수 있을까요?\n\nStorybook은 지금처럼 정적인 상태를 빠르게 확인하는 용도로도 충분히 잘하고 있다고 생각이 드는데요. 만약 욕심이 생긴다면, `play function` 을 사용해서 상호작용을 추가해보는 것도 해보시면 좋을 것 같습니다.  그리고 에러 케이스나, 다양한 variation 에서 어떻게 ui적으로 보여지는지 잘 정리해두는 것도 조금 더 개선해볼법한 것 같아요. \n\n",
+      "submittedAt": "2026-05-03T04:09:09Z",
+      "includesCreatedEdit": false,
+      "reactionGroups": [],
+      "state": "CHANGES_REQUESTED",
+      "commit": {
+        "oid": "f4affe8ab720fb8416dca51d33dbabe2d2cc3423"
+      }
+    }
+  ],
+  "state": "OPEN",
+  "title": "[1단계 - 페이먼츠] 두부(서보연) 미션 제출합니다. "
+}
+
+===== PR #502 REVIEW THREADS (line comments) =====
+{
+  "path": "index.html",
+  "line": 2,
+  "body": "_⚠️ Potential issue_ | _🟡 Minor_ | _⚡ Quick win_\n\n**문서 언어를 UI 언어와 맞춰 주세요.**\n\n현재 `lang=\"en\"`인데, 이 PR의 화면 문구가 한국어라면 스크린리더와 번역 기능이 잘못 동작할 수 있습니다. 실제 서비스 언어에 맞게 조정해 주세요.\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@index.html` at line 2, 문서의 루트 html 태그에 설정된 lang=\"en\"이 현재 UI 문구(한국어)와 불일치하므로\n루트 <html> 요소의 lang 속성 값을 서비스 화면 언어에 맞게 변경(예: lang=\"ko\")하세요; 대상은 index.html의\n<html lang=\"en\"> 문자열이며 스크린리더·브라우저 번역 동작을 위해 루트 lang 값을 한국어로 업데이트하면 됩니다.\n```\n\n</details>\n\n<!-- fingerprinting:phantom:poseidon:hawk:d1f175c0-1787-44a1-b4e1-73dd50af3b8e -->\n\n<!-- 4e71b3a2 -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->",
+  "user": "coderabbitai[bot]",
+  "html_url": "https://github.com/woowacourse/react-payments/pull/502#discussion_r3172547474"
+}
+{
+  "path": "README.md",
+  "line": 66,
+  "body": "_⚠️ Potential issue_ | _🟡 Minor_ | _⚡ Quick win_\n\n**추후 구현사항 목록을 현재 상태와 맞춰 주세요.**\n\n`path alias`, `색상 상수화`, `공통 타입 모듈화`는 이미 이번 변경에 포함된 내용이라 future work로 남아 있으면 문서가 현재 상태와 어긋납니다. 완료된 항목은 정리해 주세요.\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@README.md` around lines 62 - 66, The \"추후 구현사항\" list in README.md is out of\ndate because path alias, 색상 상수화, and 공통 타입 모듈화 were implemented in this change;\nupdate the README by removing these three items from the future work list and\neither delete the section or add a new \"완료된 항목\" (or \"오늘 구현됨\") subsection that\nexplicitly lists \"path alias 적용\", \"색상 상수화\", and \"공통 타입 모듈화\" (use the exact\nstrings as in the diff) so the document reflects the current code state.\n```\n\n</details>\n\n<!-- fingerprinting:phantom:poseidon:hawk:6d8e1ff1-7ab5-4190-a51b-b3e5b4b3d9ec -->\n\n<!-- d98c2f50 -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->",
+  "user": "coderabbitai[bot]",
+  "html_url": "https://github.com/woowacourse/react-payments/pull/502#discussion_r3172547476"
+}
+{
+  "path": "src/components/Card.tsx",
+  "line": 40,
+  "body": "_⚠️ Potential issue_ | _🟡 Minor_ | _⚡ Quick win_\n\n**브랜드 이미지에 대체 텍스트를 넣어 주세요.**\n\n현재 `CardBrandImg`에 `alt`가 없어 스크린 리더가 카드 브랜드를 전달하지 못합니다. 정보 전달용이면 브랜드명을 넣고, 장식용이면 `alt=\"\"`로 명시해 주세요.\n\n<details>\n<summary>수정 예시</summary>\n\n```diff\n-              component: <CardBrandImg src={masterCard} />,\n+              component: <CardBrandImg src={masterCard} alt=\"MasterCard\" />,\n```\n\n같은 방식으로 Visa 쪽도 추가해 주세요.\n</details>\n\n<!-- suggestion_start -->\n\n<details>\n<summary>📝 Committable suggestion</summary>\n\n> ‼️ **IMPORTANT**\n> Carefully review the code before committing. Ensure that it accurately replaces the highlighted code, contains no missing lines, and has no issues with indentation. Thoroughly test & benchmark the code to ensure it meets the requirements.\n\n```suggestion\n        <SwitchCase\n          value={brand}\n          caseBy={[\n            {\n              case: \"MasterCard\",\n              component: <CardBrandImg src={masterCard} alt=\"MasterCard\" />,\n            },\n            {\n              case: \"Visa\",\n              component: <CardBrandImg src={visa} alt=\"Visa\" />,\n            },\n          ]}\n          defaultCase={null}\n        />\n```\n\n</details>\n\n<!-- suggestion_end -->\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@src/components/Card.tsx` around lines 27 - 40, The CardBrandImg instances\ninside the SwitchCase lack alt text; update the MasterCard and Visa case\ncomponents to pass an explicit alt prop (e.g., alt=\"MasterCard\" for the\nMasterCard case and alt=\"Visa\" for the Visa case) so screen readers receive the\nbrand name (or use alt=\"\" if the image is purely decorative); locate the\nSwitchCase handling 'brand' and modify the CardBrandImg props accordingly.\n```\n\n</details>\n\n<!-- fingerprinting:phantom:poseidon:hawk:de339ede-ac75-435e-990f-26569cd6ac63 -->\n\n<!-- 4e71b3a2 -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->",
+  "user": "coderabbitai[bot]",
+  "html_url": "https://github.com/woowacourse/react-payments/pull/502#discussion_r3172547479"
+}
+{
+  "path": "src/components/CardCVCInputField.tsx",
+  "line": 43,
+  "body": "_⚠️ Potential issue_ | _🟡 Minor_ | _⚡ Quick win_\n\n**라벨 텍스트를 CVC 필드에 맞춰 주세요.**\n\n`title`은 CVC인데 `label`이 `카드 번호`로 되어 있어 사용자에게 잘못된 필드로 보입니다. 동일한 입력 필드명으로 맞추는 게 좋습니다.\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@src/components/CardCVCInputField.tsx` around lines 28 - 43, The label prop on\nthe InputField in CardCVCInputField.tsx is incorrect — change label=\"카드 번호\" to\nmatch the CVC field (e.g., \"CVC\" or \"CVC 번호\") so it aligns with title=\"CVC 번호를\n입력해 주세요\"; update the label prop used in the InputField component inside the\nCardCVCInputField render (refer to the InputField instantiation and its\ntitle/label props) to use the correct CVC label string.\n```\n\n</details>\n\n<!-- fingerprinting:phantom:poseidon:hawk:6d8e1ff1-7ab5-4190-a51b-b3e5b4b3d9ec -->\n\n<!-- d98c2f50 -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->",
+  "user": "coderabbitai[bot]",
+  "html_url": "https://github.com/woowacourse/react-payments/pull/502#discussion_r3172547488"
+}
+{
+  "path": "src/components/CardNumberInputField.tsx",
+  "line": 46,
+  "body": "_⚠️ Potential issue_ | _🟠 Major_ | _⚡ Quick win_\n\n**한 칸의 오류가 다른 칸의 에러 표시를 지우고 있습니다.**\n\n`setStatus(INPUTS_STATUSES)`로 전체 상태를 기본값으로 되돌려서, 이전에 에러였던 다른 입력의 표시가 사라집니다. 현재 편집한 인덱스만 갱신하거나, 4칸 전체를 다시 검증해서 status를 계산해야 합니다.\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@src/components/CardNumberInputField.tsx` around lines 30 - 46,\nhandleCardNumberChange currently calls setStatus(INPUTS_STATUSES) which resets\nall fields and clears other inputs' error states; instead compute and set a new\nstatus array that only updates the edited index (or revalidates all four units)\nusing the existing InputsStatuses type. Specifically, inside\nhandleCardNumberChange, build newStatuses from the previous status\n(setStatus(prev => { const s = [...prev]; /* set s[index] = \"error\" or \"valid\"\nbased on validation of input and/or full revalidation of cardNumberUnits with\ninput applied */ return s; })) so you preserve other inputs' \"error\" flags;\nreference functions/values: handleCardNumberChange, setStatus, INPUTS_STATUSES,\nInputsStatuses, cardNumberUnits, validateCardNumberUnitRange and checkIsInt, and\nensure onChange still gets the truncated newCardNumberUnits.\n```\n\n</details>\n\n<!-- fingerprinting:phantom:poseidon:hawk:de339ede-ac75-435e-990f-26569cd6ac63 -->\n\n<!-- 4e71b3a2 -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->",
+  "user": "coderabbitai[bot]",
+  "html_url": "https://github.com/woowacourse/react-payments/pull/502#discussion_r3172547491"
+}
+{
+  "path": "src/components/CardValidityPeriodInputField.tsx",
+  "line": 90,
+  "body": "_⚠️ Potential issue_ | _🟠 Major_ | _⚡ Quick win_\n\n**Blur 시 검증 결과를 반영한 뒤에만 상태를 갱신하세요.**\n\n`validityPeriodChange(key, padded)`의 반환값을 무시해서, 예를 들어 `0`이 `00`으로 패딩된 뒤에도 부모 상태로 전달될 수 있습니다. 이러면 유효하지 않은 월이 controlled state에 남습니다.\n\n<details>\n<summary>수정 방향</summary>\n\n```diff\n const handleValidityPeriodBlur = (key: keyof ValidityPeriod) => {\n   const padded = padValidityPeriodUnit(validityPeriod[key]);\n-  validityPeriodChange(key, padded);\n+  if (!validityPeriodChange(key, padded)) return;\n   if (padded === validityPeriod[key]) return;\n   onChange({ ...validityPeriod, [key]: padded });\n };\n```\n</details>\n\n<!-- suggestion_start -->\n\n<details>\n<summary>📝 Committable suggestion</summary>\n\n> ‼️ **IMPORTANT**\n> Carefully review the code before committing. Ensure that it accurately replaces the highlighted code, contains no missing lines, and has no issues with indentation. Thoroughly test & benchmark the code to ensure it meets the requirements.\n\n```suggestion\n  const handleValidityPeriodBlur = (key: keyof ValidityPeriod) => {\n    const padded = padValidityPeriodUnit(validityPeriod[key]);\n    if (!validityPeriodChange(key, padded)) return;\n    if (padded === validityPeriod[key]) return;\n    onChange({ ...validityPeriod, [key]: padded });\n  };\n```\n\n</details>\n\n<!-- suggestion_end -->\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@src/components/CardValidityPeriodInputField.tsx` around lines 85 - 90,\nhandleValidityPeriodBlur currently ignores the return value of\nvalidityPeriodChange which allows invalid values (e.g., padded \"00\") to be sent\nto the parent via onChange; capture and use the return from\nvalidityPeriodChange(key, padded) and only call onChange({ ...validityPeriod,\n[key]: padded }) if that return indicates the change was accepted/validated (or\nif it equals the padded value), otherwise do not propagate the padded value to\nthe parent; update handleValidityPeriodBlur to call padValidityPeriodUnit, pass\nthe padded value into validityPeriodChange, check its return and only call\nonChange when validation succeeded.\n```\n\n</details>\n\n<!-- fingerprinting:phantom:poseidon:hawk:5b4f3906-f37d-4714-9015-e03f717d2f5b -->\n\n<!-- 4e71b3a2 -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->",
+  "user": "coderabbitai[bot]",
+  "html_url": "https://github.com/woowacourse/react-payments/pull/502#discussion_r3172547493"
+}
+{
+  "path": "src/components/CardValidityPeriodInputField.tsx",
+  "line": 121,
+  "body": "_⚠️ Potential issue_ | _🟡 Minor_ | _⚡ Quick win_\n\n**오류 메시지를 범위 오류와 분리해 주세요.**\n\n현재 `13`, `00`처럼 숫자지만 범위를 벗어난 경우에도 `\"숫자만 입력 가능합니다.\"`가 표시됩니다. 사용자는 입력 형식 오류인지 범위 오류인지 구분하기 어렵습니다.\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@src/components/CardValidityPeriodInputField.tsx` around lines 117 - 121, The\nhelper message currently conflates format errors and range errors; update the\nhelperMessage logic in CardValidityPeriodInputField to distinguish status values\n(e.g., keep \"숫자만 입력 가능합니다.\" for status.month === \"error\" || status.year ===\n\"error\", and show a separate message like \"유효한 월/연도를 입력하세요.\" when status.month\n=== \"range\" || status.year === \"range\"). Locate the helperMessage expression in\nthe CardValidityPeriodInputField component and add the branch for range status\n(or explicit numeric-range checks on month/year values) so users see a clear,\ndifferent message for range vs format errors.\n```\n\n</details>\n\n<!-- fingerprinting:phantom:poseidon:hawk:5b4f3906-f37d-4714-9015-e03f717d2f5b -->\n\n<!-- d98c2f50 -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->",
+  "user": "coderabbitai[bot]",
+  "html_url": "https://github.com/woowacourse/react-payments/pull/502#discussion_r3172547495"
+}
+{
+  "path": "src/components/InputField.tsx",
+  "line": 31,
+  "body": "_⚠️ Potential issue_ | _🟠 Major_ | _⚡ Quick win_\n\n**그룹 제목을 `label`로 두면 접근성이 어긋납니다.**\n\n이 컴포넌트는 여러 input을 묶고 있는데, 현재 `label` 요소가 어떤 입력과도 연결되지 않습니다. `fieldset/legend` 또는 `aria-labelledby`로 그룹 이름을 주는 쪽이 더 적절합니다.\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@src/components/InputField.tsx` around lines 22 - 31, The Label element in the\nInputField component is currently a plain label that isn’t associated with any\nspecific input, breaking accessibility for the grouped inputs; change the markup\nso the group title is provided as a fieldset/legend or via aria-labelledby: wrap\nInputWrapper and the input list with a <fieldset> and render the group text as a\n<legend> (replace the Label node), or keep a non-label styled element and\ngenerate a stable id (e.g., groupLabelId) that you pass as aria-labelledby on\neach Input in inputPropsList; update InputField to set that id and ensure each\nInput receives the aria-labelledby prop so screen readers correctly associate\nthe group label with all inputs (referencing InputField, Label, InputWrapper,\ninputPropsList, and Input).\n```\n\n</details>\n\n<!-- fingerprinting:phantom:poseidon:hawk:de339ede-ac75-435e-990f-26569cd6ac63 -->\n\n<!-- 4e71b3a2 -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->",
+  "user": "coderabbitai[bot]",
+  "html_url": "https://github.com/woowacourse/react-payments/pull/502#discussion_r3172547497"
+}
+{
+  "path": "src/components/SwitchCase.tsx",
+  "line": 17,
+  "body": "_⚠️ Potential issue_ | _🟡 Minor_ | _⚡ Quick win_\n\n**불필요한 wrapper를 제거하고 falsy ReactNode를 보존해 주세요.**\n\n`defaultCase={null}`인 현재 사용처에서도 빈 `<div>`가 남고, `0`/`''` 같은 유효한 `ReactNode`가 `defaultCase`로 대체될 수 있습니다. 이 유틸은 반환값을 그대로 내보내는 쪽이 더 안전합니다.\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@src/components/SwitchCase.tsx` around lines 12 - 17, The component currently\nwraps the resolved node in a div and loses falsy ReactNodes; update SwitchCase\nto return the matched node directly instead of rendering <div>. Locate the\ncomputed caseComponent (variable caseComponent in SwitchCase) and replace the\nJSX return with a direct return that preserves falsy values by selecting\ncaseComponent when it is defined, otherwise defaultCase (e.g., use an undefined\ncheck: return caseComponent !== undefined ? caseComponent : defaultCase). Ensure\nyou remove the wrapper div so values like 0, '' or null passed as defaultCase\nare preserved as-is.\n```\n\n</details>\n\n<!-- fingerprinting:phantom:poseidon:hawk:6d8e1ff1-7ab5-4190-a51b-b3e5b4b3d9ec -->\n\n<!-- 4e71b3a2 -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->",
+  "user": "coderabbitai[bot]",
+  "html_url": "https://github.com/woowacourse/react-payments/pull/502#discussion_r3172547500"
+}
+{
+  "path": "src/pages/AddNewCardPage.tsx",
+  "line": 71,
+  "body": "_⚠️ Potential issue_ | _🟠 Major_ | _⚡ Quick win_\n\n**`form` 제출 동작을 처리해 주세요.**\n\n지금은 submit 핸들러가 없어서 Enter 입력 시 의도치 않은 제출/새로고침이 발생할 수 있습니다. 제출 UX가 아직 없다면 폼 의미를 빼고, 있다면 기본 제출을 막는 처리가 필요합니다.\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@src/pages/AddNewCardPage.tsx` around lines 67 - 71, CardInfoForm is declared\nas a styled.form but has no submit handler, causing Enter to trigger page\nsubmission/refresh; either add an onSubmit handler where CardInfoForm is\nrendered (e.g., in the AddNewCardPage component) that calls\nevent.preventDefault() and then invokes your existing save/submit logic, or\nchange CardInfoForm to a non-form container (styled.div) if you don't intend any\nform submission UX. Locate the CardInfoForm symbol and update the parent\ncomponent's JSX to supply onSubmit={e => e.preventDefault()} (and hooked submit\nlogic if implemented) or refactor the styled.form to styled.div.\n```\n\n</details>\n\n<!-- fingerprinting:phantom:poseidon:hawk:d1f175c0-1787-44a1-b4e1-73dd50af3b8e -->\n\n<!-- 4e71b3a2 -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->",
+  "user": "coderabbitai[bot]",
+  "html_url": "https://github.com/woowacourse/react-payments/pull/502#discussion_r3172547502"
+}
+{
+  "path": "src/stories/Configure.mdx",
+  "line": 218,
+  "body": "_⚠️ Potential issue_ | _🟡 Minor_ | _⚡ Quick win_\n\n**외부 링크에는 `rel=\"noreferrer noopener\"`를 붙여 주세요.**\n\n`target=\"_blank\"`가 여러 곳에 있는데 `rel`이 없어 탭 하이재킹에 노출됩니다. 이 파일의 모든 외부 링크에 동일하게 적용해야 합니다.\n\n<details>\n<summary>수정 예시</summary>\n\n```diff\n-        target=\"_blank\"\n+        target=\"_blank\"\n+        rel=\"noreferrer noopener\"\n```\n</details>\n\n<!-- suggestion_start -->\n\n<details>\n<summary>📝 Committable suggestion</summary>\n\n> ‼️ **IMPORTANT**\n> Carefully review the code before committing. Ensure that it accurately replaces the highlighted code, contains no missing lines, and has no issues with indentation. Thoroughly test & benchmark the code to ensure it meets the requirements.\n\n```suggestion\n      <a\n        className=\"sb-action-link\"\n        href=\"https://storybook.js.org/docs/configure/styling-and-css/?renderer=react&ref=configure\"\n        target=\"_blank\"\n        rel=\"noreferrer noopener\"\n      >Learn more<RightArrow /></a>\n    </div>\n    <div className=\"sb-section-item\">\n      <img\n        src={Context}\n        alt=\"An abstraction representing the composition of data for a component\"\n      />\n      <h4 className=\"sb-section-item-heading\">Provide context and mocking</h4>\n      <p className=\"sb-section-item-paragraph\">Often when a story doesn't render, it's because your component is expecting a specific environment or context (like a theme provider) to be available.</p>\n      <a\n        className=\"sb-action-link\"\n        href=\"https://storybook.js.org/docs/writing-stories/decorators/?renderer=react&ref=configure#context-for-mocking\"\n        target=\"_blank\"\n        rel=\"noreferrer noopener\"\n      >Learn more<RightArrow /></a>\n    </div>\n    <div className=\"sb-section-item\">\n      <img src={Assets} alt=\"A representation of typography and image assets\" />\n      <div>\n        <h4 className=\"sb-section-item-heading\">Load assets and resources</h4>\n        <p className=\"sb-section-item-paragraph\">To link static files (like fonts) to your projects and stories, use the\n        `staticDirs` configuration option to specify folders to load when\n        starting Storybook.</p>\n        <a\n          className=\"sb-action-link\"\n          href=\"https://storybook.js.org/docs/configure/images-and-assets/?renderer=react&ref=configure\"\n          target=\"_blank\"\n          rel=\"noreferrer noopener\"\n        >Learn more<RightArrow /></a>\n      </div>\n    </div>\n  </div>\n</div>\n<div className=\"sb-container\">\n  <div className='sb-section-title'>\n    # Do more with Storybook\n\n    Now that you know the basics, let's explore other parts of Storybook that will improve your experience. This list is just to get you started. You can customise Storybook in many ways to fit your needs.\n  </div>\n\n  <div className=\"sb-section\">\n    <div className=\"sb-features-grid\">\n      <div className=\"sb-grid-item\">\n        <img src={Docs} alt=\"A screenshot showing the autodocs tag being set, pointing a docs page being generated\" />\n        <h4 className=\"sb-section-item-heading\">Autodocs</h4>\n        <p className=\"sb-section-item-paragraph\">Auto-generate living,\n          interactive reference documentation from your components and stories.</p>\n        <a\n          className=\"sb-action-link\"\n          href=\"https://storybook.js.org/docs/writing-docs/autodocs/?renderer=react&ref=configure\"\n          target=\"_blank\"\n          rel=\"noreferrer noopener\"\n        >Learn more<RightArrow /></a>\n      </div>\n      <div className=\"sb-grid-item\">\n        <img src={Share} alt=\"A browser window showing a Storybook being published to a chromatic.com URL\" />\n        <h4 className=\"sb-section-item-heading\">Publish to Chromatic</h4>\n        <p className=\"sb-section-item-paragraph\">Publish your Storybook to review and collaborate with your entire team.</p>\n        <a\n          className=\"sb-action-link\"\n          href=\"https://storybook.js.org/docs/sharing/publish-storybook/?renderer=react&ref=configure#publish-storybook-with-chromatic\"\n          target=\"_blank\"\n          rel=\"noreferrer noopener\"\n        >Learn more<RightArrow /></a>\n      </div>\n      <div className=\"sb-grid-item\">\n        <img src={FigmaPlugin} alt=\"Windows showing the Storybook plugin in Figma\" />\n        <h4 className=\"sb-section-item-heading\">Figma Plugin</h4>\n        <p className=\"sb-section-item-paragraph\">Embed your stories into Figma to cross-reference the design and live\n          implementation in one place.</p>\n        <a\n          className=\"sb-action-link\"\n          href=\"https://storybook.js.org/docs/sharing/design-integrations/?renderer=react&ref=configure#embed-storybook-in-figma-with-the-plugin\"\n          target=\"_blank\"\n          rel=\"noreferrer noopener\"\n        >Learn more<RightArrow /></a>\n      </div>\n      <div className=\"sb-grid-item\">\n        <img src={Testing} alt=\"Screenshot of tests passing and failing\" />\n        <h4 className=\"sb-section-item-heading\">Testing</h4>\n        <p className=\"sb-section-item-paragraph\">Use stories to test a component in all its variations, no matter how\n          complex.</p>\n        <a\n          className=\"sb-action-link\"\n          href=\"https://storybook.js.org/docs/writing-tests/?renderer=react&ref=configure\"\n          target=\"_blank\"\n          rel=\"noreferrer noopener\"\n        >Learn more<RightArrow /></a>\n      </div>\n      <div className=\"sb-grid-item\">\n        <img src={Accessibility} alt=\"Screenshot of accessibility tests passing and failing\" />\n        <h4 className=\"sb-section-item-heading\">Accessibility</h4>\n        <p className=\"sb-section-item-paragraph\">Automatically test your components for a11y issues as you develop.</p>\n        <a\n          className=\"sb-action-link\"\n          href=\"https://storybook.js.org/docs/writing-tests/accessibility-testing/?renderer=react&ref=configure\"\n          target=\"_blank\"\n          rel=\"noreferrer noopener\"\n        >Learn more<RightArrow /></a>\n      </div>\n      <div className=\"sb-grid-item\">\n        <img src={Theming} alt=\"Screenshot of Storybook in light and dark mode\" />\n        <h4 className=\"sb-section-item-heading\">Theming</h4>\n        <p className=\"sb-section-item-paragraph\">Theme Storybook's UI to personalize it to your project.</p>\n        <a\n          className=\"sb-action-link\"\n          href=\"https://storybook.js.org/docs/configure/theming/?renderer=react&ref=configure\"\n          target=\"_blank\"\n          rel=\"noreferrer noopener\"\n        >Learn more<RightArrow /></a>\n      </div>\n    </div>\n  </div>\n</div>\n<div className='sb-addon'>\n  <div className='sb-addon-text'>\n    <h4>Addons</h4>\n    <p className=\"sb-section-item-paragraph\">Integrate your tools with Storybook to connect workflows.</p>\n    <a\n        className=\"sb-action-link\"\n        href=\"https://storybook.js.org/addons/?ref=configure\"\n        target=\"_blank\"\n        rel=\"noreferrer noopener\"\n      >Discover all addons<RightArrow /></a>\n  </div>\n  <div className='sb-addon-img'>\n    <img src={AddonLibrary} alt=\"Integrate your tools with Storybook to connect workflows.\" />\n  </div>\n</div>\n\n<div className=\"sb-section sb-socials\">\n    <div className=\"sb-section-item\">\n      <img src={Github} alt=\"Github logo\" className=\"sb-explore-image\"/>\n      Join our contributors building the future of UI development.\n\n      <a\n        className=\"sb-action-link\"\n        href=\"https://github.com/storybookjs/storybook\"\n        target=\"_blank\"\n        rel=\"noreferrer noopener\"\n      >Star on GitHub<RightArrow /></a>\n    </div>\n    <div className=\"sb-section-item\">\n      <img src={Discord} alt=\"Discord logo\" className=\"sb-explore-image\"/>\n      <div>\n        Get support and chat with frontend developers.\n\n        <a\n          className=\"sb-action-link\"\n          href=\"https://discord.gg/storybook\"\n          target=\"_blank\"\n          rel=\"noreferrer noopener\"\n        >Join Discord server<RightArrow /></a>\n      </div>\n    </div>\n    <div className=\"sb-section-item\">\n      <img src={Youtube} alt=\"Youtube logo\" className=\"sb-explore-image\"/>\n      <div>\n        Watch tutorials, feature previews and interviews.\n\n        <a\n          className=\"sb-action-link\"\n          href=\"https://www.youtube.com/@chromaticui\"\n          target=\"_blank\"\n          rel=\"noreferrer noopener\"\n        >Watch on YouTube<RightArrow /></a>\n      </div>\n    </div>\n    <div className=\"sb-section-item\">\n      <img src={Tutorials} alt=\"A book\" className=\"sb-explore-image\"/>\n      <p>Follow guided walkthroughs on for key workflows.</p>\n\n      <a\n          className=\"sb-action-link\"\n          href=\"https://storybook.js.org/tutorials/?ref=configure\"\n          target=\"_blank\"\n          rel=\"noreferrer noopener\"\n        >Discover tutorials<RightArrow /></a>\n```\n\n</details>\n\n<!-- suggestion_end -->\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@src/stories/Configure.mdx` around lines 50 - 218, Multiple anchor elements in\nConfigure.mdx use target=\"_blank\" without rel attributes, exposing tab‑napping\nrisk; update every JSX <a ... target=\"_blank\"> (e.g., the \"sb-action-link\"\nanchors like the Learn more links, and the links for \"Star on GitHub\", \"Join\nDiscord server\", \"Watch on YouTube\", \"Discover tutorials\", etc.) to include\nrel=\"noreferrer noopener\". Search for all occurrences of target=\"_blank\" in this\nfile and add rel=\"noreferrer noopener\" to each anchor element (keeping existing\nclassName/href/children intact) so every external link uses the security-safe\nattribute combination.\n```\n\n</details>\n\n<!-- fingerprinting:phantom:poseidon:hawk:de339ede-ac75-435e-990f-26569cd6ac63 -->\n\n<!-- 4e71b3a2 -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->",
+  "user": "coderabbitai[bot]",
+  "html_url": "https://github.com/woowacourse/react-payments/pull/502#discussion_r3172547503"
+}
+{
+  "path": "src/utils/card.ts",
+  "line": 17,
+  "body": "_⚠️ Potential issue_ | _🟠 Major_ | _⚡ Quick win_\n\n**MasterCard 감지 범위를 다시 확인해 주세요.**\n\n지금 로직은 `51~55`만 인식해서 `2221~2720` 대역의 MasterCard가 `null`로 분류됩니다. 실제 결제 카드 브랜드가 잘못 비어 보일 수 있습니다.\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@src/utils/card.ts` around lines 5 - 17, detectCardBrand currently only checks\nVISA_PREFIX and MASTER_CARD_PREFIXES (51–55) so BIN range 2221–2720 is missed;\nupdate detectCardBrand to also parse the first 4 digits (guarding for length)\nfrom cardNumber[0] and check if that integer is between 2221 and 2720, returning\n\"MasterCard\" when true while keeping the existing 51–55 slice check and Visa\ncheck (use the same function name detectCardBrand, constants VISA_PREFIX and\nMASTER_CARD_PREFIXES as anchors).\n```\n\n</details>\n\n<!-- fingerprinting:phantom:poseidon:hawk:de339ede-ac75-435e-990f-26569cd6ac63 -->\n\n<!-- 4e71b3a2 -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->",
+  "user": "coderabbitai[bot]",
+  "html_url": "https://github.com/woowacourse/react-payments/pull/502#discussion_r3172547511"
+}
+{
+  "path": "vite.config.ts",
+  "line": 68,
+  "body": "_⚠️ Potential issue_ | _🔴 Critical_\n\n<details>\n<summary>🧩 Analysis chain</summary>\n\n🏁 Script executed:\n\n```shell\n#!/bin/bash\nset -euo pipefail\n\nrg -n '\"type\"\\s*:\\s*\"module\"|__dirname|const dirname' package.json vite.config.ts\n```\n\nRepository: woowacourse/react-payments\n\nLength of output: 748\n\n---\n\n\n\n</details>\n\n**alias 설정에서 `__dirname` 대신 `dirname` 변수를 사용하세요.**\n\n이 파일의 ESM 환경에서 `__dirname`은 정의되지 않아 설정 로드가 실패합니다. 이미 파일 상단(11-13줄)에서 안전하게 계산한 `dirname` 변수를 alias 경로에 사용해야 합니다. 58-66줄의 모든 `resolve(__dirname, ...)` 부분을 `resolve(dirname, ...)`로 변경하세요.\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@vite.config.ts` around lines 56 - 68, The alias block uses the undefined ESM\n__dirname which breaks config loading; update all occurrences of\nresolve(__dirname, ...) inside the resolve.alias array to use the previously\ncomputed dirname variable (i.e., resolve(dirname, ...)) so the alias entries ({\nfind: \"@\", \"{ find: \"@assets\", etc.) reference resolve(dirname, ...) instead of\nresolve(__dirname, ...)).\n```\n\n</details>\n\n<!-- fingerprinting:phantom:poseidon:hawk:de339ede-ac75-435e-990f-26569cd6ac63 -->\n\n<!-- 4e71b3a2 -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->",
+  "user": "coderabbitai[bot]",
+  "html_url": "https://github.com/woowacourse/react-payments/pull/502#discussion_r3172547513"
+}
+{
+  "path": "src/components/CardCVCInputField.tsx",
+  "line": 21,
+  "body": "카드 번호 입력과 CVC 입력이 거의 같은 검증 흐름을 가지고 있는 것 같으데요. 검증 로직이 지금은 흩어져 있는데, 추상화하여 사용하는 것은 어떨까요? \n음... 예로 들면, \"숫자 문자열인지 확인하고, 최대 길이만 반영한다\" 같은 공통 규칙은 재사용할 수 있을 것 같네요",
+  "user": "ukkodeveloper",
+  "html_url": "https://github.com/woowacourse/react-payments/pull/502#discussion_r3177579633"
+}
+{
+  "path": "src/components/Card.tsx",
+  "line": 40,
+  "body": "`SwitchCase`를 사용하면 어떤 점이 좋고 나쁜지 두부의 생각이 궁금해요. \n사실은 image src 만 분기로 정해주면 되는데, 이 코드를 보면 컴포넌트가 다 다르네요! \n훅으로 image src 를 구하도록 하는 거랑 어떤 차이가 있을까요? ",
+  "user": "ukkodeveloper",
+  "html_url": "https://github.com/woowacourse/react-payments/pull/502#discussion_r3177582391"
+}
+{
+  "path": "src/components/CardNumberInputField.tsx",
+  "line": 42,
+  "body": "한 칸이 정상 입력될 때 전체 status를 초기화하고 있는데요. \n다른 칸에서 발생한 에러 표시도 초기화될 것 같은데 의도된 건지 확인해보면 좋을 것 같아요!",
+  "user": "ukkodeveloper",
+  "html_url": "https://github.com/woowacourse/react-payments/pull/502#discussion_r3177585252"
+}
+{
+  "path": "src/components/CardValidityPeriodInputField.tsx",
+  "line": 60,
+  "body": "`13`처럼 숫자이지만 월 범위를 벗어난 값도 지금은 \"숫자만 입력 가능합니다.\"로 안내되고 있는데요...! 별도의 문구로 안내해주는 건 어떨까요?",
+  "user": "ukkodeveloper",
+  "html_url": "https://github.com/woowacourse/react-payments/pull/502#discussion_r3177586564"
+}
+{
+  "path": "src/components/InputField.tsx",
+  "line": 29,
+  "body": "label이 시각적으론 잘 보이지만 input하고 연결이 안되어 있는데요. \ninput, label을 시멘틱하게 작성하면 좋은 점이 무엇일까요?",
+  "user": "ukkodeveloper",
+  "html_url": "https://github.com/woowacourse/react-payments/pull/502#discussion_r3177589755"
+}
+{
+  "path": "src/pages/AddNewCardPage.tsx",
+  "line": 19,
+  "body": "페이지 전체에서 모든 입력 상태를 관리하게 되면 어떤 장단점이 있을지 고민해보면 좋을 것 같습니다!",
+  "user": "ukkodeveloper",
+  "html_url": "https://github.com/woowacourse/react-payments/pull/502#discussion_r3177591157"
+}
+{
+  "path": "src/stories/Card.stories.ts",
+  "line": 41,
+  "body": "카드 프리뷰 스토리에서 Visa/MasterCard 상태를 분리 굳입니다 👍 ",
+  "user": "ukkodeveloper",
+  "html_url": "https://github.com/woowacourse/react-payments/pull/502#discussion_r3177591965"
+}
+{
+  "path": "src/stories/CardValidityPeriodInputField.stories.ts",
+  "line": 1,
+  "body": "validation 에러케이스도 하나 만들어두면 ui 확인하기에 더 좋을 것 같은데 두부는 어떻게 생각하세요?",
+  "user": "ukkodeveloper",
+  "html_url": "https://github.com/woowacourse/react-payments/pull/502#discussion_r3177593583"
+}
+
+===== PR #502 DIFF (capped 80KB) =====
+diff --git a/.gitignore b/.gitignore
+index 51a7d98a37..febf6eed64 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -26,4 +26,5 @@ dist-ssr
+ *.sln
+ *.sw?
+ 
+-*storybook.log
+\ No newline at end of file
++*storybook.log
++storybook-static
+diff --git a/.prettierrc b/.prettierrc
+new file mode 100644
+index 0000000000..222861c341
+--- /dev/null
++++ b/.prettierrc
+@@ -0,0 +1,4 @@
++{
++  "tabWidth": 2,
++  "useTabs": false
++}
+diff --git a/.storybook/main.ts b/.storybook/main.ts
+new file mode 100644
+index 0000000000..78cf7b3929
+--- /dev/null
++++ b/.storybook/main.ts
+@@ -0,0 +1,17 @@
++import type { StorybookConfig } from '@storybook/react-vite';
++
++const config: StorybookConfig = {
++  "stories": [
++    "../src/**/*.mdx",
++    "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"
++  ],
++  "addons": [
++    "@chromatic-com/storybook",
++    "@storybook/addon-vitest",
++    "@storybook/addon-a11y",
++    "@storybook/addon-docs",
++    "@storybook/addon-onboarding"
++  ],
++  "framework": "@storybook/react-vite"
++};
++export default config;
+\ No newline at end of file
+diff --git a/.storybook/preview.ts b/.storybook/preview.ts
+new file mode 100644
+index 0000000000..3b8034451c
+--- /dev/null
++++ b/.storybook/preview.ts
+@@ -0,0 +1,21 @@
++import type { Preview } from "@storybook/react-vite";
++
++const preview: Preview = {
++  parameters: {
++    controls: {
++      matchers: {
++        color: /(background|color)$/i,
++        date: /Date$/i,
++      },
++    },
++
++    a11y: {
++      // 'todo' - show a11y violations in the test UI only
++      // 'error' - fail CI on a11y violations
++      // 'off' - skip a11y checks entirely
++      test: "todo",
++    },
++  },
++};
++
++export default preview;
+diff --git a/README.md b/README.md
+index 888803b842..0063bdbd9c 100644
+--- a/README.md
++++ b/README.md
+@@ -1,15 +1,66 @@
+ # 페이먼츠 미션
+ 
+-우아한테크코스 레벨2 **페이먼츠** 미션 저장소이다.
++## 기능 요구사항
+ 
+-이 저장소는 일부러 비어 있다. 크루는 프로젝트 부트스트랩부터 라이브러리 선택·설치·설정까지 직접 수행한다. "왜 이 라이브러리를 골랐는가"가 곧 학습이다.
++### 카드 번호 입력 및 식별
+ 
+-## 프로젝트 초기화
++- 사용자는 카드 번호를 입력할 수 있다.
++- 입력한 카드 번호가 Visa 또는 MasterCard에 해당하는 경우, 해당 브랜드의 로고가 UI에 표시된다.
++- 카드 번호는 양의 정수만 입력할 수 있다.
++- 올바르지 않은 입력을 한 경우 피드백을 제공하고 입력을 제한한다.
++- 사용자의 카드 번호 입력에 따라 카드 프리뷰를 동시에 업데이트한다.
+ 
+-[React — Build a React app from scratch](https://react.dev/learn/build-a-react-app-from-scratch)
++### 카드 유효기간 입력
+ 
+-```sh
+-npm create vite@latest my-app -- --template react-ts
+-npm install
+-npm run dev
+-```
++- 사용자는 월과 년도를 입력할 수 있다.
++  - 월의 경우 1부터 12까지의 2자리의 정수이다.
++  - 년도의 경우 2자리의 양의 정수이다.
++  - 올바르지 않은 입력을 한 경우 피드백을 제공하고 입력을 제한한다.
++- 사용자의 카드 유효기간 입력에 따라 카드 프리뷰를 동시에 업데이트한다.
++
++### 카드 CVC 입력
++
++- 사용자는 CVC 번호를 입력할 수 있다.
++  - CVC 번호는 000 - 999 까지의 3자리 정수이다.
++  - 올바르지 않은 입력을 한 경우 피드백을 제공하고 입력을 제한한다.
++- 사용자의 카드 CVC 입력에 따라 카드 프리뷰를 동시에 업데이트한다.
++
++## 구현사항
++
++### 환경 설정
++
++- [x] vite + typescript + react 환경 구축
++- [x] emotion 환경 구축
++- [x] 보일러 플래이트 제거
++
++### 카드 번호 입력 및 식별
++
++- [x] 카드 ui 구현
++- [x] 카드 번호 입력창 구현
++  - [x] 사용자는 올바른 카드 번호를 입력할 수 있다.
++    - [x] 카드 번호는 0과 양의 정수만 입력할 수 있다.
++    - [x] 올바르지 않은 입력을 한 경우 피드백을 제공하고 입력을 제한한다.
++  - [x] 입력한 카드 번호가 Visa 또는 MasterCard에 해당하는 경우, 해당 브랜드의 로고가 UI에 표시된다.
++  - [x] 사용자의 카드 번호 입력에 따라 카드 프리뷰를 동시에 업데이트한다.
++
++### 카드 유효기간 입력
++
++- [x] 카드 유효기간 입력창 구현
++  - [x] 사용자는 올바른 월과 년도를 입력할 수 있다.
++    - [x] 월의 경우 1부터 12까지의 2자리의 정수이다.
++    - [x] 년도의 경우 2자리의 양의 정수이다.
++    - [x] 올바르지 않은 입력을 한 경우 피드백을 제공하고 입력을 제한한다.
++  - [x] 사용자의 카드 유효기간 입력에 따라 카드 프리뷰를 동시에 업데이트한다.
++
++### 카드 CVC 입력
++
++- [x] 카드 CVC 입력창 구현
++  - [x] 사용자는 올바른 CVC 번호를 입력할 수 있다.
++    - [x] CVC 번호는 000 - 999 까지의 3자리 정수이다.
++    - [x] 올바르지 않은 입력을 한 경우 피드백을 제공하고 입력을 제한한다.
++
++## 추후 구현사항
++
++- path alias 적용하기
++- 색상 상수화
++- 공통 타입 모듈화하기
+diff --git a/eslint.config.js b/eslint.config.js
+new file mode 100644
+index 0000000000..57a1df00f1
+--- /dev/null
++++ b/eslint.config.js
+@@ -0,0 +1,22 @@
++// For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
++import storybook from "eslint-plugin-storybook";
++
++import js from '@eslint/js'
++import globals from 'globals'
++import reactHooks from 'eslint-plugin-react-hooks'
++import reactRefresh from 'eslint-plugin-react-refresh'
++import tseslint from 'typescript-eslint'
++import { defineConfig, globalIgnores } from 'eslint/config'
++
++export default defineConfig([globalIgnores(['dist']), {
++  files: ['**/*.{ts,tsx}'],
++  extends: [
++    js.configs.recommended,
++    tseslint.configs.recommended,
++    reactHooks.configs.flat.recommended,
++    reactRefresh.configs.vite,
++  ],
++  languageOptions: {
++    globals: globals.browser,
++  },
++}, ...storybook.configs["flat/recommended"]])
+diff --git a/index.html b/index.html
+new file mode 100644
+index 0000000000..657461cc5c
+--- /dev/null
++++ b/index.html
+@@ -0,0 +1,13 @@
++<!doctype html>
++<html lang="en">
++  <head>
++    <meta charset="UTF-8" />
++    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
++    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
++    <title>react-payments</title>
++  </head>
++  <body>
++    <div id="root"></div>
++    <script type="module" src="/src/main.tsx"></script>
++  </body>
++</html>
+diff --git a/package-lock.json b/package-lock.json
+new file mode 100644
+index 0000000000..f49d760f53
+--- /dev/null
++++ b/package-lock.json
+@@ -0,0 +1,5787 @@
++{
++  "name": "react-payments",
++  "version": "0.0.0",
++  "lockfileVersion": 3,
++  "requires": true,
++  "packages": {
++    "": {
++      "name": "react-payments",
++      "version": "0.0.0",
++      "dependencies": {
++        "@emotion/react": "^11.14.0",
++        "@emotion/styled": "^11.14.1",
++        "react": "^19.2.5",
++        "react-dom": "^19.2.5"
++      },
++      "devDependencies": {
++        "@babel/core": "^7.29.0",
++        "@chromatic-com/storybook": "^5.1.2",
++        "@eslint/js": "^10.0.1",
++        "@rolldown/plugin-babel": "^0.2.3",
++        "@storybook/addon-a11y": "^10.3.5",
++        "@storybook/addon-docs": "^10.3.5",
++        "@storybook/addon-onboarding": "^10.3.5",
++        "@storybook/addon-vitest": "^10.3.5",
++        "@storybook/react-vite": "^10.3.5",
++        "@types/babel__core": "^7.20.5",
++        "@types/node": "^24.12.2",
++        "@types/react": "^19.2.14",
++        "@types/react-dom": "^19.2.3",
++        "@vitejs/plugin-react": "^6.0.1",
++        "@vitest/browser-playwright": "^4.1.5",
++        "@vitest/coverage-v8": "^4.1.5",
++        "babel-plugin-react-compiler": "^1.0.0",
++        "eslint": "^10.2.1",
++        "eslint-plugin-react-hooks": "^7.1.1",
++        "eslint-plugin-react-refresh": "^0.5.2",
++        "eslint-plugin-storybook": "^10.3.5",
++        "globals": "^17.5.0",
++        "playwright": "^1.59.1",
++        "storybook": "^10.3.5",
++        "typescript": "~6.0.2",
++        "typescript-eslint": "^8.58.2",
++        "vite": "^8.0.10",
++        "vitest": "^4.1.5"
++      }
++    },
++    "node_modules/@adobe/css-tools": {
++      "version": "4.4.4",
++      "resolved": "https://registry.npmjs.org/@adobe/css-tools/-/css-tools-4.4.4.tgz",
++      "integrity": "sha512-Elp+iwUx5rN5+Y8xLt5/GRoG20WGoDCQ/1Fb+1LiGtvwbDavuSk0jhD/eZdckHAuzcDzccnkv+rEjyWfRx18gg==",
++      "dev": true,
++      "license": "MIT"
++    },
++    "node_modules/@babel/code-frame": {
++      "version": "7.29.0",
++      "resolved": "https://registry.npmjs.org/@babel/code-frame/-/code-frame-7.29.0.tgz",
++      "integrity": "sha512-9NhCeYjq9+3uxgdtp20LSiJXJvN0FeCtNGpJxuMFZ1Kv3cWUNb6DOhJwUvcVCzKGR66cw4njwM6hrJLqgOwbcw==",
++      "license": "MIT",
++      "dependencies": {
++        "@babel/helper-validator-identifier": "^7.28.5",
++        "js-tokens": "^4.0.0",
++        "picocolors": "^1.1.1"
++      },
++      "engines": {
++        "node": ">=6.9.0"
++      }
++    },
++    "node_modules/@babel/compat-data": {
++      "version": "7.29.0",
++      "resolved": "https://registry.npmjs.org/@babel/compat-data/-/compat-data-7.29.0.tgz",
++      "integrity": "sha512-T1NCJqT/j9+cn8fvkt7jtwbLBfLC/1y1c7NtCeXFRgzGTsafi68MRv8yzkYSapBnFA6L3U2VSc02ciDzoAJhJg==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": ">=6.9.0"
++      }
++    },
++    "node_modules/@babel/core": {
++      "version": "7.29.0",
++      "resolved": "https://registry.npmjs.org/@babel/core/-/core-7.29.0.tgz",
++      "integrity": "sha512-CGOfOJqWjg2qW/Mb6zNsDm+u5vFQ8DxXfbM09z69p5Z6+mE1ikP2jUXw+j42Pf1XTYED2Rni5f95npYeuwMDQA==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@babel/code-frame": "^7.29.0",
++        "@babel/generator": "^7.29.0",
++        "@babel/helper-compilation-targets": "^7.28.6",
++        "@babel/helper-module-transforms": "^7.28.6",
++        "@babel/helpers": "^7.28.6",
++        "@babel/parser": "^7.29.0",
++        "@babel/template": "^7.28.6",
++        "@babel/traverse": "^7.29.0",
++        "@babel/types": "^7.29.0",
++        "@jridgewell/remapping": "^2.3.5",
++        "convert-source-map": "^2.0.0",
++        "debug": "^4.1.0",
++        "gensync": "^1.0.0-beta.2",
++        "json5": "^2.2.3",
++        "semver": "^6.3.1"
++      },
++      "engines": {
++        "node": ">=6.9.0"
++      },
++      "funding": {
++        "type": "opencollective",
++        "url": "https://opencollective.com/babel"
++      }
++    },
++    "node_modules/@babel/generator": {
++      "version": "7.29.1",
++      "resolved": "https://registry.npmjs.org/@babel/generator/-/generator-7.29.1.tgz",
++      "integrity": "sha512-qsaF+9Qcm2Qv8SRIMMscAvG4O3lJ0F1GuMo5HR/Bp02LopNgnZBC/EkbevHFeGs4ls/oPz9v+Bsmzbkbe+0dUw==",
++      "license": "MIT",
++      "dependencies": {
++        "@babel/parser": "^7.29.0",
++        "@babel/types": "^7.29.0",
++        "@jridgewell/gen-mapping": "^0.3.12",
++        "@jridgewell/trace-mapping": "^0.3.28",
++        "jsesc": "^3.0.2"
++      },
++      "engines": {
++        "node": ">=6.9.0"
++      }
++    },
++    "node_modules/@babel/helper-compilation-targets": {
++      "version": "7.28.6",
++      "resolved": "https://registry.npmjs.org/@babel/helper-compilation-targets/-/helper-compilation-targets-7.28.6.tgz",
++      "integrity": "sha512-JYtls3hqi15fcx5GaSNL7SCTJ2MNmjrkHXg4FSpOA/grxK8KwyZ5bubHsCq8FXCkua6xhuaaBit+3b7+VZRfcA==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@babel/compat-data": "^7.28.6",
++        "@babel/helper-validator-option": "^7.27.1",
++        "browserslist": "^4.24.0",
++        "lru-cache": "^5.1.1",
++        "semver": "^6.3.1"
++      },
++      "engines": {
++        "node": ">=6.9.0"
++      }
++    },
++    "node_modules/@babel/helper-globals": {
++      "version": "7.28.0",
++      "resolved": "https://registry.npmjs.org/@babel/helper-globals/-/helper-globals-7.28.0.tgz",
++      "integrity": "sha512-+W6cISkXFa1jXsDEdYA8HeevQT/FULhxzR99pxphltZcVaugps53THCeiWA8SguxxpSp3gKPiuYfSWopkLQ4hw==",
++      "license": "MIT",
++      "engines": {
++        "node": ">=6.9.0"
++      }
++    },
++    "node_modules/@babel/helper-module-imports": {
++      "version": "7.28.6",
++      "resolved": "https://registry.npmjs.org/@babel/helper-module-imports/-/helper-module-imports-7.28.6.tgz",
++      "integrity": "sha512-l5XkZK7r7wa9LucGw9LwZyyCUscb4x37JWTPz7swwFE/0FMQAGpiWUZn8u9DzkSBWEcK25jmvubfpw2dnAMdbw==",
++      "license": "MIT",
++      "dependencies": {
++        "@babel/traverse": "^7.28.6",
++        "@babel/types": "^7.28.6"
++      },
++      "engines": {
++        "node": ">=6.9.0"
++      }
++    },
++    "node_modules/@babel/helper-module-transforms": {
++      "version": "7.28.6",
++      "resolved": "https://registry.npmjs.org/@babel/helper-module-transforms/-/helper-module-transforms-7.28.6.tgz",
++      "integrity": "sha512-67oXFAYr2cDLDVGLXTEABjdBJZ6drElUSI7WKp70NrpyISso3plG9SAGEF6y7zbha/wOzUByWWTJvEDVNIUGcA==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@babel/helper-module-imports": "^7.28.6",
++        "@babel/helper-validator-identifier": "^7.28.5",
++        "@babel/traverse": "^7.28.6"
++      },
++      "engines": {
++        "node": ">=6.9.0"
++      },
++      "peerDependencies": {
++        "@babel/core": "^7.0.0"
++      }
++    },
++    "node_modules/@babel/helper-string-parser": {
++      "version": "7.27.1",
++      "resolved": "https://registry.npmjs.org/@babel/helper-string-parser/-/helper-string-parser-7.27.1.tgz",
++      "integrity": "sha512-qMlSxKbpRlAridDExk92nSobyDdpPijUq2DW6oDnUqd0iOGxmQjyqhMIihI9+zv4LPyZdRje2cavWPbCbWm3eA==",
++      "license": "MIT",
++      "engines": {
++        "node": ">=6.9.0"
++      }
++    },
++    "node_modules/@babel/helper-validator-identifier": {
++      "version": "7.28.5",
++      "resolved": "https://registry.npmjs.org/@babel/helper-validator-identifier/-/helper-validator-identifier-7.28.5.tgz",
++      "integrity": "sha512-qSs4ifwzKJSV39ucNjsvc6WVHs6b7S03sOh2OcHF9UHfVPqWWALUsNUVzhSBiItjRZoLHx7nIarVjqKVusUZ1Q==",
++      "license": "MIT",
++      "engines": {
++        "node": ">=6.9.0"
++      }
++    },
++    "node_modules/@babel/helper-validator-option": {
++      "version": "7.27.1",
++      "resolved": "https://registry.npmjs.org/@babel/helper-validator-option/-/helper-validator-option-7.27.1.tgz",
++      "integrity": "sha512-YvjJow9FxbhFFKDSuFnVCe2WxXk1zWc22fFePVNEaWJEu8IrZVlda6N0uHwzZrUM1il7NC9Mlp4MaJYbYd9JSg==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": ">=6.9.0"
++      }
++    },
++    "node_modules/@babel/helpers": {
++      "version": "7.29.2",
++      "resolved": "https://registry.npmjs.org/@babel/helpers/-/helpers-7.29.2.tgz",
++      "integrity": "sha512-HoGuUs4sCZNezVEKdVcwqmZN8GoHirLUcLaYVNBK2J0DadGtdcqgr3BCbvH8+XUo4NGjNl3VOtSjEKNzqfFgKw==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@babel/template": "^7.28.6",
++        "@babel/types": "^7.29.0"
++      },
++      "engines": {
++        "node": ">=6.9.0"
++      }
++    },
++    "node_modules/@babel/parser": {
++      "version": "7.29.2",
++      "resolved": "https://registry.npmjs.org/@babel/parser/-/parser-7.29.2.tgz",
++      "integrity": "sha512-4GgRzy/+fsBa72/RZVJmGKPmZu9Byn8o4MoLpmNe1m8ZfYnz5emHLQz3U4gLud6Zwl0RZIcgiLD7Uq7ySFuDLA==",
++      "license": "MIT",
++      "dependencies": {
++        "@babel/types": "^7.29.0"
++      },
++      "bin": {
++        "parser": "bin/babel-parser.js"
++      },
++      "engines": {
++        "node": ">=6.0.0"
++      }
++    },
++    "node_modules/@babel/runtime": {
++      "version": "7.29.2",
++      "resolved": "https://registry.npmjs.org/@babel/runtime/-/runtime-7.29.2.tgz",
++      "integrity": "sha512-JiDShH45zKHWyGe4ZNVRrCjBz8Nh9TMmZG1kh4QTK8hCBTWBi8Da+i7s1fJw7/lYpM4ccepSNfqzZ/QvABBi5g==",
++      "license": "MIT",
++      "engines": {
++        "node": ">=6.9.0"
++      }
++    },
++    "node_modules/@babel/template": {
++      "version": "7.28.6",
++      "resolved": "https://registry.npmjs.org/@babel/template/-/template-7.28.6.tgz",
++      "integrity": "sha512-YA6Ma2KsCdGb+WC6UpBVFJGXL58MDA6oyONbjyF/+5sBgxY/dwkhLogbMT2GXXyU84/IhRw/2D1Os1B/giz+BQ==",
++      "license": "MIT",
++      "dependencies": {
++        "@babel/code-frame": "^7.28.6",
++        "@babel/parser": "^7.28.6",
++        "@babel/types": "^7.28.6"
++      },
++      "engines": {
++        "node": ">=6.9.0"
++      }
++    },
++    "node_modules/@babel/traverse": {
++      "version": "7.29.0",
++      "resolved": "https://registry.npmjs.org/@babel/traverse/-/traverse-7.29.0.tgz",
++      "integrity": "sha512-4HPiQr0X7+waHfyXPZpWPfWL/J7dcN1mx9gL6WdQVMbPnF3+ZhSMs8tCxN7oHddJE9fhNE7+lxdnlyemKfJRuA==",
++      "license": "MIT",
++      "dependencies": {
++        "@babel/code-frame": "^7.29.0",
++        "@babel/generator": "^7.29.0",
++        "@babel/helper-globals": "^7.28.0",
++        "@babel/parser": "^7.29.0",
++        "@babel/template": "^7.28.6",
++        "@babel/types": "^7.29.0",
++        "debug": "^4.3.1"
++      },
++      "engines": {
++        "node": ">=6.9.0"
++      }
++    },
++    "node_modules/@babel/types": {
++      "version": "7.29.0",
++      "resolved": "https://registry.npmjs.org/@babel/types/-/types-7.29.0.tgz",
++      "integrity": "sha512-LwdZHpScM4Qz8Xw2iKSzS+cfglZzJGvofQICy7W7v4caru4EaAmyUuO6BGrbyQ2mYV11W0U8j5mBhd14dd3B0A==",
++      "license": "MIT",
++      "dependencies": {
++        "@babel/helper-string-parser": "^7.27.1",
++        "@babel/helper-validator-identifier": "^7.28.5"
++      },
++      "engines": {
++        "node": ">=6.9.0"
++      }
++    },
++    "node_modules/@bcoe/v8-coverage": {
++      "version": "1.0.2",
++      "resolved": "https://registry.npmjs.org/@bcoe/v8-coverage/-/v8-coverage-1.0.2.tgz",
++      "integrity": "sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@blazediff/core": {
++      "version": "1.9.1",
++      "resolved": "https://registry.npmjs.org/@blazediff/core/-/core-1.9.1.tgz",
++      "integrity": "sha512-ehg3jIkYKulZh+8om/O25vkvSsXXwC+skXmyA87FFx6A/45eqOkZsBltMw/TVteb0mloiGT8oGRTcjRAz66zaA==",
++      "dev": true,
++      "license": "MIT"
++    },
++    "node_modules/@chromatic-com/storybook": {
++      "version": "5.1.2",
++      "resolved": "https://registry.npmjs.org/@chromatic-com/storybook/-/storybook-5.1.2.tgz",
++      "integrity": "sha512-H/hgvwC3E+OtseP2OT2QYUJH2VfnzT6wM3pWOkaNV6g7QI+VUdWJbeJ3o2jFqvEPQNqzhQKWDOlvM4lu+7is6g==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@neoconfetti/react": "^1.0.0",
++        "chromatic": "^13.3.4",
++        "filesize": "^10.0.12",
++        "jsonfile": "^6.1.0",
++        "strip-ansi": "^7.1.0"
++      },
++      "engines": {
++        "node": ">=20.0.0",
++        "yarn": ">=1.22.18"
++      },
++      "peerDependencies": {
++        "storybook": "^0.0.0-0 || ^10.1.0 || ^10.1.0-0 || ^10.2.0-0 || ^10.3.0-0 || ^10.4.0-0"
++      }
++    },
++    "node_modules/@emnapi/core": {
++      "version": "1.10.0",
++      "resolved": "https://registry.npmjs.org/@emnapi/core/-/core-1.10.0.tgz",
++      "integrity": "sha512-yq6OkJ4p82CAfPl0u9mQebQHKPJkY7WrIuk205cTYnYe+k2Z8YBh11FrbRG/H6ihirqcacOgl2BIO8oyMQLeXw==",
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "dependencies": {
++        "@emnapi/wasi-threads": "1.2.1",
++        "tslib": "^2.4.0"
++      }
++    },
++    "node_modules/@emnapi/runtime": {
++      "version": "1.10.0",
++      "resolved": "https://registry.npmjs.org/@emnapi/runtime/-/runtime-1.10.0.tgz",
++      "integrity": "sha512-ewvYlk86xUoGI0zQRNq/mC+16R1QeDlKQy21Ki3oSYXNgLb45GV1P6A0M+/s6nyCuNDqe5VpaY84BzXGwVbwFA==",
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "dependencies": {
++        "tslib": "^2.4.0"
++      }
++    },
++    "node_modules/@emnapi/wasi-threads": {
++      "version": "1.2.1",
++      "resolved": "https://registry.npmjs.org/@emnapi/wasi-threads/-/wasi-threads-1.2.1.tgz",
++      "integrity": "sha512-uTII7OYF+/Mes/MrcIOYp5yOtSMLBWSIoLPpcgwipoiKbli6k322tcoFsxoIIxPDqW01SQGAgko4EzZi2BNv2w==",
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "dependencies": {
++        "tslib": "^2.4.0"
++      }
++    },
++    "node_modules/@emotion/babel-plugin": {
++      "version": "11.13.5",
++      "resolved": "https://registry.npmjs.org/@emotion/babel-plugin/-/babel-plugin-11.13.5.tgz",
++      "integrity": "sha512-pxHCpT2ex+0q+HH91/zsdHkw/lXd468DIN2zvfvLtPKLLMo6gQj7oLObq8PhkrxOZb/gGCq03S3Z7PDhS8pduQ==",
++      "license": "MIT",
++      "dependencies": {
++        "@babel/helper-module-imports": "^7.16.7",
++        "@babel/runtime": "^7.18.3",
++        "@emotion/hash": "^0.9.2",
++        "@emotion/memoize": "^0.9.0",
++        "@emotion/serialize": "^1.3.3",
++        "babel-plugin-macros": "^3.1.0",
++        "convert-source-map": "^1.5.0",
++        "escape-string-regexp": "^4.0.0",
++        "find-root": "^1.1.0",
++        "source-map": "^0.5.7",
++        "stylis": "4.2.0"
++      }
++    },
++    "node_modules/@emotion/babel-plugin/node_modules/convert-source-map": {
++      "version": "1.9.0",
++      "resolved": "https://registry.npmjs.org/convert-source-map/-/convert-source-map-1.9.0.tgz",
++      "integrity": "sha512-ASFBup0Mz1uyiIjANan1jzLQami9z1PoYSZCiiYW2FczPbenXc45FZdBZLzOT+r6+iciuEModtmCti+hjaAk0A==",
++      "license": "MIT"
++    },
++    "node_modules/@emotion/cache": {
++      "version": "11.14.0",
++      "resolved": "https://registry.npmjs.org/@emotion/cache/-/cache-11.14.0.tgz",
++      "integrity": "sha512-L/B1lc/TViYk4DcpGxtAVbx0ZyiKM5ktoIyafGkH6zg/tj+mA+NE//aPYKG0k8kCHSHVJrpLpcAlOBEXQ3SavA==",
++      "license": "MIT",
++      "dependencies": {
++        "@emotion/memoize": "^0.9.0",
++        "@emotion/sheet": "^1.4.0",
++        "@emotion/utils": "^1.4.2",
++        "@emotion/weak-memoize": "^0.4.0",
++        "stylis": "4.2.0"
++      }
++    },
++    "node_modules/@emotion/hash": {
++      "version": "0.9.2",
++      "resolved": "https://registry.npmjs.org/@emotion/hash/-/hash-0.9.2.tgz",
++      "integrity": "sha512-MyqliTZGuOm3+5ZRSaaBGP3USLw6+EGykkwZns2EPC5g8jJ4z9OrdZY9apkl3+UP9+sdz76YYkwCKP5gh8iY3g==",
++      "license": "MIT"
++    },
++    "node_modules/@emotion/is-prop-valid": {
++      "version": "1.4.0",
++      "resolved": "https://registry.npmjs.org/@emotion/is-prop-valid/-/is-prop-valid-1.4.0.tgz",
++      "integrity": "sha512-QgD4fyscGcbbKwJmqNvUMSE02OsHUa+lAWKdEUIJKgqe5IwRSKd7+KhibEWdaKwgjLj0DRSHA9biAIqGBk05lw==",
++      "license": "MIT",
++      "dependencies": {
++        "@emotion/memoize": "^0.9.0"
++      }
++    },
++    "node_modules/@emotion/memoize": {
++      "version": "0.9.0",
++      "resolved": "https://registry.npmjs.org/@emotion/memoize/-/memoize-0.9.0.tgz",
++      "integrity": "sha512-30FAj7/EoJ5mwVPOWhAyCX+FPfMDrVecJAM+Iw9NRoSl4BBAQeqj4cApHHUXOVvIPgLVDsCFoz/hGD+5QQD1GQ==",
++      "license": "MIT"
++    },
++    "node_modules/@emotion/react": {
++      "version": "11.14.0",
++      "resolved": "https://registry.npmjs.org/@emotion/react/-/react-11.14.0.tgz",
++      "integrity": "sha512-O000MLDBDdk/EohJPFUqvnp4qnHeYkVP5B0xEG0D/L7cOKP9kefu2DXn8dj74cQfsEzUqh+sr1RzFqiL1o+PpA==",
++      "license": "MIT",
++      "dependencies": {
++        "@babel/runtime": "^7.18.3",
++        "@emotion/babel-plugin": "^11.13.5",
++        "@emotion/cache": "^11.14.0",
++        "@emotion/serialize": "^1.3.3",
++        "@emotion/use-insertion-effect-with-fallbacks": "^1.2.0",
++        "@emotion/utils": "^1.4.2",
++        "@emotion/weak-memoize": "^0.4.0",
++        "hoist-non-react-statics": "^3.3.1"
++      },
++      "peerDependencies": {
++        "react": ">=16.8.0"
++      },
++      "peerDependenciesMeta": {
++        "@types/react": {
++          "optional": true
++        }
++      }
++    },
++    "node_modules/@emotion/serialize": {
++      "version": "1.3.3",
++      "resolved": "https://registry.npmjs.org/@emotion/serialize/-/serialize-1.3.3.tgz",
++      "integrity": "sha512-EISGqt7sSNWHGI76hC7x1CksiXPahbxEOrC5RjmFRJTqLyEK9/9hZvBbiYn70dw4wuwMKiEMCUlR6ZXTSWQqxA==",
++      "license": "MIT",
++      "dependencies": {
++        "@emotion/hash": "^0.9.2",
++        "@emotion/memoize": "^0.9.0",
++        "@emotion/unitless": "^0.10.0",
++        "@emotion/utils": "^1.4.2",
++        "csstype": "^3.0.2"
++      }
++    },
++    "node_modules/@emotion/sheet": {
++      "version": "1.4.0",
++      "resolved": "https://registry.npmjs.org/@emotion/sheet/-/sheet-1.4.0.tgz",
++      "integrity": "sha512-fTBW9/8r2w3dXWYM4HCB1Rdp8NLibOw2+XELH5m5+AkWiL/KqYX6dc0kKYlaYyKjrQ6ds33MCdMPEwgs2z1rqg==",
++      "license": "MIT"
++    },
++    "node_modules/@emotion/styled": {
++      "version": "11.14.1",
++      "resolved": "https://registry.npmjs.org/@emotion/styled/-/styled-11.14.1.tgz",
++      "integrity": "sha512-qEEJt42DuToa3gurlH4Qqc1kVpNq8wO8cJtDzU46TjlzWjDlsVyevtYCRijVq3SrHsROS+gVQ8Fnea108GnKzw==",
++      "license": "MIT",
++      "dependencies": {
++        "@babel/runtime": "^7.18.3",
++        "@emotion/babel-plugin": "^11.13.5",
++        "@emotion/is-prop-valid": "^1.3.0",
++        "@emotion/serialize": "^1.3.3",
++        "@emotion/use-insertion-effect-with-fallbacks": "^1.2.0",
++        "@emotion/utils": "^1.4.2"
++      },
++      "peerDependencies": {
++        "@emotion/react": "^11.0.0-rc.0",
++        "react": ">=16.8.0"
++      },
++      "peerDependenciesMeta": {
++        "@types/react": {
++          "optional": true
++        }
++      }
++    },
++    "node_modules/@emotion/unitless": {
++      "version": "0.10.0",
++      "resolved": "https://registry.npmjs.org/@emotion/unitless/-/unitless-0.10.0.tgz",
++      "integrity": "sha512-dFoMUuQA20zvtVTuxZww6OHoJYgrzfKM1t52mVySDJnMSEa08ruEvdYQbhvyu6soU+NeLVd3yKfTfT0NeV6qGg==",
++      "license": "MIT"
++    },
++    "node_modules/@emotion/use-insertion-effect-with-fallbacks": {
++      "version": "1.2.0",
++      "resolved": "https://registry.npmjs.org/@emotion/use-insertion-effect-with-fallbacks/-/use-insertion-effect-with-fallbacks-1.2.0.tgz",
++      "integrity": "sha512-yJMtVdH59sxi/aVJBpk9FQq+OR8ll5GT8oWd57UpeaKEVGab41JWaCFA7FRLoMLloOZF/c/wsPoe+bfGmRKgDg==",
++      "license": "MIT",
++      "peerDependencies": {
++        "react": ">=16.8.0"
++      }
++    },
++    "node_modules/@emotion/utils": {
++      "version": "1.4.2",
++      "resolved": "https://registry.npmjs.org/@emotion/utils/-/utils-1.4.2.tgz",
++      "integrity": "sha512-3vLclRofFziIa3J2wDh9jjbkUz9qk5Vi3IZ/FSTKViB0k+ef0fPV7dYrUIugbgupYDx7v9ud/SjrtEP8Y4xLoA==",
++      "license": "MIT"
++    },
++    "node_modules/@emotion/weak-memoize": {
++      "version": "0.4.0",
++      "resolved": "https://registry.npmjs.org/@emotion/weak-memoize/-/weak-memoize-0.4.0.tgz",
++      "integrity": "sha512-snKqtPW01tN0ui7yu9rGv69aJXr/a/Ywvl11sUjNtEcRc+ng/mQriFL0wLXMef74iHa/EkftbDzU9F8iFbH+zg==",
++      "license": "MIT"
++    },
++    "node_modules/@esbuild/aix-ppc64": {
++      "version": "0.27.7",
++      "resolved": "https://registry.npmjs.org/@esbuild/aix-ppc64/-/aix-ppc64-0.27.7.tgz",
++      "integrity": "sha512-EKX3Qwmhz1eMdEJokhALr0YiD0lhQNwDqkPYyPhiSwKrh7/4KRjQc04sZ8db+5DVVnZ1LmbNDI1uAMPEUBnQPg==",
++      "cpu": [
++        "ppc64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "aix"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/android-arm": {
++      "version": "0.27.7",
++      "resolved": "https://registry.npmjs.org/@esbuild/android-arm/-/android-arm-0.27.7.tgz",
++      "integrity": "sha512-jbPXvB4Yj2yBV7HUfE2KHe4GJX51QplCN1pGbYjvsyCZbQmies29EoJbkEc+vYuU5o45AfQn37vZlyXy4YJ8RQ==",
++      "cpu": [
++        "arm"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "android"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/android-arm64": {
++      "version": "0.27.7",
++      "resolved": "https://registry.npmjs.org/@esbuild/android-arm64/-/android-arm64-0.27.7.tgz",
++      "integrity": "sha512-62dPZHpIXzvChfvfLJow3q5dDtiNMkwiRzPylSCfriLvZeq0a1bWChrGx/BbUbPwOrsWKMn8idSllklzBy+dgQ==",
++      "cpu": [
++        "arm64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "android"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/android-x64": {
++      "version": "0.27.7",
++      "resolved": "https://registry.npmjs.org/@esbuild/android-x64/-/android-x64-0.27.7.tgz",
++      "integrity": "sha512-x5VpMODneVDb70PYV2VQOmIUUiBtY3D3mPBG8NxVk5CogneYhkR7MmM3yR/uMdITLrC1ml/NV1rj4bMJuy9MCg==",
++      "cpu": [
++        "x64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "android"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/darwin-arm64": {
++      "version": "0.27.7",
++      "resolved": "https://registry.npmjs.org/@esbuild/darwin-arm64/-/darwin-arm64-0.27.7.tgz",
++      "integrity": "sha512-5lckdqeuBPlKUwvoCXIgI2D9/ABmPq3Rdp7IfL70393YgaASt7tbju3Ac+ePVi3KDH6N2RqePfHnXkaDtY9fkw==",
++      "cpu": [
++        "arm64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "darwin"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/darwin-x64": {
++      "version": "0.27.7",
++      "resolved": "https://registry.npmjs.org/@esbuild/darwin-x64/-/darwin-x64-0.27.7.tgz",
++      "integrity": "sha512-rYnXrKcXuT7Z+WL5K980jVFdvVKhCHhUwid+dDYQpH+qu+TefcomiMAJpIiC2EM3Rjtq0sO3StMV/+3w3MyyqQ==",
++      "cpu": [
++        "x64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "darwin"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/freebsd-arm64": {
++      "version": "0.27.7",
++      "resolved": "https://registry.npmjs.org/@esbuild/freebsd-arm64/-/freebsd-arm64-0.27.7.tgz",
++      "integrity": "sha512-B48PqeCsEgOtzME2GbNM2roU29AMTuOIN91dsMO30t+Ydis3z/3Ngoj5hhnsOSSwNzS+6JppqWsuhTp6E82l2w==",
++      "cpu": [
++        "arm64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "freebsd"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/freebsd-x64": {
++      "version": "0.27.7",
++      "resolved": "https://registry.npmjs.org/@esbuild/freebsd-x64/-/freebsd-x64-0.27.7.tgz",
++      "integrity": "sha512-jOBDK5XEjA4m5IJK3bpAQF9/Lelu/Z9ZcdhTRLf4cajlB+8VEhFFRjWgfy3M1O4rO2GQ/b2dLwCUGpiF/eATNQ==",
++      "cpu": [
++        "x64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "freebsd"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/linux-arm": {
++      "version": "0.27.7",
++      "resolved": "https://registry.npmjs.org/@esbuild/linux-arm/-/linux-arm-0.27.7.tgz",
++      "integrity": "sha512-RkT/YXYBTSULo3+af8Ib0ykH8u2MBh57o7q/DAs3lTJlyVQkgQvlrPTnjIzzRPQyavxtPtfg0EopvDyIt0j1rA==",
++      "cpu": [
++        "arm"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/linux-arm64": {
++      "version": "0.27.7",
++      "resolved": "https://registry.npmjs.org/@esbuild/linux-arm64/-/linux-arm64-0.27.7.tgz",
++      "integrity": "sha512-RZPHBoxXuNnPQO9rvjh5jdkRmVizktkT7TCDkDmQ0W2SwHInKCAV95GRuvdSvA7w4VMwfCjUiPwDi0ZO6Nfe9A==",
++      "cpu": [
++        "arm64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/linux-ia32": {
++      "version": "0.27.7",
++      "resolved": "https://registry.npmjs.org/@esbuild/linux-ia32/-/linux-ia32-0.27.7.tgz",
++      "integrity": "sha512-GA48aKNkyQDbd3KtkplYWT102C5sn/EZTY4XROkxONgruHPU72l+gW+FfF8tf2cFjeHaRbWpOYa/uRBz/Xq1Pg==",
++      "cpu": [
++        "ia32"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/linux-loong64": {
++      "version": "0.27.7",
++      "resolved": "https://registry.npmjs.org/@esbuild/linux-loong64/-/linux-loong64-0.27.7.tgz",
++      "integrity": "sha512-a4POruNM2oWsD4WKvBSEKGIiWQF8fZOAsycHOt6JBpZ+JN2n2JH9WAv56SOyu9X5IqAjqSIPTaJkqN8F7XOQ5Q==",
++      "cpu": [
++        "loong64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/linux-mips64el": {
++      "version": "0.27.7",
++      "resolved": "https://registry.npmjs.org/@esbuild/linux-mips64el/-/linux-mips64el-0.27.7.tgz",
++      "integrity": "sha512-KabT5I6StirGfIz0FMgl1I+R1H73Gp0ofL9A3nG3i/cYFJzKHhouBV5VWK1CSgKvVaG4q1RNpCTR2LuTVB3fIw==",
++      "cpu": [
++        "mips64el"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/linux-ppc64": {
++      "version": "0.27.7",
++      "resolved": "https://registry.npmjs.org/@esbuild/linux-ppc64/-/linux-ppc64-0.27.7.tgz",
++      "integrity": "sha512-gRsL4x6wsGHGRqhtI+ifpN/vpOFTQtnbsupUF5R5YTAg+y/lKelYR1hXbnBdzDjGbMYjVJLJTd2OFmMewAgwlQ==",
++      "cpu": [
++        "ppc64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/linux-riscv64": {
++      "version": "0.27.7",
++      "resolved": "https://registry.npmjs.org/@esbuild/linux-riscv64/-/linux-riscv64-0.27.7.tgz",
++      "integrity": "sha512-hL25LbxO1QOngGzu2U5xeXtxXcW+/GvMN3ejANqXkxZ/opySAZMrc+9LY/WyjAan41unrR3YrmtTsUpwT66InQ==",
++      "cpu": [
++        "riscv64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/linux-s390x": {
++      "version": "0.27.7",
++      "resolved": "https://registry.npmjs.org/@esbuild/linux-s390x/-/linux-s390x-0.27.7.tgz",
++      "integrity": "sha512-2k8go8Ycu1Kb46vEelhu1vqEP+UeRVj2zY1pSuPdgvbd5ykAw82Lrro28vXUrRmzEsUV0NzCf54yARIK8r0fdw==",
++      "cpu": [
++        "s390x"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/linux-x64": {
++      "version": "0.27.7",
++      "resolved": "https://registry.npmjs.org/@esbuild/linux-x64/-/linux-x64-0.27.7.tgz",
++      "integrity": "sha512-hzznmADPt+OmsYzw1EE33ccA+HPdIqiCRq7cQeL1Jlq2gb1+OyWBkMCrYGBJ+sxVzve2ZJEVeePbLM2iEIZSxA==",
++      "cpu": [
++        "x64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/netbsd-arm64": {
++      "version": "0.27.7",
++      "resolved": "https://registry.npmjs.org/@esbuild/netbsd-arm64/-/netbsd-arm64-0.27.7.tgz",
++      "integrity": "sha512-b6pqtrQdigZBwZxAn1UpazEisvwaIDvdbMbmrly7cDTMFnw/+3lVxxCTGOrkPVnsYIosJJXAsILG9XcQS+Yu6w==",
++      "cpu": [
++        "arm64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "netbsd"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/netbsd-x64": {
++      "version": "0.27.7",
++      "resolved": "https://registry.npmjs.org/@esbuild/netbsd-x64/-/netbsd-x64-0.27.7.tgz",
++      "integrity": "sha512-OfatkLojr6U+WN5EDYuoQhtM+1xco+/6FSzJJnuWiUw5eVcicbyK3dq5EeV/QHT1uy6GoDhGbFpprUiHUYggrw==",
++      "cpu": [
++        "x64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "netbsd"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/openbsd-arm64": {
++      "version": "0.27.7",
++      "resolved": "https://registry.npmjs.org/@esbuild/openbsd-arm64/-/openbsd-arm64-0.27.7.tgz",
++      "integrity": "sha512-AFuojMQTxAz75Fo8idVcqoQWEHIXFRbOc1TrVcFSgCZtQfSdc1RXgB3tjOn/krRHENUB4j00bfGjyl2mJrU37A==",
++      "cpu": [
++        "arm64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "openbsd"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/openbsd-x64": {
++      "version": "0.27.7",
++      "resolved": "https://registry.npmjs.org/@esbuild/openbsd-x64/-/openbsd-x64-0.27.7.tgz",
++      "integrity": "sha512-+A1NJmfM8WNDv5CLVQYJ5PshuRm/4cI6WMZRg1by1GwPIQPCTs1GLEUHwiiQGT5zDdyLiRM/l1G0Pv54gvtKIg==",
++      "cpu": [
++        "x64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "openbsd"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/openharmony-arm64": {
++      "version": "0.27.7",
++      "resolved": "https://registry.npmjs.org/@esbuild/openharmony-arm64/-/openharmony-arm64-0.27.7.tgz",
++      "integrity": "sha512-+KrvYb/C8zA9CU/g0sR6w2RBw7IGc5J2BPnc3dYc5VJxHCSF1yNMxTV5LQ7GuKteQXZtspjFbiuW5/dOj7H4Yw==",
++      "cpu": [
++        "arm64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "openharmony"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/sunos-x64": {
++      "version": "0.27.7",
++      "resolved": "https://registry.npmjs.org/@esbuild/sunos-x64/-/sunos-x64-0.27.7.tgz",
++      "integrity": "sha512-ikktIhFBzQNt/QDyOL580ti9+5mL/YZeUPKU2ivGtGjdTYoqz6jObj6nOMfhASpS4GU4Q/Clh1QtxWAvcYKamA==",
++      "cpu": [
++        "x64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "sunos"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/win32-arm64": {
++      "version": "0.27.7",
++      "resolved": "https://registry.npmjs.org/@esbuild/win32-arm64/-/win32-arm64-0.27.7.tgz",
++      "integrity": "sha512-7yRhbHvPqSpRUV7Q20VuDwbjW5kIMwTHpptuUzV+AA46kiPze5Z7qgt6CLCK3pWFrHeNfDd1VKgyP4O+ng17CA==",
++      "cpu": [
++        "arm64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "win32"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/win32-ia32": {
++      "version": "0.27.7",
++      "resolved": "https://registry.npmjs.org/@esbuild/win32-ia32/-/win32-ia32-0.27.7.tgz",
++      "integrity": "sha512-SmwKXe6VHIyZYbBLJrhOoCJRB/Z1tckzmgTLfFYOfpMAx63BJEaL9ExI8x7v0oAO3Zh6D/Oi1gVxEYr5oUCFhw==",
++      "cpu": [
++        "ia32"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "win32"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@esbuild/win32-x64": {
++      "version": "0.27.7",
++      "resolved": "https://registry.npmjs.org/@esbuild/win32-x64/-/win32-x64-0.27.7.tgz",
++      "integrity": "sha512-56hiAJPhwQ1R4i+21FVF7V8kSD5zZTdHcVuRFMW0hn753vVfQN8xlx4uOPT4xoGH0Z/oVATuR82AiqSTDIpaHg==",
++      "cpu": [
++        "x64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "win32"
++      ],
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@eslint-community/eslint-utils": {
++      "version": "4.9.1",
++      "resolved": "https://registry.npmjs.org/@eslint-community/eslint-utils/-/eslint-utils-4.9.1.tgz",
++      "integrity": "sha512-phrYmNiYppR7znFEdqgfWHXR6NCkZEK7hwWDHZUjit/2/U0r6XvkDl0SYnoM51Hq7FhCGdLDT6zxCCOY1hexsQ==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "eslint-visitor-keys": "^3.4.3"
++      },
++      "engines": {
++        "node": "^12.22.0 || ^14.17.0 || >=16.0.0"
++      },
++      "funding": {
++        "url": "https://opencollective.com/eslint"
++      },
++      "peerDependencies": {
++        "eslint": "^6.0.0 || ^7.0.0 || >=8.0.0"
++      }
++    },
++    "node_modules/@eslint-community/eslint-utils/node_modules/eslint-visitor-keys": {
++      "version": "3.4.3",
++      "resolved": "https://registry.npmjs.org/eslint-visitor-keys/-/eslint-visitor-keys-3.4.3.tgz",
++      "integrity": "sha512-wpc+LXeiyiisxPlEkUzU6svyS1frIO3Mgxj1fdy7Pm8Ygzguax2N3Fa/D/ag1WqbOprdI+uY6wMUl8/a2G+iag==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "engines": {
++        "node": "^12.22.0 || ^14.17.0 || >=16.0.0"
++      },
++      "funding": {
++        "url": "https://opencollective.com/eslint"
++      }
++    },
++    "node_modules/@eslint-community/regexpp": {
++      "version": "4.12.2",
++      "resolved": "https://registry.npmjs.org/@eslint-community/regexpp/-/regexpp-4.12.2.tgz",
++      "integrity": "sha512-EriSTlt5OC9/7SXkRSCAhfSxxoSUgBm33OH+IkwbdpgoqsSsUg7y3uh+IICI/Qg4BBWr3U2i39RpmycbxMq4ew==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": "^12.0.0 || ^14.0.0 || >=16.0.0"
++      }
++    },
++    "node_modules/@eslint/config-array": {
++      "version": "0.23.5",
++      "resolved": "https://registry.npmjs.org/@eslint/config-array/-/config-array-0.23.5.tgz",
++      "integrity": "sha512-Y3kKLvC1dvTOT+oGlqNQ1XLqK6D1HU2YXPc52NmAlJZbMMWDzGYXMiPRJ8TYD39muD/OTjlZmNJ4ib7dvSrMBA==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "dependencies": {
++        "@eslint/object-schema": "^3.0.5",
++        "debug": "^4.3.1",
++        "minimatch": "^10.2.4"
++      },
++      "engines": {
++        "node": "^20.19.0 || ^22.13.0 || >=24"
++      }
++    },
++    "node_modules/@eslint/config-helpers": {
++      "version": "0.5.5",
++      "resolved": "https://registry.npmjs.org/@eslint/config-helpers/-/config-helpers-0.5.5.tgz",
++      "integrity": "sha512-eIJYKTCECbP/nsKaaruF6LW967mtbQbsw4JTtSVkUQc9MneSkbrgPJAbKl9nWr0ZeowV8BfsarBmPpBzGelA2w==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "dependencies": {
++        "@eslint/core": "^1.2.1"
++      },
++      "engines": {
++        "node": "^20.19.0 || ^22.13.0 || >=24"
++      }
++    },
++    "node_modules/@eslint/core": {
++      "version": "1.2.1",
++      "resolved": "https://registry.npmjs.org/@eslint/core/-/core-1.2.1.tgz",
++      "integrity": "sha512-MwcE1P+AZ4C6DWlpin/OmOA54mmIZ/+xZuJiQd4SyB29oAJjN30UW9wkKNptW2ctp4cEsvhlLY/CsQ1uoHDloQ==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "dependencies": {
++        "@types/json-schema": "^7.0.15"
++      },
++      "engines": {
++        "node": "^20.19.0 || ^22.13.0 || >=24"
++      }
++    },
++    "node_modules/@eslint/js": {
++      "version": "10.0.1",
++      "resolved": "https://registry.npmjs.org/@eslint/js/-/js-10.0.1.tgz",
++      "integrity": "sha512-zeR9k5pd4gxjZ0abRoIaxdc7I3nDktoXZk2qOv9gCNWx3mVwEn32VRhyLaRsDiJjTs0xq/T8mfPtyuXu7GWBcA==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": "^20.19.0 || ^22.13.0 || >=24"
++      },
++      "funding": {
++        "url": "https://eslint.org/donate"
++      },
++      "peerDependencies": {
++        "eslint": "^10.0.0"
++      },
++      "peerDependenciesMeta": {
++        "eslint": {
++          "optional": true
++        }
++      }
++    },
++    "node_modules/@eslint/object-schema": {
++      "version": "3.0.5",
++      "resolved": "https://registry.npmjs.org/@eslint/object-schema/-/object-schema-3.0.5.tgz",
++      "integrity": "sha512-vqTaUEgxzm+YDSdElad6PiRoX4t8VGDjCtt05zn4nU810UIx/uNEV7/lZJ6KwFThKZOzOxzXy48da+No7HZaMw==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "engines": {
++        "node": "^20.19.0 || ^22.13.0 || >=24"
++      }
++    },
++    "node_modules/@eslint/plugin-kit": {
++      "version": "0.7.1",
++      "resolved": "https://registry.npmjs.org/@eslint/plugin-kit/-/plugin-kit-0.7.1.tgz",
++      "integrity": "sha512-rZAP3aVgB9ds9KOeUSL+zZ21hPmo8dh6fnIFwRQj5EAZl9gzR7wxYbYXYysAM8CTqGmUGyp2S4kUdV17MnGuWQ==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "dependencies": {
++        "@eslint/core": "^1.2.1",
++        "levn": "^0.4.1"
++      },
++      "engines": {
++        "node": "^20.19.0 || ^22.13.0 || >=24"
++      }
++    },
++    "node_modules/@humanfs/core": {
++      "version": "0.19.2",
++      "resolved": "https://registry.npmjs.org/@humanfs/core/-/core-0.19.2.tgz",
++      "integrity": "sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "dependencies": {
++        "@humanfs/types": "^0.15.0"
++      },
++      "engines": {
++        "node": ">=18.18.0"
++      }
++    },
++    "node_modules/@humanfs/node": {
++      "version": "0.16.8",
++      "resolved": "https://registry.npmjs.org/@humanfs/node/-/node-0.16.8.tgz",
++      "integrity": "sha512-gE1eQNZ3R++kTzFUpdGlpmy8kDZD/MLyHqDwqjkVQI0JMdI1D51sy1H958PNXYkM2rAac7e5/CnIKZrHtPh3BQ==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "dependencies": {
++        "@humanfs/core": "^0.19.2",
++        "@humanfs/types": "^0.15.0",
++        "@humanwhocodes/retry": "^0.4.0"
++      },
++      "engines": {
++        "node": ">=18.18.0"
++      }
++    },
++    "node_modules/@humanfs/types": {
++      "version": "0.15.0",
++      "resolved": "https://registry.npmjs.org/@humanfs/types/-/types-0.15.0.tgz",
++      "integrity": "sha512-ZZ1w0aoQkwuUuC7Yf+7sdeaNfqQiiLcSRbfI08oAxqLtpXQr9AIVX7Ay7HLDuiLYAaFPu8oBYNq/QIi9URHJ3Q==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "engines": {
++        "node": ">=18.18.0"
++      }
++    },
++    "node_modules/@humanwhocodes/module-importer": {
++      "version": "1.0.1",
++      "resolved": "https://registry.npmjs.org/@humanwhocodes/module-importer/-/module-importer-1.0.1.tgz",
++      "integrity": "sha512-bxveV4V8v5Yb4ncFTT3rPSgZBOpCkjfK0y4oVVVJwIuDVBRMDXrPyXRL988i5ap9m9bnyEEjWfm5WkBmtffLfA==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "engines": {
++        "node": ">=12.22"
++      },
++      "funding": {
++        "type": "github",
++        "url": "https://github.com/sponsors/nzakas"
++      }
++    },
++    "node_modules/@humanwhocodes/retry": {
++      "version": "0.4.3",
++      "resolved": "https://registry.npmjs.org/@humanwhocodes/retry/-/retry-0.4.3.tgz",
++      "integrity": "sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "engines": {
++        "node": ">=18.18"
++      },
++      "funding": {
++        "type": "github",
++        "url": "https://github.com/sponsors/nzakas"
++      }
++    },
++    "node_modules/@joshwooding/vite-plugin-react-docgen-typescript": {
++      "version": "0.7.0",
++      "resolved": "https://registry.npmjs.org/@joshwooding/vite-plugin-react-docgen-typescript/-/vite-plugin-react-docgen-typescript-0.7.0.tgz",
++      "integrity": "sha512-qvsTEwEFefhdirGOPnu9Wp6ChfIwy2dBCRuETU3uE+4cC+PFoxMSiiEhxk4lOluA34eARHA0OxqsEUYDqRMgeQ==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "glob": "^13.0.1",
++        "react-docgen-typescript": "^2.2.2"
++      },
++      "peerDependencies": {
++        "typescript": ">= 4.3.x",
++        "vite": "^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0"
++      },
++      "peerDependenciesMeta": {
++        "typescript": {
++          "optional": true
++        }
++      }
++    },
++    "node_modules/@jridgewell/gen-mapping": {
++      "version": "0.3.13",
++      "resolved": "https://registry.npmjs.org/@jridgewell/gen-mapping/-/gen-mapping-0.3.13.tgz",
++      "integrity": "sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==",
++      "license": "MIT",
++      "dependencies": {
++        "@jridgewell/sourcemap-codec": "^1.5.0",
++        "@jridgewell/trace-mapping": "^0.3.24"
++      }
++    },
++    "node_modules/@jridgewell/remapping": {
++      "version": "2.3.5",
++      "resolved": "https://registry.npmjs.org/@jridgewell/remapping/-/remapping-2.3.5.tgz",
++      "integrity": "sha512-LI9u/+laYG4Ds1TDKSJW2YPrIlcVYOwi2fUC6xB43lueCjgxV4lffOCZCtYFiH6TNOX+tQKXx97T4IKHbhyHEQ==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@jridgewell/gen-mapping": "^0.3.5",
++        "@jridgewell/trace-mapping": "^0.3.24"
++      }
++    },
++    "node_modules/@jridgewell/resolve-uri": {
++      "version": "3.1.2",
++      "resolved": "https://registry.npmjs.org/@jridgewell/resolve-uri/-/resolve-uri-3.1.2.tgz",
++      "integrity": "sha512-bRISgCIjP20/tbWSPWMEi54QVPRZExkuD9lJL+UIxUKtwVJA8wW1Trb1jMs1RFXo1CBTNZ/5hpC9QvmKWdopKw==",
++      "license": "MIT",
++      "engines": {
++        "node": ">=6.0.0"
++      }
++    },
++    "node_modules/@jridgewell/sourcemap-codec": {
++      "version": "1.5.5",
++      "resolved": "https://registry.npmjs.org/@jridgewell/sourcemap-codec/-/sourcemap-codec-1.5.5.tgz",
++      "integrity": "sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og==",
++      "license": "MIT"
++    },
++    "node_modules/@jridgewell/trace-mapping": {
++      "version": "0.3.31",
++      "resolved": "https://registry.npmjs.org/@jridgewell/trace-mapping/-/trace-mapping-0.3.31.tgz",
++      "integrity": "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==",
++      "license": "MIT",
++      "dependencies": {
++        "@jridgewell/resolve-uri": "^3.1.0",
++        "@jridgewell/sourcemap-codec": "^1.4.14"
++      }
++    },
++    "node_modules/@mdx-js/react": {
++      "version": "3.1.1",
++      "resolved": "https://registry.npmjs.org/@mdx-js/react/-/react-3.1.1.tgz",
++      "integrity": "sha512-f++rKLQgUVYDAtECQ6fn/is15GkEH9+nZPM3MS0RcxVqoTfawHvDlSCH7JbMhAM6uJ32v3eXLvLmLvjGu7PTQw==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@types/mdx": "^2.0.0"
++      },
++      "funding": {
++        "type": "opencollective",
++        "url": "https://opencollective.com/unified"
++      },
++      "peerDependencies": {
++        "@types/react": ">=16",
++        "react": ">=16"
++      }
++    },
++    "node_modules/@napi-rs/wasm-runtime": {
++      "version": "1.1.4",
++      "resolved": "https://registry.npmjs.org/@napi-rs/wasm-runtime/-/wasm-runtime-1.1.4.tgz",
++      "integrity": "sha512-3NQNNgA1YSlJb/kMH1ildASP9HW7/7kYnRI2szWJaofaS1hWmbGI4H+d3+22aGzXXN9IJ+n+GiFVcGipJP18ow==",
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "dependencies": {
++        "@tybys/wasm-util": "^0.10.1"
++      },
++      "funding": {
++        "type": "github",
++        "url": "https://github.com/sponsors/Brooooooklyn"
++      },
++      "peerDependencies": {
++        "@emnapi/core": "^1.7.1",
++        "@emnapi/runtime": "^1.7.1"
++      }
++    },
++    "node_modules/@neoconfetti/react": {
++      "version": "1.0.0",
++      "resolved": "https://registry.npmjs.org/@neoconfetti/react/-/react-1.0.0.tgz",
++      "integrity": "sha512-klcSooChXXOzIm+SE5IISIAn3bYzYfPjbX7D7HoqZL84oAfgREeSg5vSIaSFH+DaGzzvImTyWe1OyrJ67vik4A==",
++      "dev": true,
++      "license": "MIT"
++    },
++    "node_modules/@oxc-project/types": {
++      "version": "0.127.0",
++      "resolved": "https://registry.npmjs.org/@oxc-project/types/-/types-0.127.0.tgz",
++      "integrity": "sha512-aIYXQBo4lCbO4z0R3FHeucQHpF46l2LbMdxRvqvuRuW2OxdnSkcng5B8+K12spgLDj93rtN3+J2Vac/TIO+ciQ==",
++      "dev": true,
++      "license": "MIT",
++      "funding": {
++        "url": "https://github.com/sponsors/Boshen"
++      }
++    },
++    "node_modules/@polka/url": {
++      "version": "1.0.0-next.29",
++      "resolved": "https://registry.npmjs.org/@polka/url/-/url-1.0.0-next.29.tgz",
++      "integrity": "sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==",
++      "dev": true,
++      "license": "MIT"
++    },
++    "node_modules/@rolldown/binding-android-arm64": {
++      "version": "1.0.0-rc.17",
++      "resolved": "https://registry.npmjs.org/@rolldown/binding-android-arm64/-/binding-android-arm64-1.0.0-rc.17.tgz",
++      "integrity": "sha512-s70pVGhw4zqGeFnXWvAzJDlvxhlRollagdCCKRgOsgUOH3N1l0LIxf83AtGzmb5SiVM4Hjl5HyarMRfdfj3DaQ==",
++      "cpu": [
++        "arm64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "android"
++      ],
++      "engines": {
++        "node": "^20.19.0 || >=22.12.0"
++      }
++    },
++    "node_modules/@rolldown/binding-darwin-arm64": {
++      "version": "1.0.0-rc.17",
++      "resolved": "https://registry.npmjs.org/@rolldown/binding-darwin-arm64/-/binding-darwin-arm64-1.0.0-rc.17.tgz",
++      "integrity": "sha512-4ksWc9n0mhlZpZ9PMZgTGjeOPRu8MB1Z3Tz0Mo02eWfWCHMW1zN82Qz/pL/rC+yQa+8ZnutMF0JjJe7PjwasYw==",
++      "cpu": [
++        "arm64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "darwin"
++      ],
++      "engines": {
++        "node": "^20.19.0 || >=22.12.0"
++      }
++    },
++    "node_modules/@rolldown/binding-darwin-x64": {
++      "version": "1.0.0-rc.17",
++      "resolved": "https://registry.npmjs.org/@rolldown/binding-darwin-x64/-/binding-darwin-x64-1.0.0-rc.17.tgz",
++      "integrity": "sha512-SUSDOI6WwUVNcWxd02QEBjLdY1VPHvlEkw6T/8nYG322iYWCTxRb1vzk4E+mWWYehTp7ERibq54LSJGjmouOsw==",
++      "cpu": [
++        "x64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "darwin"
++      ],
++      "engines": {
++        "node": "^20.19.0 || >=22.12.0"
++      }
++    },
++    "node_modules/@rolldown/binding-freebsd-x64": {
++      "version": "1.0.0-rc.17",
++      "resolved": "https://registry.npmjs.org/@rolldown/binding-freebsd-x64/-/binding-freebsd-x64-1.0.0-rc.17.tgz",
++      "integrity": "sha512-hwnz3nw9dbJ05EDO/PvcjaaewqqDy7Y1rn1UO81l8iIK1GjenME75dl16ajbvSSMfv66WXSRCYKIqfgq2KCfxw==",
++      "cpu": [
++        "x64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "freebsd"
++      ],
++      "engines": {
++        "node": "^20.19.0 || >=22.12.0"
++      }
++    },
++    "node_modules/@rolldown/binding-linux-arm-gnueabihf": {
++      "version": "1.0.0-rc.17",
++      "resolved": "https://registry.npmjs.org/@rolldown/binding-linux-arm-gnueabihf/-/binding-linux-arm-gnueabihf-1.0.0-rc.17.tgz",
++      "integrity": "sha512-IS+W7epTcwANmFSQFrS1SivEXHtl1JtuQA9wlxrZTcNi6mx+FDOYrakGevvvTwgj2JvWiK8B29/qD9BELZPyXQ==",
++      "cpu": [
++        "arm"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ],
++      "engines": {
++        "node": "^20.19.0 || >=22.12.0"
++      }
++    },
++    "node_modules/@rolldown/binding-linux-arm64-gnu": {
++      "version": "1.0.0-rc.17",
++      "resolved": "https://registry.npmjs.org/@rolldown/binding-linux-arm64-gnu/-/binding-linux-arm64-gnu-1.0.0-rc.17.tgz",
++      "integrity": "sha512-e6usGaHKW5BMNZOymS1UcEYGowQMWcgZ71Z17Sl/h2+ZziNJ1a9n3Zvcz6LdRyIW5572wBCTH/Z+bKuZouGk9Q==",
++      "cpu": [
++        "arm64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ],
++      "engines": {
++        "node": "^20.19.0 || >=22.12.0"
++      }
++    },
++    "node_modules/@rolldown/binding-linux-arm64-musl": {
++      "version": "1.0.0-rc.17",
++      "resolved": "https://registry.npmjs.org/@rolldown/binding-linux-arm64-musl/-/binding-linux-arm64-musl-1.0.0-rc.17.tgz",
++      "integrity": "sha512-b/CgbwAJpmrRLp02RPfhbudf5tZnN9nsPWK82znefso832etkem8H7FSZwxrOI9djcdTP7U6YfNhbRnh7djErg==",
++      "cpu": [
++        "arm64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ],
++      "engines": {
++        "node": "^20.19.0 || >=22.12.0"
++      }
++    },
++    "node_modules/@rolldown/binding-linux-ppc64-gnu": {
++      "version": "1.0.0-rc.17",
++      "resolved": "https://registry.npmjs.org/@rolldown/binding-linux-ppc64-gnu/-/binding-linux-ppc64-gnu-1.0.0-rc.17.tgz",
++      "integrity": "sha512-4EII1iNGRUN5WwGbF/kOh/EIkoDN9HsupgLQoXfY+D1oyJm7/F4t5PYU5n8SWZgG0FEwakyM8pGgwcBYruGTlA==",
++      "cpu": [
++        "ppc64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ],
++      "engines": {
++        "node": "^20.19.0 || >=22.12.0"
++      }
++    },
++    "node_modules/@rolldown/binding-linux-s390x-gnu": {
++      "version": "1.0.0-rc.17",
++      "resolved": "https://registry.npmjs.org/@rolldown/binding-linux-s390x-gnu/-/binding-linux-s390x-gnu-1.0.0-rc.17.tgz",
++      "integrity": "sha512-AH8oq3XqQo4IibpVXvPeLDI5pzkpYn0WiZAfT05kFzoJ6tQNzwRdDYQ45M8I/gslbodRZwW8uxLhbSBbkv96rA==",
++      "cpu": [
++        "s390x"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ],
++      "engines": {
++        "node": "^20.19.0 || >=22.12.0"
++      }
++    },
++    "node_modules/@rolldown/binding-linux-x64-gnu": {
++      "version": "1.0.0-rc.17",
++      "resolved": "https://registry.npmjs.org/@rolldown/binding-linux-x64-gnu/-/binding-linux-x64-gnu-1.0.0-rc.17.tgz",
++      "integrity": "sha512-cLnjV3xfo7KslbU41Z7z8BH/E1y5mzUYzAqih1d1MDaIGZRCMqTijqLv76/P7fyHuvUcfGsIpqCdddbxLLK9rA==",
++      "cpu": [
++        "x64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ],
++      "engines": {
++        "node": "^20.19.0 || >=22.12.0"
++      }
++    },
++    "node_modules/@rolldown/binding-linux-x64-musl": {
++      "version": "1.0.0-rc.17",
++      "resolved": "https://registry.npmjs.org/@rolldown/binding-linux-x64-musl/-/binding-linux-x64-musl-1.0.0-rc.17.tgz",
++      "integrity": "sha512-0phclDw1spsL7dUB37sIARuis2tAgomCJXAHZlpt8PXZ4Ba0dRP1e+66lsRqrfhISeN9bEGNjQs+T/Fbd7oYGw==",
++      "cpu": [
++        "x64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "linux"
++      ],
++      "engines": {
++        "node": "^20.19.0 || >=22.12.0"
++      }
++    },
++    "node_modules/@rolldown/binding-openharmony-arm64": {
++      "version": "1.0.0-rc.17",
++      "resolved": "https://registry.npmjs.org/@rolldown/binding-openharmony-arm64/-/binding-openharmony-arm64-1.0.0-rc.17.tgz",
++      "integrity": "sha512-0ag/hEgXOwgw4t8QyQvUCxvEg+V0KBcA6YuOx9g0r02MprutRF5dyljgm3EmR02O292UX7UeS6HzWHAl6KgyhA==",
++      "cpu": [
++        "arm64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "openharmony"
++      ],
++      "engines": {
++        "node": "^20.19.0 || >=22.12.0"
++      }
++    },
++    "node_modules/@rolldown/binding-wasm32-wasi": {
++      "version": "1.0.0-rc.17",
++      "resolved": "https://registry.npmjs.org/@rolldown/binding-wasm32-wasi/-/binding-wasm32-wasi-1.0.0-rc.17.tgz",
++      "integrity": "sha512-LEXei6vo0E5wTGwpkJ4KoT3OZJRnglwldt5ziLzOlc6qqb55z4tWNq2A+PFqCJuvWWdP53CVhG1Z9NtToDPJrA==",
++      "cpu": [
++        "wasm32"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "dependencies": {
++        "@emnapi/core": "1.10.0",
++        "@emnapi/runtime": "1.10.0",
++        "@napi-rs/wasm-runtime": "^1.1.4"
++      },
++      "engines": {
++        "node": "^20.19.0 || >=22.12.0"
++      }
++    },
++    "node_modules/@rolldown/binding-win32-arm64-msvc": {
++      "version": "1.0.0-rc.17",
++      "resolved": "https://registry.npmjs.org/@rolldown/binding-win32-arm64-msvc/-/binding-win32-arm64-msvc-1.0.0-rc.17.tgz",
++      "integrity": "sha512-gUmyzBl3SPMa6hrqFUth9sVfcLBlYsbMzBx5PlexMroZStgzGqlZ26pYG89rBb45Mnia+oil6YAIFeEWGWhoZA==",
++      "cpu": [
++        "arm64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "win32"
++      ],
++      "engines": {
++        "node": "^20.19.0 || >=22.12.0"
++      }
++    },
++    "node_modules/@rolldown/binding-win32-x64-msvc": {
++      "version": "1.0.0-rc.17",
++      "resolved": "https://registry.npmjs.org/@rolldown/binding-win32-x64-msvc/-/binding-win32-x64-msvc-1.0.0-rc.17.tgz",
++      "integrity": "sha512-3hkiolcUAvPB9FLb3UZdfjVVNWherN1f/skkGWJP/fgSQhYUZpSIRr0/I8ZK9TkF3F7kxvJAk0+IcKvPHk9qQg==",
++      "cpu": [
++        "x64"
++      ],
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "os": [
++        "win32"
++      ],
++      "engines": {
++        "node": "^20.19.0 || >=22.12.0"
++      }
++    },
++    "node_modules/@rolldown/plugin-babel": {
++      "version": "0.2.3",
++      "resolved": "https://registry.npmjs.org/@rolldown/plugin-babel/-/plugin-babel-0.2.3.tgz",
++      "integrity": "sha512-+zEk16yGlz1F9STiRr6uG9hmIXb6nprjLczV/htGptYuLoCuxb+itZ03RKCEeOhBpDDd1NU7qF6x1VLMUp62bw==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "picomatch": "^4.0.4"
++      },
++      "engines": {
++        "node": ">=22.12.0 || ^24.0.0"
++      },
++      "peerDependencies": {
++        "@babel/core": "^7.29.0 || ^8.0.0-rc.1",
++        "@babel/plugin-transform-runtime": "^7.29.0 || ^8.0.0-rc.1",
++        "@babel/runtime": "^7.27.0 || ^8.0.0-rc.1",
++        "rolldown": "^1.0.0-rc.5",
++        "vite": "^8.0.0"
++      },
++      "peerDependenciesMeta": {
++        "@babel/plugin-transform-runtime": {
++          "optional": true
++        },
++        "@babel/runtime": {
++          "optional": true
++        },
++        "vite": {
++          "optional": true
++        }
++      }
++    },
++    "node_modules/@rolldown/pluginutils": {
++      "version": "1.0.0-rc.7",
++      "resolved": "https://registry.npmjs.org/@rolldown/pluginutils/-/pluginutils-1.0.0-rc.7.tgz",
++      "integrity": "sha512-qujRfC8sFVInYSPPMLQByRh7zhwkGFS4+tyMQ83srV1qrxL4g8E2tyxVVyxd0+8QeBM1mIk9KbWxkegRr76XzA==",
++      "dev": true,
++      "license": "MIT"
++    },
++    "node_modules/@rollup/pluginutils": {
++      "version": "5.3.0",
++      "resolved": "https://registry.npmjs.org/@rollup/pluginutils/-/pluginutils-5.3.0.tgz",
++      "integrity": "sha512-5EdhGZtnu3V88ces7s53hhfK5KSASnJZv8Lulpc04cWO3REESroJXg73DFsOmgbU2BhwV0E20bu2IDZb3VKW4Q==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@types/estree": "^1.0.0",
++        "estree-walker": "^2.0.2",
++        "picomatch": "^4.0.2"
++      },
++      "engines": {
++        "node": ">=14.0.0"
++      },
++      "peerDependencies": {
++        "rollup": "^1.20.0||^2.0.0||^3.0.0||^4.0.0"
++      },
++      "peerDependenciesMeta": {
++        "rollup": {
++          "optional": true
++        }
++      }
++    },
++    "node_modules/@standard-schema/spec": {
++      "version": "1.1.0",
++      "resolved": "https://registry.npmjs.org/@standard-schema/spec/-/spec-1.1.0.tgz",
++      "integrity": "sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==",
++      "dev": true,
++      "license": "MIT"
++    },
++    "node_modules/@storybook/addon-a11y": {
++      "version": "10.3.5",
++      "resolved": "https://registry.npmjs.org/@storybook/addon-a11y/-/addon-a11y-10.3.5.tgz",
++      "integrity": "sha512-5k6lpgfIeLxvNhE8v3wEzdiu73ONKjF4gmH1AHvfqYd8kIVzQJai0KCDxgvqNncXHQhIWkaf1fg6+9hKaYJyaw==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@storybook/global": "^5.0.0",
++        "axe-core": "^4.2.0"
++      },
++      "funding": {
++        "type": "opencollective",
++        "url": "https://opencollective.com/storybook"
++      },
++      "peerDependencies": {
++        "storybook": "^10.3.5"
++      }
++    },
++    "node_modules/@storybook/addon-docs": {
++      "version": "10.3.5",
++      "resolved": "https://registry.npmjs.org/@storybook/addon-docs/-/addon-docs-10.3.5.tgz",
++      "integrity": "sha512-WuHbxia/o5TX4Rg/IFD0641K5qId/Nk0dxhmAUNoFs5L0+yfZUwh65XOBbzXqrkYmYmcVID4v7cgDRmzstQNkA==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@mdx-js/react": "^3.0.0",
++        "@storybook/csf-plugin": "10.3.5",
++        "@storybook/icons": "^2.0.1",
++        "@storybook/react-dom-shim": "10.3.5",
++        "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0",
++        "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0",
++        "ts-dedent": "^2.0.0"
++      },
++      "funding": {
++        "type": "opencollective",
++        "url": "https://opencollective.com/storybook"
++      },
++      "peerDependencies": {
++        "storybook": "^10.3.5"
++      }
++    },
++    "node_modules/@storybook/addon-onboarding": {
++      "version": "10.3.5",
++      "resolved": "https://registry.npmjs.org/@storybook/addon-onboarding/-/addon-onboarding-10.3.5.tgz",
++      "integrity": "sha512-s3/gIy9Tqxji27iclLY+KSk8kGeow1JxXMl1lPLyu8n6XVvv+tFrUPhAvUTs+fVenG6JQEWc0uzpYBdFRWbMtw==",
++      "dev": true,
++      "license": "MIT",
++      "funding": {
++        "type": "opencollective",
++        "url": "https://opencollective.com/storybook"
++      },
++      "peerDependencies": {
++        "storybook": "^10.3.5"
++      }
++    },
++    "node_modules/@storybook/addon-vitest": {
++      "version": "10.3.5",
++      "resolved": "https://registry.npmjs.org/@storybook/addon-vitest/-/addon-vitest-10.3.5.tgz",
++      "integrity": "sha512-PQDeeMwoF55kvzlhFqVKOryBJskkVk71AbDh7F0y8PdRRxlGbTvIUkKXktHZWBdESo0dV6BkeVxGQ4ZpiFxirg==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@storybook/global": "^5.0.0",
++        "@storybook/icons": "^2.0.1"
++      },
++      "funding": {
++        "type": "opencollective",
++        "url": "https://opencollective.com/storybook"
++      },
++      "peerDependencies": {
++        "@vitest/browser": "^3.0.0 || ^4.0.0",
++        "@vitest/browser-playwright": "^4.0.0",
++        "@vitest/runner": "^3.0.0 || ^4.0.0",
++        "storybook": "^10.3.5",
++        "vitest": "^3.0.0 || ^4.0.0"
++      },
++      "peerDependenciesMeta": {
++        "@vitest/browser": {
++          "optional": true
++        },
++        "@vitest/browser-playwright": {
++          "optional": true
++        },
++        "@vitest/runner": {
++          "optional": true
++        },
++        "vitest": {
++          "optional": true
++        }
++      }
++    },
++    "node_modules/@storybook/builder-vite": {
++      "version": "10.3.5",
++      "resolved": "https://registry.npmjs.org/@storybook/builder-vite/-/builder-vite-10.3.5.tgz",
++      "integrity": "sha512-i4KwCOKbhtlbQIbhm53+Kk7bMnxa0cwTn1pxmtA/x5wm1Qu7FrrBQV0V0DNjkUqzcSKo1CjspASJV/HlY0zYlw==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@storybook/csf-plugin": "10.3.5",
++        "ts-dedent": "^2.0.0"
++      },
++      "funding": {
++        "type": "opencollective",
++        "url": "https://opencollective.com/storybook"
++      },
++      "peerDependencies": {
++        "storybook": "^10.3.5",
++        "vite": "^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0"
++      }
++    },
++    "node_modules/@storybook/csf-plugin": {
++      "version": "10.3.5",
++      "resolved": "https://registry.npmjs.org/@storybook/csf-plugin/-/csf-plugin-10.3.5.tgz",
++      "integrity": "sha512-qlEzNKxOjq86pvrbuMwiGD/bylnsXk1dg7ve0j77YFjEEchqtl7qTlrXvFdNaLA89GhW6D/EV6eOCu/eobPDgw==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "unplugin": "^2.3.5"
++      },
++      "funding": {
++        "type": "opencollective",
++        "url": "https://opencollective.com/storybook"
++      },
++      "peerDependencies": {
++        "esbuild": "*",
++        "rollup": "*",
++        "storybook": "^10.3.5",
++        "vite": "*",
++        "webpack": "*"
++      },
++      "peerDependenciesMeta": {
++        "esbuild": {
++          "optional": true
++        },
++        "rollup": {
++          "optional": true
++        },
++        "vite": {
++          "optional": true
++        },
++        "webpack": {
++          "optional": true
++        }
++      }
++    },
++    "node_modules/@storybook/global": {
++      "version": "5.0.0",
++      "resolved": "https://registry.npmjs.org/@storybook/global/-/global-5.0.0.tgz",
++      "integrity": "sha512-FcOqPAXACP0I3oJ/ws6/rrPT9WGhu915Cg8D02a9YxLo0DE9zI+a9A5gRGvmQ09fiWPukqI8ZAEoQEdWUKMQdQ==",
++      "dev": true,
++      "license": "MIT"
++    },
++    "node_modules/@storybook/icons": {
++      "version": "2.0.1",
++      "resolved": "https://registry.npmjs.org/@storybook/icons/-/icons-2.0.1.tgz",
++      "integrity": "sha512-/smVjw88yK3CKsiuR71vNgWQ9+NuY2L+e8X7IMrFjexjm6ZR8ULrV2DRkTA61aV6ryefslzHEGDInGpnNeIocg==",
++      "dev": true,
++      "license": "MIT",
++      "peerDependencies": {
++        "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0",
++        "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"
++      }
++    },
++    "node_modules/@storybook/react": {
++      "version": "10.3.5",
++      "resolved": "https://registry.npmjs.org/@storybook/react/-/react-10.3.5.tgz",
++      "integrity": "sha512-tpLTLaVGoA6fLK3ReyGzZUricq7lyPaV2hLPpj5wqdXLV/LpRtAHClUpNoPDYSBjlnSjL81hMZijbkGC3mA+gw==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@storybook/global": "^5.0.0",
++        "@storybook/react-dom-shim": "10.3.5",
++        "react-docgen": "^8.0.2",
++        "react-docgen-typescript": "^2.2.2"
++      },
++      "funding": {
++        "type": "opencollective",
++        "url": "https://opencollective.com/storybook"
++      },
++      "peerDependencies": {
++        "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0",
++        "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0",
++        "storybook": "^10.3.5",
++        "typescript": ">= 4.9.x"
++      },
++      "peerDependenciesMeta": {
++        "typescript": {
++          "optional": true
++        }
++      }
++    },
++    "node_modules/@storybook/react-dom-shim": {
++      "version": "10.3.5",
++      "resolved": "https://registry.npmjs.org/@storybook/react-dom-shim/-/react-dom-shim-10.3.5.tgz",
++      "integrity": "sha512-Gw8R7XZm0zSUH0XAuxlQJhmizsLzyD6x00KOlP6l7oW9eQHXGfxg3seNDG3WrSAcW07iP1/P422kuiriQlOv7g==",
++      "dev": true,
++      "license": "MIT",
++      "funding": {
++        "type": "opencollective",
++        "url": "https://opencollective.com/storybook"
++      },
++      "peerDependencies": {
++        "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0",
++        "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0",
++        "storybook": "^10.3.5"
++      }
++    },
++    "node_modules/@storybook/react-vite": {
++      "version": "10.3.5",
++      "resolved": "https://registry.npmjs.org/@storybook/react-vite/-/react-vite-10.3.5.tgz",
++      "integrity": "sha512-UB5sJHeh26bfd8sNMx2YPGYRYmErIdTRaLOT28m4bykQIa1l9IgVktsYg/geW7KsJU0lXd3oTbnUjLD+enpi3w==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@joshwooding/vite-plugin-react-docgen-typescript": "^0.7.0",
++        "@rollup/pluginutils": "^5.0.2",
++        "@storybook/builder-vite": "10.3.5",
++        "@storybook/react": "10.3.5",
++        "empathic": "^2.0.0",
++        "magic-string": "^0.30.0",
++        "react-docgen": "^8.0.0",
++        "resolve": "^1.22.8",
++        "tsconfig-paths": "^4.2.0"
++      },
++      "funding": {
++        "type": "opencollective",
++        "url": "https://opencollective.com/storybook"
++      },
++      "peerDependencies": {
++        "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0",
++        "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0",
++        "storybook": "^10.3.5",
++        "vite": "^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0"
++      }
++    },
++    "node_modules/@testing-library/dom": {
++      "version": "10.4.1",
++      "resolved": "https://registry.npmjs.org/@testing-library/dom/-/dom-10.4.1.tgz",
++      "integrity": "sha512-o4PXJQidqJl82ckFaXUeoAW+XysPLauYI43Abki5hABd853iMhitooc6znOnczgbTYmEP6U6/y1ZyKAIsvMKGg==",
++      "dev": true,
++      "license": "MIT",
++      "peer": true,
++      "dependencies": {
++        "@babel/code-frame": "^7.10.4",
++        "@babel/runtime": "^7.12.5",
++        "@types/aria-query": "^5.0.1",
++        "aria-query": "5.3.0",
++        "dom-accessibility-api": "^0.5.9",
++        "lz-string": "^1.5.0",
++        "picocolors": "1.1.1",
++        "pretty-format": "^27.0.2"
++      },
++      "engines": {
++        "node": ">=18"
++      }
++    },
++    "node_modules/@testing-library/jest-dom": {
++      "version": "6.9.1",
++      "resolved": "https://registry.npmjs.org/@testing-library/jest-dom/-/jest-dom-6.9.1.tgz",
++      "integrity": "sha512-zIcONa+hVtVSSep9UT3jZ5rizo2BsxgyDYU7WFD5eICBE7no3881HGeb/QkGfsJs6JTkY1aQhT7rIPC7e+0nnA==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@adobe/css-tools": "^4.4.0",
++        "aria-query": "^5.0.0",
++        "css.escape": "^1.5.1",
++        "dom-accessibility-api": "^0.6.3",
++        "picocolors": "^1.1.1",
++        "redent": "^3.0.0"
++      },
++      "engines": {
++        "node": ">=14",
++        "npm": ">=6",
++        "yarn": ">=1"
++      }
++    },
++    "node_modules/@testing-library/jest-dom/node_modules/dom-accessibility-api": {
++      "version": "0.6.3",
++      "resolved": "https://registry.npmjs.org/dom-accessibility-api/-/dom-accessibility-api-0.6.3.tgz",
++      "integrity": "sha512-7ZgogeTnjuHbo+ct10G9Ffp0mif17idi0IyWNVA/wcwcm7NPOD/WEHVP3n7n3MhXqxoIYm8d6MuZohYWIZ4T3w==",
++      "dev": true,
++      "license": "MIT"
++    },
++    "node_modules/@testing-library/user-event": {
++      "version": "14.6.1",
++      "resolved": "https://registry.npmjs.org/@testing-library/user-event/-/user-event-14.6.1.tgz",
++      "integrity": "sha512-vq7fv0rnt+QTXgPxr5Hjc210p6YKq2kmdziLgnsZGgLJ9e6VAShx1pACLuRjd/AS/sr7phAR58OIIpf0LlmQNw==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": ">=12",
++        "npm": ">=6"
++      },
++      "peerDependencies": {
++        "@testing-library/dom": ">=7.21.4"
++      }
++    },
++    "node_modules/@tybys/wasm-util": {
++      "version": "0.10.1",
++      "resolved": "https://registry.npmjs.org/@tybys/wasm-util/-/wasm-util-0.10.1.tgz",
++      "integrity": "sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg==",
++      "dev": true,
++      "license": "MIT",
++      "optional": true,
++      "dependencies": {
++        "tslib": "^2.4.0"
++      }
++    },
++    "node_modules/@types/aria-query": {
++      "version": "5.0.4",
++      "resolved": "https://registry.npmjs.org/@types/aria-query/-/aria-query-5.0.4.tgz",
++      "integrity": "sha512-rfT93uj5s0PRL7EzccGMs3brplhcrghnDoV26NqKhCAS1hVo+WdNsPvE/yb6ilfr5hi2MEk6d5EWJTKdxg8jVw==",
++      "dev": true,
++      "license": "MIT",
++      "peer": true
++    },
++    "node_modules/@types/babel__core": {
++      "version": "7.20.5",
++      "resolved": "https://registry.npmjs.org/@types/babel__core/-/babel__core-7.20.5.tgz",
++      "integrity": "sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@babel/parser": "^7.20.7",
++        "@babel/types": "^7.20.7",
++        "@types/babel__generator": "*",
++        "@types/babel__template": "*",
++        "@types/babel__traverse": "*"
++      }
++    },
++    "node_modules/@types/babel__generator": {
++      "version": "7.27.0",
++      "resolved": "https://registry.npmjs.org/@types/babel__generator/-/babel__generator-7.27.0.tgz",
++      "integrity": "sha512-ufFd2Xi92OAVPYsy+P4n7/U7e68fex0+Ee8gSG9KX7eo084CWiQ4sdxktvdl0bOPupXtVJPY19zk6EwWqUQ8lg==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@babel/types": "^7.0.0"
++      }
++    },
++    "node_modules/@types/babel__template": {
++      "version": "7.4.4",
++      "resolved": "https://registry.npmjs.org/@types/babel__template/-/babel__template-7.4.4.tgz",
++      "integrity": "sha512-h/NUaSyG5EyxBIp8YRxo4RMe2/qQgvyowRwVMzhYhBCONbW8PUsg4lkFMrhgZhUe5z3L3MiLDuvyJ/CaPa2A8A==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@babel/parser": "^7.1.0",
++        "@babel/types": "^7.0.0"
++      }
++    },
++    "node_modules/@types/babel__traverse": {
++      "version": "7.28.0",
++      "resolved": "https://registry.npmjs.org/@types/babel__traverse/-/babel__traverse-7.28.0.tgz",
++      "integrity": "sha512-8PvcXf70gTDZBgt9ptxJ8elBeBjcLOAcOtoO/mPJjtji1+CdGbHgm77om1GrsPxsiE+uXIpNSK64UYaIwQXd4Q==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@babel/types": "^7.28.2"
++      }
++    },
++    "node_modules/@types/chai": {
++      "version": "5.2.3",
++      "resolved": "https://registry.npmjs.org/@types/chai/-/chai-5.2.3.tgz",
++      "integrity": "sha512-Mw558oeA9fFbv65/y4mHtXDs9bPnFMZAL/jxdPFUpOHHIXX91mcgEHbS5Lahr+pwZFR8A7GQleRWeI6cGFC2UA==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@types/deep-eql": "*",
++        "assertion-error": "^2.0.1"
++      }
++    },
++    "node_modules/@types/deep-eql": {
++      "version": "4.0.2",
++      "resolved": "https://registry.npmjs.org/@types/deep-eql/-/deep-eql-4.0.2.tgz",
++      "integrity": "sha512-c9h9dVVMigMPc4bwTvC5dxqtqJZwQPePsWjPlpSOnojbor6pGqdk541lfA7AqFQr5pB1BRdq0juY9db81BwyFw==",
++      "dev": true,
++      "license": "MIT"
++    },
++    "node_modules/@types/doctrine": {
++      "version": "0.0.9",
++      "resolved": "https://registry.npmjs.org/@types/doctrine/-/doctrine-0.0.9.tgz",
++      "integrity": "sha512-eOIHzCUSH7SMfonMG1LsC2f8vxBFtho6NGBznK41R84YzPuvSBzrhEps33IsQiOW9+VL6NQ9DbjQJznk/S4uRA==",
++      "dev": true,
++      "license": "MIT"
++    },
++    "node_modules/@types/esrecurse": {
++      "version": "4.3.1",
++      "resolved": "https://registry.npmjs.org/@types/esrecurse/-/esrecurse-4.3.1.tgz",
++      "integrity": "sha512-xJBAbDifo5hpffDBuHl0Y8ywswbiAp/Wi7Y/GtAgSlZyIABppyurxVueOPE8LUQOxdlgi6Zqce7uoEpqNTeiUw==",
++      "dev": true,
++      "license": "MIT"
++    },
++    "node_modules/@types/estree": {
++      "version": "1.0.8",
++      "resolved": "https://registry.npmjs.org/@types/estree/-/estree-1.0.8.tgz",
++      "integrity": "sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==",
++      "dev": true,
++      "license": "MIT"
++    },
++    "node_modules/@types/json-schema": {
++      "version": "7.0.15",
++      "resolved": "https://registry.npmjs.org/@types/json-schema/-/json-schema-7.0.15.tgz",
++      "integrity": "sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==",
++      "dev": true,
++      "license": "MIT"
++    },
++    "node_modules/@types/mdx": {
++      "version": "2.0.13",
++      "resolved": "https://registry.npmjs.org/@types/mdx/-/mdx-2.0.13.tgz",
++      "integrity": "sha512-+OWZQfAYyio6YkJb3HLxDrvnx6SWWDbC0zVPfBRzUk0/nqoDyf6dNxQi3eArPe8rJ473nobTMQ/8Zk+LxJ+Yuw==",
++      "dev": true,
++      "license": "MIT"
++    },
++    "node_modules/@types/node": {
++      "version": "24.12.2",
++      "resolved": "https://registry.npmjs.org/@types/node/-/node-24.12.2.tgz",
++      "integrity": "sha512-A1sre26ke7HDIuY/M23nd9gfB+nrmhtYyMINbjI1zHJxYteKR6qSMX56FsmjMcDb3SMcjJg5BiRRgOCC/yBD0g==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "undici-types": "~7.16.0"
++      }
++    },
++    "node_modules/@types/parse-json": {
++      "version": "4.0.2",
++      "resolved": "https://registry.npmjs.org/@types/parse-json/-/parse-json-4.0.2.tgz",
++      "integrity": "sha512-dISoDXWWQwUquiKsyZ4Ng+HX2KsPL7LyHKHQwgGFEA3IaKac4Obd+h2a/a6waisAoepJlBcx9paWqjA8/HVjCw==",
++      "license"
