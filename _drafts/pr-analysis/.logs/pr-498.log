@@ -2518,3 +2518,114 @@ hook: UserPromptSubmit
 hook: UserPromptSubmit
 hook: UserPromptSubmit Completed
 hook: UserPromptSubmit Completed
+codex
+# PR #498 피트(안강준) (OPEN)
+
+- author: GamjaIsMine02
+- url: https://github.com/woowacourse/react-payments/pull/498
+- changedFiles: 50 (+7385 -10)
+
+## 페어 고민 (PR body 핵심 발췌)
+
+- 이번 미션은 3인 페어로 진행했습니다. 페어 인원이 3명이다 보니 구현 전에 설계와 역할 분리에 대해 많이 이야기했고, 그 과정에서 설계에 꽤 많은 시간을 투자했습니다.
+- "설계를 너무 완벽하게 하려고 한다기 보다는 주요 요구사항을 중심으로 잡고 약 75%? 정도 러프하게 설계를 해보자" 였습니다.
+- 상태 관리에서는 “누가 어떤 상태를 알아야 하는가”를 기준으로 책임을 나누려고 했습니다.
+- 이번 미션을 진행하면서 가장 뜨거운 주제는 "입력 UX", "state 관리 위치" 이 두 가지였습니다.
+- Storybook은 단순 테스트 도구로만 보면 상위 컴포넌트 중심으로 작성해도 충분할 수 있다고 생각했습니다.
+
+## 핵심 코드 결정/패턴 (실제 diff 발췌)
+
+### 결정 1 — Storybook 상태 문서화 환경 추가
+**파일**: `.storybook/main.ts`
+```ts
+// .storybook/main.ts
+import type { StorybookConfig } from '@storybook/react-vite';
+
+const config: StorybookConfig = {
+  "stories": [
+    "../src/**/*.mdx",
+    "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"
+  ],
+  "addons": [
+    "@chromatic-com/storybook",
+    "@storybook/addon-vitest",
+    "@storybook/addon-a11y",
+    "@storybook/addon-docs"
+  ],
+  "framework": "@storybook/react-vite"
+};
+export default config;
+```
+
+### 결정 2 — 접근성 검사를 Storybook에 연결
+**파일**: `.storybook/preview.ts`
+```ts
+// .storybook/preview.ts
+const preview: Preview = {
+  parameters: {
+    controls: {
+      matchers: {
+       color: /(background|color)$/i,
+       date: /Date$/i,
+      },
+    },
+
+    a11y: {
+      test: 'todo'
+    }
+  },
+};
+```
+
+### 결정 3 — 카드 브랜드 식별 요구사항 문서화
+**파일**: `README.md`
+```md
+// README.md
+#### 카드 브랜드 로고 (Card Brand Logo)
+- [x] 카드 번호 입력 조건 충족 시 해당 카드사 로고 표시
+  - **Visa:** `4`로 시작하는 16자리 숫자
+  - **MasterCard:** `51`~`55`로 시작하는 16자리 숫자
+- [x] 위 조건을 만족하지 않으면 로고 미표시
+- [x] 실시간으로 브랜드 로고 업데이트
+```
+
+### 결정 4 — GitHub Pages 배포 워크플로우
+**파일**: `.github/workflows/deploy.yml`
+```yml
+// .github/workflows/deploy.yml
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+      - step1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+```
+
+## 리뷰어 피드백 (실제 인용)
+
+- @coderabbitai[bot] `README.md:121`: "코드 펜스 언어 지정이 빠져 markdownlint 경고가 발생합니다." → 답변 없음
+- @coderabbitai[bot] `src/common/components/Label/Label.tsx:11`: "`label`과 입력 필드를 연결할 수 없어 접근성이 깨집니다." → 답변 없음
+- @coderabbitai[bot] `src/feature/CardRegister/components/CardPreviewSection/CardPreviewContainer/CardPreviewContainer.tsx:16`: "MasterCard 2-series(2221–2720) BIN이 누락되어 브랜드 판별이 틀립니다." → 답변 없음
+- @coderabbitai[bot] `src/feature/CardRegister/components/InfoInputSection/ExpiryField/ExpiryField.tsx:95`: "공유 `isError`를 필드 단위로 덮어써 전체 검증 상태가 깨질 수 있습니다." → 답변 없음
+- @JUDONGHYEOK `src/feature/CardRegister/components/InfoInputSection/NumberField/NumberField.tsx:18`: "isTouched 패턴이 다른 필드에도 반복되고 있는데요!" → 답변 없음
+- @JUDONGHYEOK `src/feature/CardRegister/components/InfoInputSection/ExpiryField/ExpiryField.tsx:28`: "13처럼 잘못된 월은 입력 자체가 막히는데" → 답변 없음
+- @JUDONGHYEOK `src/feature/CardRegister/components/InfoInputSection/CvcField/CvCField.tsx:17`: "CVC는 입력칸이 1개인데도 flag 배열과 index 기반 로직을 사용" → 답변 없음
+
+## 잠재 안티패턴 태그
+
+[state-shape]: CVC와 preview 상태 위치 논의
+[state-update]: 공유 isError를 필드별로 덮어씀
+[validation]: 월 범위 입력 차단 피드백 논의
+[type-safety]: cardNumbers가 string[]로 정의됨
+[component-split]: 필드별 반복 패턴 추상화 신호
+[card-brand]: MasterCard 2-series 누락됨
+hook: Stop
+hook: Stop
+hook: Stop
