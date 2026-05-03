@@ -2721,3 +2721,100 @@ const preview: Preview = {
 hook: Stop
 hook: Stop
 hook: Stop
+hook: Stop Completed
+hook: Stop Completed
+hook: Stop Completed
+2026-05-03T09:34:43.334681Z ERROR codex_core::session: failed to record rollout items: thread 019ded30-1567-7d00-a728-a66c99c73aea not found
+tokens used
+88,211
+# PR #506 해니(장혜원) (OPEN)
+
+- author: janghw0126
+- url: https://github.com/woowacourse/react-payments/pull/506
+- changedFiles: 42 (+7131 -10)
+
+## 페어 고민 (PR body 핵심 발췌)
+
+- 결국 상태를 App으로 올리고 양쪽에 props로 내려주는 구조로 바꿨습니다.
+- 검증을 두 단계로 나눴습니다.
+- 컴포넌트를 분리하는 기준은 "복잡한가"가 아니라 "반복되는가" 라는 것을 이때 알게 됐습니다.
+- CardNumberSegmentsInput의 이중 상태 구조가 적절한가요?
+- setFormState를 직접 내려주는 방식 vs 구체적인 핸들러를 만들어 내려주는 방식
+
+## 핵심 코드 결정/패턴 (실제 diff 발췌)
+
+### 결정 1 — 카드 입력 요구사항 정리
+**파일**: `README.md`
+```md
+<!-- README.md -->
+# 페이먼츠 미션
+
+## 기능 요구 사항
+
+### 카드 번호 입력 및 식별
+
+- [x] 카드 번호는 4자리씩 4개의 input으로 입력받는다
+- [x] 입력은 숫자만 가능하고 유효하지 않은 번호 입력시 피드백을 제공한다.
+
+### 카드 유효기간 입력
+
+- [x] 카드 유효기간은 월 2자리와 년도 2자리를 각각 별도의 input으로 입력받는다.
+- [x] 입력은 유효한 월과 년도만 입력가능하도록 제한한다.
+```
+
+### 결정 2 — Storybook 접근성 설정
+**파일**: `.storybook/preview.ts`
+```ts
+// .storybook/preview.ts
+import type { Preview } from '@storybook/react-vite';
+import '../src/styles/index.css';
+
+const preview: Preview = {
+  parameters: {
+    controls: {
+      matchers: {
+        color: /(background|color)$/i,
+        date: /Date$/i,
+      },
+    },
+
+    a11y: {
+      test: 'todo',
+    },
+  },
+};
+```
+
+### 결정 3 — 앱 진입 HTML 구성
+**파일**: `index.html`
+```html
+<!-- index.html -->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>react-payments</title>
+  </head>
+  <body>
+    <div id="root"></div>
+```
+
+## 리뷰어 피드백 (실제 인용)
+
+- @coderabbitai[bot] `src/components/CardExpiryDateInput.tsx:25`: "`value`를 초기값으로만 사용해 부모 상태와 불일치할 수 있습니다." → controlled 패턴 제안
+- @coderabbitai[bot] `src/components/CardForm.tsx:27`: "폼 기본 submit 동작을 막아 주세요." → onSubmit preventDefault 제안
+- @coderabbitai[bot] `src/components/Common/ValidationInput.tsx:56`: "블러 검증은 `props.value`가 아니라 현재 입력값으로 검사해야 합니다." → event.currentTarget.value 사용 제안
+- @coolchaem `src/components/CardNumberSegmentsInput.tsx:14`: "부모 상태와 같은 의미의 값을 한 번 더 복사한 것인지 구분해보는 것" → 이중 상태 의미 구분 피드백
+- @coolchaem `src/hooks/useCardBrand.ts:4`: "굳이 `useMemo`를 사용하지 않아도 괜찮아 보입니다." → 계산 비용 작으면 함수 계산 가능
+- @coolchaem `src/components/CardForm.tsx:36`: "상태를 다루는 방법만 외부에 열어두고 싶다" → 구체적 핸들러 형태 흐름 언급
+
+## 잠재 안티패턴 태그
+
+- [state-shape] : 부모/자식 이중 상태 신호
+- [state-update] : setFormState 직접 전달 고민
+- [validation] : blur 검증 값 기준 이슈
+- [input-handling] : 공백 숫자 검증 통과
+- [card-brand] : MasterCard 정규식 앵커링
+- [styling] : inline style 병합/일관성 이슈
