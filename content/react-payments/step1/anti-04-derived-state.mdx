@@ -1,0 +1,91 @@
+---
+title: 'anti-04. 카드 브랜드 — 파생값을 state로 저장'
+---
+
+import { Reveal } from '../../../components/Reveal'
+
+# anti-04. 카드 브랜드 — 파생값을 state로 저장
+
+**빈도: 25건 중 5+건** — `cardNumber[0]` 한 자리에서 *유도 가능한* 값을 별도 `useState` / `useEffect`로 *동기화* 한다.
+
+## 패턴 한 줄
+
+카드 브랜드(visa / mastercard)는 카드번호의 prefix에서 매 렌더링마다 계산할 수 있는 **파생값**이다. 그런데 8기 페어들은 이를 별도 state로 두고, 카드번호가 바뀔 때마다 setter를 호출하거나 `useEffect`로 동기화한다.
+
+## AS-IS 코드 (8기 PR 발췌)
+
+> 🔍 **읽기 전에**
+>
+> "내 코드에서 `cardBrand`(또는 `networkBrand` / `brand`)를 검색해보자. 그게 *state* 인가, 아니면 *함수 호출*인가?"
+
+### 사례 A — formValue에 cardBrand를 끼워넣기
+
+[PR #513](https://github.com/woowacourse/react-payments/pull/513) — `docs/architecture.md`
+
+```md
+# Page
+
+> formValue와 (step2에서 추가될 step..)을 관리함.
+
+## state
+
+- formValue: {
+  cardNumbers: {value: ["","","",""]},
+  ExpirationPeriod: {value: ["",""]},
+  cvcNumbers: {value: ""},
+  cardBrand: {value: "" (visa | master | local)},
+}
+```
+
+설계 문서까지 만들어 *카드번호와 같은 레벨에서* `cardBrand`를 state로 보유. PR 작성자도 *"숨겨진 formValue로써 cardBrand를 해석"* 이라고 명시적으로 기록.
+
+### 사례 B — `setCardBrand` 또는 `setNetworkBrand`
+
+[PR #497](https://github.com/woowacourse/react-payments/pull/497) — `CardNumberInput.tsx`
+
+리뷰어가 한 줄로 짚었다:
+> *"networkBrand 는 `cardNumber['first-digits']`에서 바로 유도 가능한 값"*
+
+같은 패턴이 [PR #515](https://github.com/woowacourse/react-payments/pull/515)에서도:
+> *"cardBrand를 별도 상태로 보관하신 이유가 있을까요?"* → 리뷰어는 파생값 계산 방향 권장
+
+### 사례 C — `useEffect`로 동기화
+
+[PR #516](https://github.com/woowacourse/react-payments/pull/516) — PR 작성자가 직접 PR body에 적은 의문:
+
+> *"`brand`는 `cardInfo.numbers[0]`으로부터 파생되는 값인데, 에러 상태와 마찬가지로 굳이 `useEffect`를 통해 상태로 저장해야 하는지도 고민이 됩니다."*
+
+같은 의문이 [PR #509](https://github.com/woowacourse/react-payments/pull/509)에서도:
+> *"다만 `useEffect`로 파생 상태를 관리하는 게 맞는 패턴인지는 잘 모르겠습니다."*
+
+→ 페어들이 *이미 의심하고 있는데도* 그 코드가 PR에 그대로 들어왔다는 게 더 흥미로운 신호다.
+
+## 리뷰어 피드백 (실제 인용)
+
+- [PR #497](https://github.com/woowacourse/react-payments/pull/497) `CardNumberInput.tsx:37` — *"networkBrand 는 `cardNumber['first-digits']`에서 바로 유도 가능한 값"*
+- [PR #513](https://github.com/woowacourse/react-payments/pull/513) `AddCardPage.tsx:36` — *"cardBrand를 formValue에서 빼고, 렌더링 시점에 매번 계산하는 파생값으로 관리"*
+- [PR #515](https://github.com/woowacourse/react-payments/pull/515) `AddCardPage.tsx:25` — *"cardBrand를 별도 상태로 보관하신 이유가 있을까요?"* → 리뷰어는 파생값 계산 방향 권장
+
+## 토론 질문
+
+1. 카드번호가 바뀔 때마다 `cardBrand` state를 따라 바꾸는 코드와, 매 렌더링마다 `detectBrand(cardNumber)`를 호출하는 코드 — 두 코드의 *동작*은 같은가? *코드량*은? *틀릴 가능성*은?
+2. `useEffect`로 두 state를 *동기화*하는 코드는 거의 항상 *같은 정보를 두 번 저장한다*는 신호다. `useEffect` 없이 다시 쓸 수 있는가?
+3. 만약 `cardBrand`가 *서버에서 받아오는 값*이라면 — 그땐 state로 둬야 할까? 어떤 차이가 있는가?
+
+<Reveal label="단서 펼쳐보기 (정답 아님)" title="단서 — 가설을 점검하는 데만 쓰세요">
+
+## 단서 (정답 아님)
+
+- React 공식문서 [Choosing the State Structure](https://react.dev/learn/choosing-the-state-structure)의 5원칙 중 *3번 — Avoid redundant state*. 파생값은 state가 아니다.
+- 매 렌더링마다 `detectBrand(cardNumber)`를 호출하는 비용은 카드 한 자리 비교 수준 — *완전히 무시 가능*. `useMemo`도 보통 필요 없다.
+- [PR #506](https://github.com/woowacourse/react-payments/pull/506)의 리뷰: *"굳이 `useMemo`를 사용하지 않아도 괜찮아 보입니다."*
+- [Don't Sync State. Derive It! (Kent C. Dodds)](https://kentcdodds.com/blog/dont-sync-state-derive-it) — *동기화*는 *파생 계산*으로 대체할 수 있다.
+- 같은 원리는 *유효성*에도 적용된다. `formValid`, `isError` 같은 값도 입력값에서 파생 계산이 가능하다 → [anti-01](./anti-01-error-overwrite)과 한 줄로 이어짐.
+
+</Reveal>
+
+## 연관 카드
+
+- [Q6 — 카드 브랜드 — 폼 vs 도메인](./q06-card-brand-domain) — 같은 주제, 고민 관점
+- [Q2 — state 구조](./q02-state-shape) — 5원칙 중 redundant state
+- [anti-01 — 한 칸 에러가 다른 칸을 덮어쓴다](./anti-01-error-overwrite) — 유효성도 파생값

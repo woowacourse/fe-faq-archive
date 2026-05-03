@@ -10,5 +10,11 @@
   "q07-input-constraints": "Q7. input 제약 — maxLength vs type=number",
   "q08-typescript-narrowing": "Q8. TypeScript 타입 좁히기 — never 회피",
   "q09-official-docs-ko": "공식문서 단서 — 한글 번역",
+  "anti-00-overview": "안티패턴 6선 — 8기에서 본 것",
+  "anti-01-error-overwrite": "anti-01. 한 칸 에러가 다른 칸을 덮어쓴다",
+  "anti-02-mastercard-bin": "anti-02. MasterCard 2-series 누락",
+  "anti-03-number-coercion": "anti-03. Number()/isNaN() 검증의 함정",
+  "anti-04-derived-state": "anti-04. 카드 브랜드 — 파생값을 state로",
+  "anti-05-fixed-length-array": "anti-05. 4칸 고정인데 string[]",
   "q10-appendix-all-prs": "부록 — 1단계 PR 전체 인덱스"
 }

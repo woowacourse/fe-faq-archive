@@ -1,0 +1,101 @@
+---
+title: 'anti-01. 한 칸 에러가 다른 칸을 덮어쓴다'
+---
+
+import { Reveal } from '../../../components/Reveal'
+
+# anti-01. 한 칸의 에러가 다른 칸을 덮어쓴다
+
+**빈도: 25건 중 8+건** — 8기 1단계에서 가장 자주 보이는 안티패턴이다.
+
+## 패턴 한 줄
+
+카드 번호 4칸·만료일 2칸·CVC 1칸을 **단일 `isError` / `errorStatus` / `errorMessage` 한 변수로 묶어서**, 새 입력이 들어올 때마다 *이전에 다른 칸에서 발견된 에러 표시가 사라진다*.
+
+## AS-IS 코드 (8기 PR 발췌)
+
+> 🔍 **읽기 전에**
+>
+> "두 번째 칸을 잘못 입력해서 빨간 테두리가 떴다. 그 상태에서 첫 번째 칸을 정상 입력하면 — 두 번째 칸의 빨간 테두리는 어떻게 될까?"
+
+### 사례 A — 단일 boolean으로 4칸 묶기
+
+[PR #518](https://github.com/woowacourse/react-payments/pull/518) — `InfoInputSection.tsx`
+
+```tsx
+// src/feature/CardRegister/components/InfoInputSection/InfoInputSection.tsx
+const [isError, setIsError] = useState(false);
+
+<NumberField cardNumbers={cardNumbers} setCardNumbers={setCardNumbers} setIsError={setIsError} />
+<ExpiryField ... setIsError={setIsError} />
+<CvcField cvcNumber={cvcNumber} setCvcNumber={setCvcNumber} setIsError={setIsError} />
+```
+
+`isError` **하나**를 세 필드가 공유한다. CVC에서 에러가 났는데 카드번호를 정상 입력하면 `setIsError(false)` 호출로 CVC 에러 표시까지 사라진다.
+
+### 사례 B — `errorStatus` 단일 값으로 4칸 묶기
+
+[PR #515](https://github.com/woowacourse/react-payments/pull/515) — `CardNumbersField.tsx`
+
+```tsx
+// src/components/domain/CardNumbersField.tsx
+const [errorStatus, setErrorStatus] = useState<ErrorStatus | null>(null);
+
+const handleBlur = (index: number) => {
+  if (cardNumbers[index].length !== 4) {
+    setErrorStatus('LENGTH');
+  }
+  // 통과 분기에서 setErrorStatus(null)이 없음
+};
+```
+
+PR 작성자도 이 한계를 인지하고 있다 — *"여러 input 중 하나에서 발생한 에러가 다른 input 조작 시 덮어써지는 버그가 존재합니다."*
+
+### 사례 C — 동일 패턴, 다른 이름
+
+[PR #498](https://github.com/woowacourse/react-payments/pull/498), [PR #519](https://github.com/woowacourse/react-payments/pull/519), [PR #524](https://github.com/woowacourse/react-payments/pull/524) 등도 같은 형태로 발견된다. 이름만 `errorMode` / `inputStatus` / `formError` 등으로 다르다.
+
+## 리뷰어 피드백 (실제 인용)
+
+- [PR #498](https://github.com/woowacourse/react-payments/pull/498) `ExpiryField.tsx:95` — *"공유 `isError`를 필드 단위로 덮어써 전체 검증 상태가 깨질 수 있습니다."*
+- [PR #502](https://github.com/woowacourse/react-payments/pull/502) `CardNumberInputField.tsx:46` — *"한 칸의 오류가 다른 칸의 에러 표시를 지우고 있습니다."*
+- [PR #513](https://github.com/woowacourse/react-payments/pull/513) `CardNumbersField.tsx:16` — *"다른 카드 번호 칸의 오류를 현재 칸 입력이 덮어쓰고 있습니다."*
+- [PR #515](https://github.com/woowacourse/react-payments/pull/515) `CardNumbersField.tsx:52` — *"통과 분기에서 `setErrorStatus(null)`이 없어 이전 에러가 남을 수 있습니다."*
+- [PR #519](https://github.com/woowacourse/react-payments/pull/519) `InfoInputSection.tsx:41` — *"전역 에러 상태 집계가 덮어쓰기 구조입니다."*
+
+리뷰어 5명이 **거의 같은 문장**으로 같은 안티패턴을 짚고 있다.
+
+## 비슷하게 따라오는 신호
+
+이 안티패턴이 있는 PR에는 종종 함께 나타나는 신호가 있다. 카드를 따로 만들지 않고 여기 정리한다.
+
+- **`prev` 미사용 setter** — `setFormValue({ ...formValue, ... })` 형태로 클로저 캡처. [PR #511](https://github.com/woowacourse/react-payments/pull/511) [PR #513](https://github.com/woowacourse/react-payments/pull/513) [PR #515](https://github.com/woowacourse/react-payments/pull/515) [PR #520](https://github.com/woowacourse/react-payments/pull/520).
+- **검증 실패값이 그대로 state에 반영** — `setMonth(value)` 직후 검증해서 에러 표시만 함. [PR #517](https://github.com/woowacourse/react-payments/pull/517) [PR #520](https://github.com/woowacourse/react-payments/pull/520) [PR #524](https://github.com/woowacourse/react-payments/pull/524).
+- **submit 기본 동작 미차단** — `<form onSubmit>` 또는 `preventDefault()` 누락. [PR #500](https://github.com/woowacourse/react-payments/pull/500) [PR #501](https://github.com/woowacourse/react-payments/pull/501) [PR #505](https://github.com/woowacourse/react-payments/pull/505) [PR #512](https://github.com/woowacourse/react-payments/pull/512) [PR #515](https://github.com/woowacourse/react-payments/pull/515) [PR #517](https://github.com/woowacourse/react-payments/pull/517) [PR #521](https://github.com/woowacourse/react-payments/pull/521).
+
+같은 *"에러 흐름의 책임 위치를 명확히 하지 않은"* 패밀리다.
+
+## 토론 질문
+
+코드를 보면서 페어와 함께 이야기해보자.
+
+1. 카드번호 4칸의 에러는 *서로 같이 변하는가*? 같이 변하지 않는다면 한 변수로 묶은 이유는?
+2. "한 칸의 입력이 들어왔을 때, *어떤 에러*가 사라져야 하고 *어떤 에러*가 유지되어야 하는가?"를 명시할 수 있는가?
+3. `setErrorStatus(null)`을 통과 분기에 추가하면 — 다른 칸의 에러 표시는 어떻게 될까?
+
+<Reveal label="단서 펼쳐보기 (정답 아님)" title="단서 — 가설을 점검하는 데만 쓰세요">
+
+## 단서 (정답 아님)
+
+- React 공식문서 [Choosing the State Structure](https://react.dev/learn/choosing-the-state-structure)의 5원칙 중 *"같이 바뀌는 것끼리 묶어라"* — 4칸 에러는 *같이* 바뀌지 않는다.
+- 4칸 각각의 검증 결과를 표현하는 자연스러운 형태: `errors: [null, 'LENGTH', null, null]` 같은 *4칸 짝꿍 배열*. 또는 `errors: { '1': 'LENGTH' }` 같은 *index→메시지 사전*.
+- "이전에 본 에러를 *지우는* 시점"을 명시적으로 정한다: 입력 시작 시? blur 통과 시? 폼 submit 시? — 각 선택의 사용자 경험은 다르다.
+- 개별 칸의 에러를 *상위에서 합쳐서 폼 전체의 유효성*을 계산하는 것은 분리된 문제. `formValid = errors.every(e => e === null)` 같은 파생값으로 충분하다 → [anti-04](./anti-04-derived-state).
+
+</Reveal>
+
+## 연관 카드
+
+- [Q5 — 검증과 에러 책임](./q05-validation-error) — 같은 주제, 고민 관점
+- [Q2 — state 구조](./q02-state-shape) — 묶을까 나눌까의 원리
+- [anti-04 — 파생값을 state로 저장](./anti-04-derived-state) — *유효성 자체*도 파생값
