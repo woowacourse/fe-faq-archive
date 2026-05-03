@@ -2573,3 +2573,48 @@ hook: UserPromptSubmit
 hook: UserPromptSubmit
 hook: UserPromptSubmit Completed
 hook: UserPromptSubmit Completed
+codex
+# PR #505 루멘(이운태) (MERGED)
+
+- author: bigcloud07
+- url: https://github.com/woowacourse/react-payments/pull/505
+- changedFiles: 41 (+7215 -7)
+
+## 페어 고민 (PR body 핵심 발췌)
+
+- 이번 단계에서는 단순히 카드 등록 UI를 구현하는 것보다, **입력값 검증 로직을 어떤 기준으로 분리하고 관리할지**를 가장 많이 고민했습니다.
+- 처음에는 각 컴포넌트 안에서 입력값과 에러 상태를 함께 처리하려고 했지만, 그렇게 하면 컴포넌트가 UI 렌더링뿐 아니라 상태 변경, 검증, 에러 메시지 노출까지 모두 책임지게 되어 복잡도가 빠르게 커졌습니다.
+- 컴포넌트는 현재 상태를 받아 화면에 보여주고, 훅은 입력 변경과 blur 시점의 검증을 담당하도록 역할을 나누니 코드의 의도가 더 분명해졌습니다.
+- 단순히 `isError` 같은 boolean으로 관리하면 에러가 발생했다는 사실은 알 수 있지만, 어떤 이유로 발생했는지 구분하기 어렵다고 생각했습니다.
+- 나중에 “전체 카드 정보가 유효한지”, “제출 버튼을 활성화할 수 있는지” 같은 폼 전체 검증이 필요해지면 상태가 여러 훅에 흩어져 있어 조합이 번거로울 수도 있겠다고 느꼈습니다.
+
+## 핵심 코드 결정/패턴 (실제 diff 발췌)
+
+### 결정 1 — src 실제 코드 diff 원문 미제공
+**파일**: `정보 없음`
+```text
+정보 없음
+```
+
+## 리뷰어 피드백 (실제 인용)
+
+- @coderabbitai `index.html:2`: "Line 2의 `lang="en"`은 한국어 UI 기준에서" → 정보 없음
+- @coderabbitai `src/components/CardCvc.tsx:37`: "`label`이 `input`과 명시적으로 연결되지 않아" → 정보 없음
+- @coderabbitai `src/components/CardInput.tsx:35`: "`<form>`은 `onSubmit` 처리 없이 Enter 입력 시" → 정보 없음
+- @coderabbitai `src/hooks/useCardNumber.tsx:17`: "`isNotNumber()` 함수는 단순히 `isNaN(Number(value))`" → 정보 없음
+- @coderabbitai `src/hooks/useExpiryDate.tsx:53`: "현재는 빈 값만 검사해서 `0` 또는 한 자리 월" → 정보 없음
+- @jw-r `src/components/CardCvc.tsx:12`: "`<h1>` 안에 `<div>`가 들어 있어요." → 정보 없음
+- @jw-r `src/components/CardPreview.tsx:4`: "`cardBrand: string`이 너무 넓습니다." → 정보 없음
+- @jw-r `src/types/cardStausTypes.ts:1`: "파일명이 `cardStausTypes.ts`인데, \"Status\"의 오타" → 정보 없음
+
+## 잠재 안티패턴 태그
+
+- [validation] : Number 변환 검증, 월 blur 느슨
+- [input-handling] : 특수 입력 통과 가능성
+- [type-safety] : cardBrand string, 배열 폭 넓음
+- [component-split] : CardInput 역할·handler명 모호
+- [card-brand] : 브랜드 로직 확장 지점 분산
+- [naming] : 파일명 오타, setter명 혼선
+hook: Stop
+hook: Stop
+hook: Stop
