@@ -2532,3 +2532,89 @@ const preview: Preview = {
 hook: Stop
 hook: Stop
 hook: Stop
+hook: Stop Completed
+hook: Stop Completed
+hook: Stop Completed
+2026-05-03T09:37:39.785650Z ERROR codex_core::session: failed to record rollout items: thread 019ded32-b7a6-7d12-b915-1e9a4eb96c53 not found
+tokens used
+83,594
+# PR #519 이현(정연준) (OPEN)
+
+- author: jebiyeon02
+- url: https://github.com/woowacourse/react-payments/pull/519
+- changedFiles: 50 (+7384 -10)
+
+## 페어 고민 (PR body 핵심 발췌)
+
+- 이번 미션은 3인 페어로 진행하면서 기능 구현보다 설계에 더 많은 시간을 사용했습니다.
+- 컴포넌트를 어떤 기준으로 나눌지, 상태를 어디까지 끌어올릴지, 공통 로직을 언제 추상화할지에 대해 많이 논의했습니다.
+- 이때 “누가 이 상태를 알아야만 하는가?”를 기준으로 상태 위치를 결정했습니다.
+- 사용자가 카드 정보를 정확하게 입력할 수 있도록, 카드 번호/유효기간/CVC 입력에서는 숫자가 아닌 입력을 제한하고, blur 이후 자릿수가 맞지 않으면 에러 메시지를 보여주도록 구현했습니다.
+- 공통 컴포넌트에서 기본 attribute를 어느 정도까지 열어두는 것이 적절할까요?
+
+## 핵심 코드 결정/패턴 (실제 diff 발췌)
+
+### 결정 1 — 카드 프리뷰 요구사항 문서화
+**파일**: `README.md`
+```md
+// README.md
+#### 카드 번호 표시 (Card Number Display)
+- [x] 사용자 입력에 따라 실시간으로 카드 번호 표시
+- [x] 카드 번호는 4자리씩 묶어서 표시 (예: `1234 5678 9012 3456`)
+- [x] 카드 번호의 9~16번째 자리는 마스킹 처리 (예: `1234 5678 **** ****`)
+- [x] 초기 상태에서는 placeholder 텍스트 표시
+
+#### 만료일 표시 (Card Expiry Date Display)
+- [x] 사용자 입력에 따라 실시간으로 만료일 표시
+- [x] 월 또는 년도 둘 중 하나가 올바르게 입력됐을 때만 `/` 기호 표시 (예: `MM/YY`)
+```
+
+### 결정 2 — 카드 입력 UX 규칙 명세
+**파일**: `README.md`
+```md
+// README.md
+#### 카드 번호 입력 (Card Number Input)
+- [x] 입력 형식: 4자리씩 4개 입력칸 (총 16자리)
+- [x] 숫자만 입력 가능하며, 숫자 외 입력은 자동 차단
+- [x] 각 입력칸의 placeholder: `1234`
+- [x] 입력 중인 칸의 테두리를 검은색(`#000000`)으로 강조
+- [x] 에러 발생 시 테두리를 빨간색(`#FF3D3D`)으로 표시
+- [x] 입력 때마다 실시간으로 카드 프리뷰 업데이트
+- [x] 순차적 에러 유효성 검사:
+```
+
+### 결정 3 — Storybook 접근성 애드온 설정
+**파일**: `.storybook/preview.ts`
+```ts
+// .storybook/preview.ts
+const preview: Preview = {
+  parameters: {
+    controls: {
+      matchers: {
+       color: /(background|color)$/i,
+       date: /Date$/i,
+      },
+    },
+
+    a11y: {
+      test: 'todo'
+    }
+  },
+};
+```
+
+## 리뷰어 피드백 (실제 인용)
+
+- @coderabbitai[bot] `src/common/components/Input/Input.tsx:29`: "에러 상태 입력의 포커스 가시성이 부족합니다." → 정보 없음
+- @coderabbitai[bot] `src/common/components/Label/Label.tsx:10`: "`label`-`input` 연결을 위한 `htmlFor` 전달 경로를 열어주세요." → 정보 없음
+- @coderabbitai[bot] `src/feature/CardRegister/components/CardPreviewSection/CardBrandLogo/CardBrandLogo.tsx:2`: "Vite에서 `/public` 디렉토리의 파일을 상대 경로로 import할 수 없습니다." → 정보 없음
+- @coderabbitai[bot] `src/feature/CardRegister/components/CardPreviewSection/CardPreviewContainer/CardPreviewContainer.tsx:17`: "카드 브랜드 판별이 너무 이른 시점에 발생합니다." → 정보 없음
+- @coderabbitai[bot] `src/feature/CardRegister/components/InfoInputSection/InfoInputSection.tsx:41`: "전역 에러 상태 집계가 덮어쓰기 구조입니다." → 정보 없음
+
+## 잠재 안티패턴 태그
+
+- [state-update] : 공용 isError를 필드별로 덮어씀
+- [validation] : 브랜드 판별 시점이 16자리 전
+- [input-handling] : 포커스 가시성 신호 부족
+- [card-brand] : public 이미지 import 방식
+- [docs] : README 마스킹 예시 불일치
