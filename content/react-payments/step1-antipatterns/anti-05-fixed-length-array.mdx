@@ -2,7 +2,7 @@
 title: 'anti-05. 4칸 고정인데 string[]'
 ---
 
-import { Reveal } from '../../../../components/Reveal'
+import { Reveal } from '../../../components/Reveal'
 
 # anti-05. 4칸 고정인데 `string[]` — 튜플 누락
 
@@ -80,12 +80,12 @@ interface CardInfo {
 - 튜플 타입: `[string, string, string, string]` — 길이가 컴파일러에게 보장된다.
 - 더 압축적인 표현: `Tuple<string, 4>` 같은 헬퍼 타입을 만들 수도 있다.
 - 리터럴 유니온: `type NetworkBrand = 'visa' | 'master' | null` — `if (brand === 'amex')` 같은 *불가능한 분기*가 컴파일 시점에 막힌다.
-- 여기서도 [Q2 — state 구조](../q02-state-shape)의 *2원칙 — Avoid contradictions* 가 다시 등장. *불가능한 상태를 표현 불가능하게* 만드는 도구가 타입 시스템.
-- [Q8 — TypeScript 타입 좁히기](../q08-typescript-narrowing)에 제네릭·`never`·타입 가드 단서가 정리되어 있다.
+- 여기서도 [Q2 — state 구조](../step1/q02-state-shape)의 *2원칙 — Avoid contradictions* 가 다시 등장. *불가능한 상태를 표현 불가능하게* 만드는 도구가 타입 시스템.
+- [Q8 — TypeScript 타입 좁히기](../step1/q08-typescript-narrowing)에 제네릭·`never`·타입 가드 단서가 정리되어 있다.
 
 </Reveal>
 
 ## 연관 카드
 
-- [Q8 — TypeScript 타입 좁히기 — never 회피](../q08-typescript-narrowing) — 같은 주제, 고민 관점
-- [Q2 — state 구조](../q02-state-shape) — 모순을 막는 표현 형태
+- [Q8 — TypeScript 타입 좁히기 — never 회피](../step1/q08-typescript-narrowing) — 같은 주제, 고민 관점
+- [Q2 — state 구조](../step1/q02-state-shape) — 모순을 막는 표현 형태

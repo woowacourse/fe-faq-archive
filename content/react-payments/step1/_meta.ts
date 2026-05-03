@@ -15,10 +15,6 @@ const meta: MetaRecord = {
     type: 'doc',
     title: '공식문서 단서 — 한글 번역',
   },
-  antipatterns: {
-    type: 'doc',
-    title: '안티패턴 — 8기 PR에서 본 6선',
-  },
   'q10-appendix-all-prs': '부록 — 1단계 PR 전체 인덱스',
 }
 

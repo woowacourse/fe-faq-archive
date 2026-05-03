@@ -2,7 +2,7 @@
 title: 'anti-03. Number()/isNaN() 검증의 함정'
 ---
 
-import { Reveal } from '../../../../components/Reveal'
+import { Reveal } from '../../../components/Reveal'
 
 # anti-03. `Number()` / `isNaN()` 기반 숫자 검증의 함정
 
@@ -87,11 +87,11 @@ const isNotNumber = (value: string) => isNaN(Number(value));
 - *숫자 문자열만 허용*: `/^\d*$/` (빈 문자열 포함) 또는 `/^\d+$/` (빈 문자열 제외) — 의도에 따라 정규식을 선택. `Number()` / `isNaN()` 보다 명시적이다.
 - 빈 문자열은 *지우는 입력* 에서 합법이다. `''` 도 통과해야 백스페이스로 지울 수 있다 — [PR #500](https://github.com/woowacourse/react-payments/pull/500)의 *"CVC 입력을 빈 문자열로 되돌릴 수 없는 버그"* 가 같은 결.
 - 입력 시점 검증과 blur 시점 검증을 분리하면 단순해진다 — onChange는 *허용 가능한 문자열인지* 만, blur는 *완성된 값인지* 까지.
-- [Q7 — input 제약 카드](../q07-input-constraints)에 `type=number`의 함정과 `inputMode` 단서가 정리되어 있다.
+- [Q7 — input 제약 카드](../step1/q07-input-constraints)에 `type=number`의 함정과 `inputMode` 단서가 정리되어 있다.
 
 </Reveal>
 
 ## 연관 카드
 
-- [Q7 — input 제약 — maxLength vs type=number](../q07-input-constraints) — 같은 주제, 고민 관점
-- [Q5 — 검증과 에러 책임](../q05-validation-error)
+- [Q7 — input 제약 — maxLength vs type=number](../step1/q07-input-constraints) — 같은 주제, 고민 관점
+- [Q5 — 검증과 에러 책임](../step1/q05-validation-error)
