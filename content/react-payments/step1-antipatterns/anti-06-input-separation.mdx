@@ -1,0 +1,101 @@
+---
+title: 'anti-06. Input 컴포넌트가 입력 종류마다 따로 만들어졌다'
+---
+
+import { Reveal } from '../../../components/Reveal'
+
+# anti-06. Input 컴포넌트가 입력 종류마다 따로 만들어졌다
+
+**빈도: 25건 중 5+건 (변종 포함 9+건)** — 미션 학습 목표 1번이 *"재사용 가능한 Input Component 개발"* 인데, 카드번호·만료일·CVC가 모두 *숫자 입력*임에도 베이스 Input 없이 종류별 컴포넌트가 각자 native input을 들고 있거나, 단일 Input에 type prop으로 도메인을 분기시킨다.
+
+## 패턴 한 줄
+
+베이스 Input이 *없거나*, 베이스 Input이 *도메인을 알고 있다*. 둘 다 카드번호·만료일·CVC를 type 분기와 중복 검증으로 묶어버려, *재사용 가능한 Input Component를 개발한다* 는 학습 목표를 우회한다.
+
+## AS-IS 코드 (8기 PR 발췌)
+
+> 🔍 **읽기 전에**
+>
+> "내 코드의 `src/components/` 폴더 트리를 열어보자. *베이스 Input* 컴포넌트가 있는가? 있다면 그 컴포넌트는 *카드 도메인*을 모르는가?"
+
+### 사례 A — 베이스 Input 자체가 없다
+
+[PR #505](https://github.com/woowacourse/react-payments/pull/505) — `src/components/`
+
+`CardNumber.tsx`, `CardExpiryDate.tsx`, `CardCvc.tsx`가 각자 native `<input>`을 들고 자체 검증·자체 onChange·자체 에러 표시를 한다. `CardInput.tsx`는 단지 *폼 컨테이너*(자식 합성)일 뿐 베이스 Input이 아니다. 같은 줄의 *공통 Input* 자리에 종류별 컴포넌트 3개가 평행으로 존재한다.
+
+[PR #507](https://github.com/woowacourse/react-payments/pull/507)도 같은 구조 — 페어 본인이 PR body에 *"각각 다른 입력값을 다루다 보니 검증 로직과 에러 상태를 어떤 단위로 관리해야 하는지를 많이 고민했습니다"* 라고 적었다. 그 고민의 답이 *"종류별 컴포넌트 3개"* 로 굳어졌다.
+
+### 사례 B — 단일 Input에 type prop으로 도메인을 분기
+
+[PR #522](https://github.com/woowacourse/react-payments/pull/522) — PR body에서 페어가 직접 결정 사유를 적었다.
+
+> *"현재 `CardInfoInput` 컴포넌트를 type prop(`'card-number'` / `'exp'` / `'cvc'`)에 따라 내부적으로 width를 결정하도록 설계했습니다. 도메인 규칙을 컴포넌트 수준에서 강제하는 것은 오히려 책임이 명확한 설계라고 판단했습니다."*
+
+도메인 규칙을 컴포넌트 *내부*로 강제하는 결정은 *명시적이라 책임이 명확*해 보이지만, 실제로는 카드번호·만료일·CVC를 한 컴포넌트의 *분기*로 묶어버린다. 새 종류(예: 비밀번호 앞 2자리)가 들어오면 `type` 값을 추가하고 컴포넌트 내부 분기를 다시 늘려야 한다.
+
+[PR #524](https://github.com/woowacourse/react-payments/pull/524)도 같은 패턴 + 한 단계 더 나아간다. `useInputHandle` 훅이 `string[]`을 받도록 시그니처가 좁아져, **단일 string인 CVC를 `[""]` 배열로 감싸야** 한다 — 컴포넌트의 type 분기가 *훅 시그니처*까지 전염시킨 사례. 자세한 신호는 [anti-05 사례 D](./anti-05-fixed-length-array#single-value-array-wrap)에 정리.
+
+### 사례 C — 베이스가 *오염되어* 있다 (변종)
+
+[PR #506](https://github.com/woowacourse/react-payments/pull/506) — `Common/ValidationInput.tsx`
+
+베이스 컴포넌트는 있다. 단 그 컴포넌트가 *검증까지 떠안았다*. 리뷰어 코멘트가 짧게 짚는다.
+
+> *"너무 내부에서 많은 일들을 하려고 하는 것 같아요. 에러 메시지 렌더링은 상위 도메인 컴포넌트가 결정하는 형태가 더 확장 가능합니다."*
+
+[PR #511](https://github.com/woowacourse/react-payments/pull/511), [PR #516](https://github.com/woowacourse/react-payments/pull/516)에서도 `ValidationInput`/`ValidatedInputGroup`이 onChange 검증·에러 렌더까지 책임지는 동일 변종이 나타난다. *"Common"* 폴더 안에 있어도 *도메인을 알고 있는 Input*은 anti-06이다.
+
+### 사례 D — 모범 대조군 (의도적으로 분리)
+
+[PR #502](https://github.com/woowacourse/react-payments/pull/502) — PR body에서 페어가 *반대 패턴*을 정확히 언어화했다.
+
+> *"`Input`, `InputField`는 카드 도메인을 모르는 순수 UI 컴포넌트로 두고 `CardNumberInputField`, `CardValidityPeriodInputField`, `CardCVCInputField`에서 각 입력 도메인의 상태와 검증 로직을 결합했습니다."*
+
+[PR #517](https://github.com/woowacourse/react-payments/pull/517)도 같은 결정을 *결과*까지 검증한다.
+
+> *"실제로 Input 컴포넌트를 도메인과 무관한 원자 컴포넌트로 만들고 나니, `CardNumberInputField`, `CardValidityPeriodInputField`, `CardCVCInputField` 전부에서 별도 수정 없이 그대로 재사용할 수 있었습니다."*
+
+같은 미션, 같은 시간 — *Input은 도메인을 모른다, Field는 도메인을 안다* 라는 한 줄 결정만 다르다. 그리고 그 한 줄이 *재사용 가능* 이라는 학습 목표를 충족시키느냐를 가른다.
+
+## 리뷰어 피드백 (실제 인용)
+
+- [PR #523](https://github.com/woowacourse/react-payments/pull/523) `Payments.tsx:14` — *"이번 과제의 핵심 중 하나가 *재사용성*인데 현재 재사용이 고려되고 있지 않은 것 같아요."*
+- [PR #523](https://github.com/woowacourse/react-payments/pull/523) `Input.tsx:4` — *"input 엘리먼트의 속성에서 확장하는 형태로 만들어 볼 수 있을까요?"* → 베이스 Input의 props 폭을 native input 수준으로 열라는 제안
+- [PR #524](https://github.com/woowacourse/react-payments/pull/524) `CardInfo.tsx:21` — *"props가 비대해지고 부모 컴포넌트가 내부 구현에 강하게 결합돼요."*
+- [PR #516](https://github.com/woowacourse/react-payments/pull/516) `ValidatedInputGroup.tsx` — *"너무 내부에서 많은 일들을 하려고 하는 것 같아요."*
+- [PR #506](https://github.com/woowacourse/react-payments/pull/506) `useCardBrand.ts:4` — *"굳이 `useMemo`를 사용하지 않아도 괜찮아 보입니다."* → 종류별 컴포넌트가 베이스 부재 상태에서 자체 추상화를 만들어내는 부작용
+
+## 변종이 함께 따라오는 신호
+
+이 안티패턴이 있는 PR은 *다른 카드*의 신호가 함께 따라온다.
+
+- 검증 로직이 컴포넌트에 박힘 → [anti-03 — Number 검증의 함정](./anti-03-number-coercion)이 *함수가 아니라 컴포넌트 내부*에 있는 형태로 나타난다.
+- 훅 시그니처 일반화 부작용 → [anti-05 — 4칸 고정인데 string[]](./anti-05-fixed-length-array#single-value-array-wrap)의 사례 D.
+- 에러 메시지 컴포넌트 분리 부재 → [anti-01 — 한 칸 에러가 다른 칸을 덮어쓴다](./anti-01-error-overwrite)와 결합해 *어느 종류의 에러인지* 구분조차 어려워진다.
+
+## 토론 질문
+
+코드를 보면서 페어와 함께 이야기해보자.
+
+1. 내 베이스 Input 컴포넌트는 `'card-number'`, `'exp'`, `'cvc'` 같은 *도메인 단어*를 알고 있는가? 알고 있다면 — *그 단어를 모르는* Input은 어떻게 생겼을까?
+2. *"종류별 컴포넌트 3개를 따로 만들었지만 실제로는 같은 코드의 90%가 중복이다"* — 이 문장이 내 코드에 해당하는가? 해당한다면 *중복의 단위*는 무엇인가? 스타일? props 시그니처? 검증?
+3. [PR #522](https://github.com/woowacourse/react-payments/pull/522)는 *"도메인 규칙을 컴포넌트 수준에서 강제하는 것이 책임이 명확한 설계"* 라고 적었다. 한편 [PR #517](https://github.com/woowacourse/react-payments/pull/517)은 *"Input은 도메인을 모르는 원자 컴포넌트"* 가 정답이라고 적었다. 두 결정 중 *재사용 가능한 Input Component를 개발한다* 는 학습 목표에 가까운 쪽은 어느 쪽인가?
+
+<Reveal label="단서 펼쳐보기 (정답 아님)" title="단서 — 가설을 점검하는 데만 쓰세요">
+
+## 단서 (정답 아님)
+
+- 베이스 Input은 *native input의 props를 그대로 확장*하면 된다 — `Omit<InputHTMLAttributes<HTMLInputElement>, '...'>` 또는 `extends`. 도메인 단어가 들어오는 순간 베이스가 아니다.
+- *재사용 단위*를 컴포넌트가 아니라 *합성*으로 보면 길이가 짧아진다 — `<InputField label={...} error={...}> <Input ... /> </InputField>` 같은 합성으로 카드번호·만료일·CVC를 *같은 베이스의 3가지 합성*으로 표현 가능.
+- [PR #502](https://github.com/woowacourse/react-payments/pull/502) [PR #517](https://github.com/woowacourse/react-payments/pull/517)의 결정이 일관된 단서다 — *Input은 도메인을 모른다 / Field가 도메인을 안다*.
+- *type prop으로 분기*가 *2개일 때*는 자연스러운 도구지만 *3개를 넘는 순간* 새 컴포넌트의 신호다. [PR #522](https://github.com/woowacourse/react-payments/pull/522)의 type 3분기는 그 임계를 넘었다.
+- *Common / Shared / UI* 같은 폴더 이름은 *재사용*을 보장하지 않는다. 그 폴더 안의 컴포넌트가 *카드*나 *결제*라는 단어를 알고 있다면 이름만 Common이다.
+
+</Reveal>
+
+## 연관 카드
+
+- [anti-05 — 4칸 고정인데 string[]](./anti-05-fixed-length-array) — 종류별 컴포넌트 분리가 *훅 시그니처*까지 전염되는 사례 D
+- [anti-03 — Number 검증의 함정](./anti-03-number-coercion) — 컴포넌트 내부에 박힌 검증 로직의 부작용
+- [Q1 — state location](../step1/q01-state-location) — 컴포넌트 분리와 state 위치는 같은 결정의 두 면

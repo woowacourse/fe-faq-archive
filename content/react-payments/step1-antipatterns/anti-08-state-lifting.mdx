@@ -1,0 +1,105 @@
+---
+title: 'anti-08. state 위치 — 이중 상태이거나 통째로 lifting됐다'
+---
+
+import { Reveal } from '../../../components/Reveal'
+
+# anti-08. state 위치 — 이중 상태이거나 통째로 lifting됐다
+
+**빈도: 25건 중 8+건** — 학습 목표 3번이 *"카드 정보를 효과적으로 렌더링하기 위한 상태 관리를 경험한다"* 인데, *같은 입력값*이 부모와 자식 양쪽에 존재하거나(이중 상태), 반대로 *모든 state* 가 페이지 한 곳에 몰려 prop drilling만 무거워지는 *양극단*이 반복된다.
+
+## 패턴 한 줄
+
+state 위치를 페어가 *결정하지 못해서* 양극단으로 흐른다. 한쪽은 *부모-자식 양쪽에 같은 값을 들고* 같은 의미의 setter를 두 번 호출한다. 다른 쪽은 *페이지 컴포넌트가 모든 state를 들고* setter를 그대로 prop drilling 한다.
+
+## AS-IS 코드 (8기 PR 발췌)
+
+> 🔍 **읽기 전에**
+>
+> "내 코드의 *카드번호 입력값*은 어디 한 곳에만 있는가? 부모의 useState와 자식의 useState 양쪽에 있는 건 아닌가? 또는 — 페이지 컴포넌트의 useState 무더기가 setter들을 그대로 자식에게 내려주고 있지는 않은가?"
+
+### 사례 A — 이중 상태 (부모와 자식 양쪽에 같은 값)
+
+[PR #506](https://github.com/woowacourse/react-payments/pull/506) — `CardNumberSegmentsInput.tsx`
+
+페어 본인이 PR body에 직접 의문을 적었다.
+
+> *"CardNumberSegmentsInput의 이중 상태 구조가 적절한가요?"*
+
+리뷰어 coolchaem의 코멘트가 한 줄로 진단했다.
+
+> *"부모 상태와 같은 의미의 값을 한 번 더 복사한 것인지 구분해보는 것이 좋겠어요."*
+
+[PR #511](https://github.com/woowacourse/react-payments/pull/511) (페어 짝꿍)도 같은 코드, 같은 신호 — 자식이 `value`를 *초기값*으로만 받고 그 다음은 자체 useState로 흘러간다(controlled가 아니다). 결과는 *부모 상태와 자식 내부 상태가 어긋나는* 시점이 생긴다는 것.
+
+### 사례 B — 통째 lifting (페이지가 모든 setter를 prop drilling)
+
+[PR #524](https://github.com/woowacourse/react-payments/pull/524) — PR body에서 페어가 직접 *결정*과 *부작용*을 같이 적었다.
+
+> *"PaymentWidget에서 모든 state를 들고 setter를 그대로 prop drilling 하고 있습니다."*
+
+이 결정의 부작용은 [anti-06](./anti-06-input-separation)과 함께 따라온다 — *모든 칸*에 같은 훅 시그니처를 쓰려고 `useInputHandle(string[])` 로 좁혀버려, 단일 string인 CVC를 `[""]` 배열로 감싸야 했다([anti-05 사례 D](./anti-05-fixed-length-array#single-value-array-wrap)). 한 자리에 *너무 많이 모은 state*는 추상화의 모양까지 잡아당긴다.
+
+[PR #523](https://github.com/woowacourse/react-payments/pull/523)도 같은 패턴 — 페어 본인이 *자기 회수* 과정을 PR body에 명시했다.
+
+> *"해당 필드의 훅 들은 상태를 그저 격리하고, 로직을 분리할 뿐 큰 이점이 없었습니다. Payments가 많은 책임을 가지더라도 한 곳에 모으게 됐습니다."*
+
+처음에는 필드별 훅으로 분산시켰다가 *큰 이점이 없다* 며 통째로 페이지로 모았다 — 분산과 lifting 사이의 *적절한 단위*를 페어가 결정 못 한 흔적이다.
+
+### 사례 C — 같은 정보가 두 자료구조에 (#516)
+
+[PR #516](https://github.com/woowacourse/react-payments/pull/516) — PR body에서 페어가 직접 적었다.
+
+> *"입력값 상태(`inputValues`)가 두 곳에 존재하게 되었습니다."*
+
+`inputValues`가 두 자료구조에 동시 보관되고, 그 외에도 *brand* 같은 파생값까지 useEffect로 추가 저장([anti-04](./anti-04-derived-state))되어 있다 — *같은 정보의 복사본 3개*가 한 컴포넌트 안에 공존하는 형태.
+
+### 사례 D — 모범 대조군 (분리 결정을 명시적으로 언어화)
+
+[PR #517](https://github.com/woowacourse/react-payments/pull/517) — PR body에서 페어가 정확히 결정 기준을 적었다.
+
+> *"카드 입력값(cardNumber, validityPeriod, CVC)은 Card 프리뷰와 공유해야 하므로 페이지(AddNewCardPage)로 끌어올렸습니다. 반면 에러 상태(inputStatus)는 카드 프리뷰가 알 필요가 없으므로 각 CardXxxInputField 내부에 로컬로 두었습니다."*
+
+*프리뷰가 알아야 하는가 / 모르는가* 라는 한 줄 기준이 lifting의 결정을 떠받친다. [PR #498](https://github.com/woowacourse/react-payments/pull/498), [PR #501](https://github.com/woowacourse/react-payments/pull/501), [PR #502](https://github.com/woowacourse/react-payments/pull/502), [PR #512](https://github.com/woowacourse/react-payments/pull/512), [PR #522](https://github.com/woowacourse/react-payments/pull/522)는 *CVC만 페이지로 올리지 않는다* 는 같은 결정에 도달했다 — 5건이 같은 기준을 채택했다는 점이 좋은 단서다.
+
+## 리뷰어 피드백 (실제 인용)
+
+- [PR #506](https://github.com/woowacourse/react-payments/pull/506) `CardNumberSegmentsInput.tsx:14` (coolchaem) — *"부모 상태와 같은 의미의 값을 한 번 더 복사한 것인지 구분해보는 것이 좋겠어요."*
+- [PR #506](https://github.com/woowacourse/react-payments/pull/506) `CardExpiryDateInput.tsx:25` (코드래빗) — *"`value`를 초기값으로만 사용해 부모 상태와 불일치할 수 있습니다."* → controlled 패턴 제안
+- [PR #523](https://github.com/woowacourse/react-payments/pull/523) `Payments.tsx:14` (eastroots92) — *"이번 과제의 핵심 중 하나가 재사용성인데 현재 재사용이 고려되고 있지 않은 것 같아요."*
+- [PR #524](https://github.com/woowacourse/react-payments/pull/524) `CardInfo.tsx:21` (eastroots92) — *"props가 비대해지고 부모 컴포넌트가 내부 구현에 강하게 결합돼요."*
+
+## 함께 따라오는 신호
+
+이 안티패턴이 있는 PR은 다른 카드의 신호가 함께 나타난다.
+
+- *통째 lifting*은 *훅 시그니처 일반화*를 부른다 → [anti-05 사례 D](./anti-05-fixed-length-array#single-value-array-wrap)의 `string[]` 통일.
+- *통째 lifting*은 *훅 시그니처 일반화*를 부르고, 그건 *type prop 분기형 컴포넌트*까지 이어진다 → [anti-06](./anti-06-input-separation)의 사례 B.
+- *이중 상태*는 *함수형 업데이터 미사용*과 함께 나타난다 → [anti-01](./anti-01-error-overwrite)의 *prev 미사용 setter*.
+
+## 토론 질문
+
+코드를 보면서 페어와 함께 이야기해보자.
+
+1. 내 카드번호 입력값은 *어디 한 곳*에 있는가? 부모와 자식 모두에 useState로 들고 있지는 않은가? *같은 의미의 값*을 두 번 들고 있다면 — 두 번째 자리는 *왜* 필요한가?
+2. *카드 프리뷰가 알아야 하는가* — 이 한 줄 질문으로 *내 state 무더기*를 분류해보면 어디까지 페이지로 올라가야 하나? CVC는? 에러 메시지는? 카드 브랜드는?
+3. 페어 [PR #523](https://github.com/woowacourse/react-payments/pull/523)은 *필드별 훅으로 분산했다가 페이지로 통합했다* 라고 회고했다. 이 회수가 *옳았다* 면 — *원래의 분산*은 무엇이 부족했나? *과한 통합*에는 어떤 부작용이 있나?
+
+<Reveal label="단서 펼쳐보기 (정답 아님)" title="단서 — 가설을 점검하는 데만 쓰세요">
+
+## 단서 (정답 아님)
+
+- React 공식문서 [Sharing State Between Components](https://react.dev/learn/sharing-state-between-components)의 한 줄 — *"두 컴포넌트가 같은 정보를 보여줘야 한다면, 가장 가까운 공통 부모로 끌어올린다"*. *공통 부모* 는 *모든 부모* 가 아니다.
+- *"카드 프리뷰가 알아야 하는가?"* 가 결정 기준이 된다 — 카드번호·만료일은 ⭕ (프리뷰가 보여줌), CVC는 ❌ (프리뷰가 안 보여줌), 에러는 ❌ (프리뷰가 모름). [PR #517](https://github.com/woowacourse/react-payments/pull/517)이 그 기준을 명시적으로 언어화했다.
+- *Controlled* 컴포넌트 — value/onChange를 *둘 다* props로 받는다. value만 받고 자체 useState로 들고 있으면 *uncontrolled*가 섞여 부모와 어긋난다 ([PR #506](https://github.com/woowacourse/react-payments/pull/506) [PR #511](https://github.com/woowacourse/react-payments/pull/511) 사례).
+- *통째 lifting*의 부작용은 *모든 setter가 같은 시그니처*를 갖도록 강제하는 것이다 — 그 결과가 [anti-05 사례 D](./anti-05-fixed-length-array#single-value-array-wrap)의 `string[]` 전염. 한 자리에 너무 많이 모으는 결정은 *추상화의 모양*까지 잡아당긴다.
+- 분산 vs 통합의 *임계*는 *데이터의 공유 범위*다. 카드 프리뷰까지 가야 하는 값(카드번호·만료일·브랜드)은 페이지로 올린다. 카드 프리뷰가 모르는 값(CVC·에러·touched)은 필드 안에 둔다.
+
+</Reveal>
+
+## 연관 카드
+
+- [anti-04 — 카드 브랜드를 state로 저장](./anti-04-derived-state) — state 위치와 *파생값 vs 진짜 state*는 같은 결정의 두 면
+- [anti-06 — Input 컴포넌트가 입력 종류마다 따로](./anti-06-input-separation) — 통째 lifting이 컴포넌트 모양까지 잡아당기는 사례 B
+- [Q1 — state location](../step1/q01-state-location) — 같은 주제, 고민 관점
+- [Q2 — state 구조](../step1/q02-state-shape) — *같이 바뀌는 것끼리 묶어라* 5원칙

@@ -6,7 +6,7 @@ import { Reveal } from '../../../components/Reveal'
 
 # anti-05. 4칸 고정인데 `string[]` — 튜플 누락
 
-**빈도: 25건 중 5+건** — 카드번호 4칸·만료일 2칸은 *고정 길이*인데 `string[]`로 선언해 컴파일러가 길이를 보장하지 못한다.
+**빈도: 25건 중 9+건** — 카드번호 4칸·만료일 2칸은 *고정 길이*인데 `string[]`로 선언해 컴파일러가 길이를 보장하지 못한다. 더 나아가 *훅 시그니처*까지 `string[]`로 좁아지면 단일 string인 CVC를 `[""]` 배열로 감싸는 *역방향 전염*까지 발생한다.
 
 ## 패턴 한 줄
 
@@ -35,6 +35,8 @@ interface CardInfo {
 리뷰어 코멘트:
 > *"string[] 대신 튜플(cardNumbers 4칸, expirationPeriod 2칸)"*
 
+<a id="single-value-array-wrap" />
+
 ### 사례 B — 단일 문자열을 굳이 배열로 감싸기
 
 [PR #524](https://github.com/woowacourse/react-payments/pull/524) — PR body 회고:
@@ -42,6 +44,12 @@ interface CardInfo {
 > *"cvc는 사실상 단일 문자열인데, useInputHandle 훅이 string[]을 받기 때문에 [""] 배열로 감싸서 사용했습니다."*
 
 훅의 입력 타입이 `string[]`로 좁혀져 있어, *원래 string인 값*까지 배열로 감싸는 역방향 전염이 일어났다.
+
+리뷰어 eastroots92가 한 줄로 짚었다.
+
+> *"string, string[] 둘다 고려 가능하게 해볼 수 있을까요?"* → 훅 입력 타입 재검토 요청
+
+이 사례가 보여주는 것은 — *고정 길이 배열을 `string[]`로 표현한 결정* 이 *훅 시그니처* 와 *컴포넌트 분리*([anti-06](./anti-06-input-separation))와 *통째 lifting*([anti-08](./anti-08-state-lifting)) 까지 모두 같은 *형태의 모양*을 갖도록 잡아당긴다는 점이다. **타입은 단순한 안전망이 아니라 코드의 *모양*을 결정한다.**
 
 ### 사례 C — 같은 형태, 다른 PR
 
