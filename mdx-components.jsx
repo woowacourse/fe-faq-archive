@@ -13,15 +13,25 @@ const ILLUSTRATION = {
   idea: '/heading-illustrations/idea.png',
   improve: '/heading-illustrations/improve.png',
   learning: '/heading-illustrations/learning.png',
+  patternSummary: '/heading-illustrations/pattern-summary.png',
   pr: '/heading-illustrations/pr.png',
   question: '/heading-illustrations/question.png',
   reading: '/heading-illustrations/reading.png',
   review: '/heading-illustrations/review.png',
+  reviewerFeedback: '/heading-illustrations/reviewer-feedback.png',
   search: '/heading-illustrations/search.png',
   seniorPrGuide: '/heading-illustrations/senior-pr-guide.png',
 }
 
 const headingIllustrationRules = [
+  {
+    src: ILLUSTRATION.reviewerFeedback,
+    terms: ['리뷰어 피드백'],
+  },
+  {
+    src: ILLUSTRATION.patternSummary,
+    terms: ['패턴 한 줄'],
+  },
   {
     src: ILLUSTRATION.search,
     terms: ['미션 선택', '단계 선택', '그룹 선택', '주제 고르기', '탐색 미션', '학습 흐름'],
