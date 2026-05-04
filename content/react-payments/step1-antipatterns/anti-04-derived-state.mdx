@@ -10,7 +10,7 @@ import { Reveal } from '../../../components/Reveal'
 
 ## 패턴 한 줄
 
-카드 브랜드(visa / mastercard)는 카드번호의 prefix에서 매 렌더링마다 계산할 수 있는 **파생값**이다. 그런데 8기 페어들은 이를 별도 state로 두고, 카드번호가 바뀔 때마다 setter를 호출하거나 `useEffect`로 동기화한다.
+카드 브랜드(visa / mastercard)는 카드번호의 prefix에서 매 렌더링마다 계산할 수 있는 **파생값**이다. 그런데 일부 PR에서는 이를 별도 state로 두고, 카드번호가 바뀔 때마다 setter를 호출하거나 `useEffect`로 동기화한다.
 
 ## AS-IS 코드 (8기 PR 발췌)
 
@@ -58,7 +58,7 @@ import { Reveal } from '../../../components/Reveal'
 같은 의문이 [PR #509](https://github.com/woowacourse/react-payments/pull/509)에서도:
 > *"다만 `useEffect`로 파생 상태를 관리하는 게 맞는 패턴인지는 잘 모르겠습니다."*
 
-→ 페어들이 *이미 의심하고 있는데도* 그 코드가 PR에 그대로 들어왔다는 게 더 흥미로운 신호다.
+→ PR 작성자들이 *이미 의심하고 있는데도* 그 코드가 그대로 들어왔다는 게 더 흥미로운 신호다.
 
 ## 리뷰어 피드백 (실제 인용)
 

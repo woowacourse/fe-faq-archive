@@ -1,9 +1,8 @@
 import type { MetaRecord } from 'nextra'
 
 const meta: MetaRecord = {
-  index: '안티패턴 6선 — 한눈에',
+  index: '안티패턴 4선 — 한눈에',
   'anti-01-error-overwrite': 'anti-01. 한 칸 에러가 다른 칸을 덮어쓴다',
-  'anti-02-mastercard-bin': 'anti-02. MasterCard 2-series 누락',
   'anti-03-number-coercion': 'anti-03. Number()/isNaN() 검증의 함정',
   'anti-04-derived-state': 'anti-04. 카드 브랜드 — 파생값을 state로',
   'anti-05-fixed-length-array': 'anti-05. 4칸 고정인데 string[]',
